@@ -592,9 +592,12 @@ function openForm(prefill={}) {
   document.getElementById('f-ev-pct').value = prefill.evPct || '';
   document.getElementById('f-ev-stake').value = prefill.stake || '';
   // Split gametime for new split fields
-  if (document.getElementById('f-gamedate')) document.getElementById('f-gamedate').value = '';
+  if (document.getElementById('f-gamedate')) {
+    document.getElementById('f-gamedate').value = prefill.gamedate || prefill._gamedate || '';
+  }
   if (document.getElementById('f-gametime-only')) {
-    document.getElementById('f-gametime-only').value = prefill.gametime ? prefill.gametime.split(' · ').slice(1).join(' · ') : '';
+    const gt = prefill.gametimeonly || prefill._gametime_only || (prefill.gametime ? prefill.gametime.split(' · ').slice(1).join(' · ') : '');
+    document.getElementById('f-gametime-only').value = gt;
   }
   document.getElementById('f-notes').value = prefill.notes || '';
   toggleBetType();
@@ -730,14 +733,17 @@ window.logBetFromDashboard = function(prefill) {
       game: p.get('game')||'',
       sport: (() => {
         const s = (p.get('sport')||'').toLowerCase();
-        if(s.includes('basketball')||s.includes('nba')) return '🏀 NBA';
-        if(s.includes('football')||s.includes('nfl')) return '🏈 NFL';
+        if(s.includes('soccer')||s.includes('epl')||s.includes('liga')||s.includes('serie')||s.includes('ligue')||s.includes('bundesliga')||s.includes('mls')||s.includes('eredivisie')||s.includes('superliga')||s.includes('allsvenskan')||s.includes('libertadores')||s.includes('champions')) return '⚽ Soccer';
+        if(s.includes('basketball')||s.includes('nba')||s.includes('ncaab')||s.includes('wnba')) return '🏀 NBA';
+        if(s.includes('americanfootball')||s.includes('nfl')||s.includes('ncaaf')) return '🏈 NFL';
         if(s.includes('baseball')||s.includes('mlb')) return '⚾ MLB';
         if(s.includes('hockey')||s.includes('nhl')) return '🏒 NHL';
-        if(s.includes('soccer')||s.includes('football')) return '⚽ Soccer';
         if(s.includes('tennis')) return '🎾 Tennis';
-        if(s.includes('mma')||s.includes('martial')) return '🥊 MMA';
-        return '🏀 NBA';
+        if(s.includes('mma')||s.includes('martial')||s.includes('boxing')) return '🥊 MMA';
+        if(s.includes('golf')) return '🏌️ Golf';
+        if(s.includes('cricket')) return '🏏 Cricket';
+        if(s.includes('rugby')||s.includes('nrl')) return '🏉 Rugby';
+        return '⚽ Soccer';
       })(),
       book1: p.get('book1')||'',
       book2: p.get('book2')||'',
@@ -747,10 +753,29 @@ window.logBetFromDashboard = function(prefill) {
       stake: p.get('stake')||'',
       profit: p.get('profit')||'',
       gametime: p.get('gametime')||'',
+      gamedate: p.get('gamedate')||'',
+      gametimeonly: p.get('gametimeonly')||'',
       notes: p.get('notes')||'',
       status: 'pending',
     };
-    setTimeout(() => openForm(prefill), 300);
+    // Parse gamedate/time from prefill
+    if (prefill.gamedate && document.getElementById('f-gamedate')) {
+      prefill._gamedate = prefill.gamedate;
+    } else if (prefill.gametime) {
+      // Try to extract date from combined gametime string
+      const parts = prefill.gametime.split(' · ');
+      prefill._gametime_only = parts.length > 1 ? parts.slice(1).join(' · ') : prefill.gametime;
+    }
+    setTimeout(() => {
+      openForm(prefill);
+      // Set split fields after form opens
+      if (prefill._gamedate && document.getElementById('f-gamedate')) {
+        document.getElementById('f-gamedate').value = prefill._gamedate;
+      }
+      if (prefill._gametime_only && document.getElementById('f-gametime-only')) {
+        document.getElementById('f-gametime-only').value = prefill._gametime_only;
+      }
+    }, 300);
     // Clean URL
     window.history.replaceState({}, '', window.location.pathname);
   }

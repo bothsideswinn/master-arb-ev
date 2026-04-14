@@ -1191,19 +1191,28 @@ function updateSportChips() {
   const chips = $('sport-chips');
   const btn = $('sport-picker-label');
   if (!chips) return;
+
   if (selected.length === 0) {
+    // Nothing selected
     chips.innerHTML = '';
     if (btn) btn.textContent = 'Select sports…';
-  } else if (selected.length <= 3) {
+  } else if (selected.length === 1) {
+    // Exactly one sport — show its name in the button, no chip needed
+    const name = labels[selected[0]] || selected[0];
+    chips.innerHTML = '';
+    if (btn) btn.textContent = name;
+  } else if (selected.length <= 4) {
+    // 2–4 sports — show each as a removable chip, button says "X sports"
     chips.innerHTML = selected.map(v =>
       `<span class="sp-chip">${labels[v]||v}<span class="sp-chip-x" onclick="removeSport('${v}')">×</span></span>`
     ).join('');
-    if (btn) btn.textContent = selected.length + ' selected';
+    if (btn) btn.textContent = selected.length + ' sports';
   } else {
+    // 5+ sports — summarise
     chips.innerHTML = `<span class="sp-chip">${selected.length} sports selected<span class="sp-chip-x" onclick="clearAllSports()">×</span></span>`;
-    if (btn) btn.textContent = selected.length + ' selected';
+    if (btn) btn.textContent = selected.length + ' sports';
   }
-  // Sync legacy f-sport for any code that might still read it
+  // Sync legacy f-sport
   if ($('f-sport') && selected.length > 0) $('f-sport').value = selected[0];
 }
 function removeSport(val) {
@@ -1221,17 +1230,24 @@ function logArbById(arbId) {
   const a = arbStore[arbId];
   if (!a) { alert('Could not find arb data. Please re-fetch odds and try again.'); return; }
   const trackerUrl = 'https://bothsideswinn.github.io/master-arb-ev/public_tracker.html';
-  const gt = a.commenceTime ? new Date(a.commenceTime).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}) + ' · ' + new Date(a.commenceTime).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true}) : '';
+  const ctDate = a.commenceTime ? new Date(a.commenceTime) : null;
+  const gamedate = ctDate ? ctDate.toISOString().split('T')[0] : '';
+  const gametimeonly = ctDate ? ctDate.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true}) : '';
+  const gt = ctDate ? ctDate.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}) + ' · ' + gametimeonly : '';
+  // Pass sport key (lowercase) so tracker can map it accurately
+  const sportKey = (a.sport||'').toLowerCase();
   const params = new URLSearchParams({
     type: 'arb',
     game: a.event || '',
-    sport: a.sport || '',
+    sport: sportKey,
     mkt: a.mkt || '',
     book1: a.leg1?.book || a.leg1?.bk || '',
     book2: a.leg2?.book || a.leg2?.bk || '',
     stake: ((a.leg1?.stake||0) + (a.leg2?.stake||0)).toFixed(2),
     profit: (a.profit||0).toFixed(2),
     gametime: gt,
+    gamedate: gamedate,
+    gametimeonly: gametimeonly,
     notes: (a.leg1?.name||'') + ' / ' + (a.leg2?.name||''),
   });
   window.open(trackerUrl + '?' + params.toString(), '_blank');
@@ -1242,7 +1258,10 @@ function logEVById(evId) {
   const e = evStore[evId];
   if (!e) { alert('Could not find EV data. Please re-fetch and try again.'); return; }
   const trackerUrl = 'https://bothsideswinn.github.io/master-arb-ev/public_tracker.html';
-  const gt = e.commenceTime ? new Date(e.commenceTime).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}) + ' · ' + new Date(e.commenceTime).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true}) : '';
+  const ctDate2 = e.commenceTime ? new Date(e.commenceTime) : null;
+  const gamedate2 = ctDate2 ? ctDate2.toISOString().split('T')[0] : '';
+  const gametimeonly2 = ctDate2 ? ctDate2.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true}) : '';
+  const gt = ctDate2 ? ctDate2.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}) + ' · ' + gametimeonly2 : '';
   const params = new URLSearchParams({
     type: 'ev',
     game: e.event || '',
@@ -1252,6 +1271,9 @@ function logEVById(evId) {
     evPct: (e.ev||0).toFixed(1),
     stake: String(e.unit || 50),
     gametime: gt,
+    gamedate: gamedate2,
+    gametimeonly: gametimeonly2,
+    sport: (e.sport||'').toLowerCase(),
     notes: (e.bet||'') + ' · +' + (e.ev||0).toFixed(1) + '% EV',
   });
   window.open(trackerUrl + '?' + params.toString(), '_blank');
