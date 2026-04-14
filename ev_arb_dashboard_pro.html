@@ -213,6 +213,30 @@ input[type="range"] { width: 80px; accent-color: var(--blue); }
 .book-sel-all:hover { border-color:var(--green); color:var(--green); }
 .book-sel-divider { width:.5px; height:18px; background:var(--border2); margin:0 2px; }
 
+
+/* ── Input panel ── */
+.input-panel { display:flex; flex-direction:column; gap:.5rem; margin-bottom:.5rem; }
+.input-row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.input-group { display:flex; flex-direction:column; gap:4px; }
+.inp-label { font-size:11px; font-weight:600; color:var(--text3); text-transform:uppercase; letter-spacing:.05em; white-space:nowrap; }
+.input-group input, .input-group select { font-size:13px; padding:6px 10px; border-radius:var(--r); border:.5px solid var(--border2); background:var(--bg); color:var(--text); }
+
+/* Book chips */
+.bk-row { flex-wrap:wrap; gap:6px; }
+.bk-chip { display:inline-flex; align-items:center; gap:5px; padding:5px 11px; border-radius:20px; font-size:12px; font-weight:700; cursor:pointer; border:1.5px solid var(--bk); background:transparent; color:var(--bk); opacity:.35; transition:opacity .15s; font-family:inherit; -webkit-tap-highlight-color:transparent; }
+.bk-chip.active { opacity:1; background:color-mix(in srgb, var(--bk) 12%, transparent); }
+.bk-dot { width:6px; height:6px; border-radius:50%; background:var(--bk); flex-shrink:0; }
+.bk-sel-all { font-size:11px; font-weight:600; padding:5px 12px; border-radius:20px; border:.5px solid var(--border2); background:transparent; color:var(--text2); cursor:pointer; font-family:inherit; }
+.bk-sel-all:hover { border-color:var(--green); color:var(--green); }
+
+/* Toggles */
+.toggle-group { display:flex; align-items:center; gap:8px; padding:8px 12px; background:var(--bg2); border:.5px solid var(--border2); border-radius:var(--r); }
+.tgl-label { display:flex; align-items:center; gap:8px; cursor:pointer; font-size:12px; font-weight:600; color:var(--text2); white-space:nowrap; }
+.tgl-track { position:relative; width:38px; height:22px; background:var(--border2); border-radius:11px; transition:background .2s; flex-shrink:0; }
+.tgl-thumb { position:absolute; top:3px; left:3px; width:16px; height:16px; background:#fff; border-radius:50%; transition:left .2s; box-shadow:0 1px 3px rgba(0,0,0,.3); }
+.tgl-note { font-size:11px; color:var(--amber); font-weight:600; display:none; }
+.tgl-divider { width:.5px; height:30px; background:var(--border2); margin:0 4px; }
+
 </style>
 </head>
 <body>
@@ -238,33 +262,40 @@ input[type="range"] { width: 80px; accent-color: var(--blue); }
     </div>
   </div>
 
-  <div class="info blue" id="help">
-    Get your free API key at <a href="https://the-odds-api.com" target="_blank">the-odds-api.com</a> and paste it below. This dashboard scans <strong>28 book combinations</strong> simultaneously for arb opportunities, and uses Pinnacle as the sharp-line EV benchmark. Tap any book button to open that sportsbook and place your bet.
-  </div>
-  <div class="info red" id="err"></div>
+  <!-- Input panel -->
+  <div class="input-panel">
 
     <!-- Row 1: API Key -->
-  <div style="margin-bottom:.5rem;">
-    <div class="field" style="max-width:100%;">
-      <label for="f-key" style="font-size:11px;font-weight:600;color:var(--text3);">API key</label>
-      <input type="password" id="f-key" placeholder="paste key from the-odds-api.com" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" style="width:100%;">
+    <div class="input-row">
+      <div class="input-group" style="flex:1;">
+        <label class="inp-label" for="f-key">API key</label>
+        <input type="password" id="f-key" placeholder="paste key from the-odds-api.com" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
+      </div>
     </div>
-  </div>
 
-  <!-- Row 2: Book selector -->
-  <div class="book-selector-row" id="book-selector-row" style="margin-bottom:.5rem;">
-    <!-- populated by JS -->
-  </div>
+    <!-- Row 2: Books -->
+    <div class="input-row bk-row">
+      <button class="bk-chip active" id="bchip-fanduel" data-key="fanduel" style="--bk:#1890ff;" onclick="toggleBook('fanduel')"><span class="bk-dot"></span>FanDuel</button>
+      <button class="bk-chip active" id="bchip-draftkings" data-key="draftkings" style="--bk:#53c028;" onclick="toggleBook('draftkings')"><span class="bk-dot"></span>DraftKings</button>
+      <button class="bk-chip active" id="bchip-betmgm" data-key="betmgm" style="--bk:#b8960c;" onclick="toggleBook('betmgm')"><span class="bk-dot"></span>BetMGM</button>
+      <button class="bk-chip active" id="bchip-williamhill_us" data-key="williamhill_us" style="--bk:#0c7c3e;" onclick="toggleBook('williamhill_us')"><span class="bk-dot"></span>Caesars</button>
+      <button class="bk-chip active" id="bchip-bovada" data-key="bovada" style="--bk:#c8960a;" onclick="toggleBook('bovada')"><span class="bk-dot"></span>Bovada</button>
+      <button class="bk-chip active" id="bchip-betonlineag" data-key="betonlineag" style="--bk:#0a6b9e;" onclick="toggleBook('betonlineag')"><span class="bk-dot"></span>BetOnline</button>
+      <button class="bk-chip active" id="bchip-hardrockbet" data-key="hardrockbet" style="--bk:#b0174e;" onclick="toggleBook('hardrockbet')"><span class="bk-dot"></span>Hard Rock</button>
+      <button class="bk-chip active" id="bchip-pinnacle" data-key="pinnacle" style="--bk:#8b5cf6;" onclick="toggleBook('pinnacle')"><span class="bk-dot"></span>Pinnacle (EV ref)</button>
+      
+      <button class="bk-sel-all" onclick="selectAllBooks()">Select all</button>
+    </div>
 
-  <!-- Row 3: Sport · Status · Date · Unit -->
-  <div class="config" style="margin-bottom:.5rem;flex-wrap:wrap;gap:8px;align-items:flex-end;">
-    <div class="field" style="min-width:160px;flex:1;">
-      <label style="font-size:11px;font-weight:600;color:var(--text3);">Sport</label>
-      <div class="sport-picker-wrap" id="sport-picker-wrap">
-        <div class="sport-picker-btn" id="sport-picker-btn" onclick="toggleSportPicker()">
-          <span id="sport-picker-label">Select sports…</span>
-        </div>
-        <div class="sport-picker-dropdown" id="sport-picker-dropdown">
+    <!-- Row 3: Sport · Status · Date · Unit -->
+    <div class="input-row" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
+      <div class="input-group" style="min-width:150px;flex:1;">
+        <label class="inp-label">Sport</label>
+        <div class="sport-picker-wrap" id="sport-picker-wrap">
+          <div class="sport-picker-btn" id="sport-picker-btn" onclick="toggleSportPicker()">
+            <span id="sport-picker-label">Select sports…</span>
+          </div>
+          <div class="sport-picker-dropdown" id="sport-picker-dropdown">
 
           <div class="sp-group-hd">American Football</div>
           <label class="sp-item"><input type="checkbox" value="americanfootball_nfl"> NFL</label>
@@ -371,68 +402,64 @@ input[type="range"] { width: 80px; accent-color: var(--blue); }
           </div>
         </div>
       </div>
-      <div class="sp-selected-chips" id="sport-chips"></div>
-    </div>
-    </div>
-    <div style="display:flex;align-items:center;gap:6px;">
-      <span style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;">Status</span>
-      <select id="status-filter-pre" onchange="syncFilters('status')" style="font-size:12px;padding:5px 8px;">
-        <option value="all">All events</option>
-        <option value="upcoming">Upcoming only</option>
-        <option value="live">Live only</option>
-      </select>
-    </div>
-    <div style="display:flex;align-items:center;gap:6px;">
-      <span style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;">Date</span>
-      <select id="date-preset-pre" onchange="syncFilters('date')" style="font-size:12px;padding:5px 8px;">
-        <option value="all">All dates</option>
-        <option value="today">Today</option>
-        <option value="tomorrow">Tomorrow</option>
-        <option value="week">Next 7 days</option>
-        <option value="custom">Custom range…</option>
-      </select>
-    </div>
-    <div id="custom-date-wrap-pre" style="display:none;align-items:center;gap:6px;flex-wrap:wrap;">
-      <span style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;">From</span>
-      <input type="date" id="date-from-pre" onchange="syncFilters('date')" style="font-size:12px;padding:5px 8px;border-radius:var(--r);border:.5px solid var(--border2);background:var(--bg);color:var(--text);">
-      <span style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;">To</span>
-      <input type="date" id="date-to-pre" onchange="syncFilters('date')" style="font-size:12px;padding:5px 8px;border-radius:var(--r);border:.5px solid var(--border2);background:var(--bg);color:var(--text);">
-    </div>
-    <div class="field" style="min-width:80px;max-width:110px;">
-      <label for="f-unit" style="font-size:11px;font-weight:600;color:var(--text3);">Unit ($)</label>
-      <input type="number" id="f-unit" value="50" min="1" max="999999" step="1" inputmode="numeric">
-    </div>
-  </div>
-
-  <!-- Row 4: Toggles -->
-  <div style="margin-bottom:.5rem;">
-    <div style="display:inline-flex;align-items:center;gap:12px;background:var(--bg2);border:.5px solid var(--border2);border-radius:var(--r);padding:8px 12px;flex-wrap:wrap;">
-      <div style="display:flex;align-items:center;gap:8px;">
-        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-          <div id="props-track" style="position:relative;width:38px;height:22px;background:var(--border2);border-radius:11px;transition:background .2s;flex-shrink:0;">
-            <div id="props-thumb" style="position:absolute;top:3px;left:3px;width:16px;height:16px;background:#fff;border-radius:50%;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.3);"></div>
-          </div>
-          <span style="font-size:12px;font-weight:600;color:var(--text2);">Player props</span>
-        </label>
-        <span id="props-cost-note" style="font-size:11px;color:var(--amber);font-weight:600;display:none;">1 req/game</span>
+          <div class="sp-selected-chips" id="sport-chips"></div>
+        </div>
       </div>
-      <div style="width:.5px;height:20px;background:var(--border2);"></div>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-          <div id="t2-track" style="position:relative;width:38px;height:22px;background:var(--border2);border-radius:11px;transition:background .2s;flex-shrink:0;">
-            <div id="t2-thumb" style="position:absolute;top:3px;left:3px;width:16px;height:16px;background:#fff;border-radius:50%;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.3);"></div>
-          </div>
-          <span style="font-size:12px;font-weight:600;color:var(--text2);">Tier 2 props</span>
-        </label>
-        <span id="t2-cost-note" style="font-size:11px;color:var(--amber);font-weight:600;display:none;">1 req/game</span>
+      <div class="input-group">
+        <label class="inp-label">Status</label>
+        <select id="status-filter-pre" onchange="syncFilters('status')">
+          <option value="all">All events</option>
+          <option value="upcoming">Upcoming</option>
+          <option value="live">Live only</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label class="inp-label">Date</label>
+        <select id="date-preset-pre" onchange="syncFilters('date')">
+          <option value="all">All dates</option>
+          <option value="today">Today</option>
+          <option value="tomorrow">Tomorrow</option>
+          <option value="week">Next 7 days</option>
+          <option value="custom">Custom…</option>
+        </select>
+      </div>
+      <div id="custom-date-wrap-pre" style="display:none;align-items:center;gap:6px;flex-wrap:wrap;">
+        <label class="inp-label">From</label>
+        <input type="date" id="date-from-pre" onchange="syncFilters('date')">
+        <label class="inp-label">To</label>
+        <input type="date" id="date-to-pre" onchange="syncFilters('date')">
+      </div>
+      <div class="input-group" style="max-width:100px;">
+        <label class="inp-label" for="f-unit">Unit ($)</label>
+        <input type="number" id="f-unit" value="50" min="1" max="999999" step="1" inputmode="numeric">
       </div>
     </div>
-  </div>
 
-  <!-- Fetch buttons -->
-  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:.6rem;">
-    <button class="fetch-btn" id="fetch-btn" onclick="go()" style="margin:0;">Fetch odds</button>
-    <button class="fetch-btn" id="fetch-all-btn" onclick="goAll()" style="background:var(--green);margin:0;">Fetch all in-season</button>
+    <!-- Row 4: Toggles -->
+    <div class="input-row" style="gap:0;">
+      <div class="toggle-group">
+        <label class="tgl-label">
+          <div class="tgl-track" id="props-track"><div class="tgl-thumb" id="props-thumb"></div></div>
+          Player props
+        </label>
+        <span class="tgl-note" id="props-cost-note">1 req/game</span>
+      </div>
+      <div class="tgl-divider"></div>
+      <div class="toggle-group">
+        <label class="tgl-label">
+          <div class="tgl-track" id="t2-track"><div class="tgl-thumb" id="t2-thumb"></div></div>
+          Tier 2 props
+        </label>
+        <span class="tgl-note" id="t2-cost-note">1 req/game</span>
+      </div>
+    </div>
+
+    <!-- Row 5: Fetch buttons -->
+    <div class="input-row" style="gap:8px;">
+      <button class="fetch-btn" id="fetch-btn" onclick="go()">Fetch odds</button>
+      <button class="fetch-btn" id="fetch-all-btn" onclick="goAll()" style="background:var(--green);">Fetch all in-season</button>
+    </div>
+
   </div>
 
   <div class="usage-row">
@@ -1970,6 +1997,38 @@ function getSelectedBookmarks() {
 document.addEventListener('DOMContentLoaded', initBookSelector);
 // Also init immediately in case DOM is already ready
 initBookSelector();
+
+
+// ── Book selector ──────────────────────────────────────────────────────────
+let selectedBooks = new Set(['fanduel', 'draftkings', 'betmgm', 'williamhill_us', 'bovada', 'betonlineag', 'hardrockbet', 'pinnacle']);
+
+function toggleBook(key) {
+  if (selectedBooks.has(key)) {
+    if (selectedBooks.size <= 1) return;
+    selectedBooks.delete(key);
+    const chip = document.getElementById('bchip-' + key);
+    if (chip) chip.classList.remove('active');
+  } else {
+    selectedBooks.add(key);
+    const chip = document.getElementById('bchip-' + key);
+    if (chip) chip.classList.add('active');
+  }
+}
+
+function selectAllBooks() {
+  selectedBooks.add('fanduel'); const c_0=document.getElementById('bchip-fanduel'); if(c_0) c_0.classList.add('active');
+selectedBooks.add('draftkings'); const c_1=document.getElementById('bchip-draftkings'); if(c_1) c_1.classList.add('active');
+selectedBooks.add('betmgm'); const c_2=document.getElementById('bchip-betmgm'); if(c_2) c_2.classList.add('active');
+selectedBooks.add('williamhill_us'); const c_3=document.getElementById('bchip-williamhill_us'); if(c_3) c_3.classList.add('active');
+selectedBooks.add('bovada'); const c_4=document.getElementById('bchip-bovada'); if(c_4) c_4.classList.add('active');
+selectedBooks.add('betonlineag'); const c_5=document.getElementById('bchip-betonlineag'); if(c_5) c_5.classList.add('active');
+selectedBooks.add('hardrockbet'); const c_6=document.getElementById('bchip-hardrockbet'); if(c_6) c_6.classList.add('active');
+selectedBooks.add('pinnacle'); const c_7=document.getElementById('bchip-pinnacle'); if(c_7) c_7.classList.add('active');
+}
+
+function getSelectedBookmarks() {
+  return [...selectedBooks].join(',');
+}
 
 </script>
 </body>
