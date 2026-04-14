@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>Arb Dashboard Pro — 8 Books</title>
 <style>
@@ -1183,37 +1186,48 @@ function clearAllSports() {
 }
 function updateSportChips() {
   const selected = getSelectedSports();
+  // Build label map from checkboxes
   const labels = {};
   document.querySelectorAll('#sport-picker-dropdown .sp-item').forEach(item => {
-    const cb = item.querySelector('input');
+    const cb = item.querySelector('input[type="checkbox"]');
     if (cb) labels[cb.value] = item.textContent.trim();
   });
-  const chips = $('sport-chips');
-  const btn = $('sport-picker-label');
+  // Update chips area
+  const chips = document.getElementById('sport-chips');
+  // Update button label — try both the span and the button div as fallback
+  const btnSpan = document.getElementById('sport-picker-label');
+  const btnDiv  = document.getElementById('sport-picker-btn');
+
+  function setLabel(text) {
+    if (btnSpan) btnSpan.textContent = text;
+    // Also update the button div's first text node as fallback
+    if (btnDiv) {
+      const span = btnDiv.querySelector('#sport-picker-label');
+      if (span) span.textContent = text;
+    }
+  }
+
   if (!chips) return;
 
   if (selected.length === 0) {
-    // Nothing selected
     chips.innerHTML = '';
-    if (btn) btn.textContent = 'Select sports…';
+    setLabel('Select sports…');
   } else if (selected.length === 1) {
-    // Exactly one sport — show its name in the button, no chip needed
     const name = labels[selected[0]] || selected[0];
     chips.innerHTML = '';
-    if (btn) btn.textContent = name;
+    setLabel(name);
   } else if (selected.length <= 4) {
-    // 2–4 sports — show each as a removable chip, button says "X sports"
     chips.innerHTML = selected.map(v =>
       `<span class="sp-chip">${labels[v]||v}<span class="sp-chip-x" onclick="removeSport('${v}')">×</span></span>`
     ).join('');
-    if (btn) btn.textContent = selected.length + ' sports';
+    setLabel(selected.length + ' sports');
   } else {
-    // 5+ sports — summarise
     chips.innerHTML = `<span class="sp-chip">${selected.length} sports selected<span class="sp-chip-x" onclick="clearAllSports()">×</span></span>`;
-    if (btn) btn.textContent = selected.length + ' sports';
+    setLabel(selected.length + ' sports');
   }
   // Sync legacy f-sport
-  if ($('f-sport') && selected.length > 0) $('f-sport').value = selected[0];
+  const fs = document.getElementById('f-sport');
+  if (fs && selected.length > 0) fs.value = selected[0];
 }
 function removeSport(val) {
   const cb = document.querySelector(`#sport-picker-dropdown input[value="${val}"]`);
