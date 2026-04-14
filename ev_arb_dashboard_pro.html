@@ -4,159 +4,206 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<title>Arb Dashboard Pro — 8 Books</title>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>Arb Dashboard Pro</title>
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-:root {
-  --bg: #ffffff; --bg2: #f6f6f4; --bg3: #eeede9;
-  --text: #1a1a18; --text2: #5f5e5a; --text3: #95938d;
-  --border: rgba(0,0,0,0.10); --border2: rgba(0,0,0,0.20);
-  --green: #2d6a0f; --green-bg: #eaf3de; --green-border: #b8d98a;
-  --blue: #0f4d8a; --blue-bg: #e6f0fb; --blue-border: #90bde8;
-  --amber: #7a4800; --amber-bg: #fdf0d8; --amber-border: #f5c96e;
-  --red: #8a1010; --red-bg: #fce8e8; --red-border: #f0a0a0;
-  --bovada: #c8960a; --betonline: #0a6b9e; --hardrock: #b0174e;
-  --fanduel: #1a56a0; --draftkings: #1a7a3a; --betmgm: #c0920a;
-  --caesars: #8a1a1a; --pinnacle: #4a0a8a;
-  --r: 10px; --r-lg: 14px;
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#ffffff;--bg2:#f6f6f4;--bg3:#eeede9;
+  --text:#1a1a18;--text2:#5f5e5a;--text3:#95938d;
+  --border:rgba(0,0,0,0.10);--border2:rgba(0,0,0,0.20);
+  --green:#2d9e5f;--green-bg:#eaf3de;--green-border:#b8d98a;
+  --blue:#185FA5;--blue-bg:#e6f1fb;--blue-border:#b5d4f4;
+  --amber:#ba7517;--amber-bg:#faeeda;
+  --red:#a32d2d;--red-bg:#fcebeb;
+  --r:8px;--r-lg:12px;
 }
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #1c1c1a; --bg2: #252523; --bg3: #2c2c29;
-    --text: #eeebe4; --text2: #a8a69f; --text3: #706e69;
-    --border: rgba(255,255,255,0.09); --border2: rgba(255,255,255,0.17);
-    --green: #8fd45a; --green-bg: #172e07; --green-border: #3a6018;
-    --blue: #7ab8ed; --blue-bg: #06244a; --blue-border: #1a4f8a;
-    --amber: #f5c040; --amber-bg: #3a2000; --amber-border: #7a5000;
-    --red: #f08080; --red-bg: #3a0808; --red-border: #7a1818;
-    --bovada: #f0b830; --betonline: #50b0e0; --hardrock: #e060a0;
-    --fanduel: #60a0e0; --draftkings: #50c070; --betmgm: #e0b040;
-    --caesars: #e06060; --pinnacle: #a070e0;
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#1c1c1a;--bg2:#252523;--bg3:#2c2c29;
+    --text:#e8e7e3;--text2:#a8a7a2;--text3:#706f6a;
+    --border:rgba(255,255,255,0.09);--border2:rgba(255,255,255,0.17);
+    --green:#52c47a;--green-bg:#1b3d25;--green-border:#2d6a40;
+    --blue:#5ba3e8;--blue-bg:#0d2540;--blue-border:#1a4a7a;
+    --amber:#e09f3e;--amber-bg:#2d2010;
+    --red:#e06060;--red-bg:#2d1010;
   }
 }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg3); color: var(--text); font-size: 14px; line-height: 1.5; -webkit-text-size-adjust: 100%; }
-.page { max-width: 860px; margin: 0 auto; padding: 1rem 0.85rem 6rem; }
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg3);color:var(--text);font-size:14px;line-height:1.5;-webkit-text-size-adjust:100%}
+.page{max-width:860px;margin:0 auto;padding:1rem 0.85rem 6rem}
 
-.topbar { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
-.app-title { font-size: 17px; font-weight: 700; letter-spacing: -.3px; }
-.app-sub { font-size: 11px; color: var(--text3); margin-top: 1px; }
-.refreshed { font-size: 11px; color: var(--text3); }
-.status-pills { display: flex; gap: 5px; flex-wrap: wrap; }
-.spill { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 500; color: var(--text2); background: var(--bg2); border: .5px solid var(--border2); border-radius: 20px; padding: 3px 9px; }
-.dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
-.dot-on { background: #52a020; } .dot-off { background: #cc3030; } .dot-warn { background: #cc8800; }
+/* topbar */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:1rem;flex-wrap:wrap}
+.app-title{font-size:20px;font-weight:700;letter-spacing:-.3px}
+.app-sub{font-size:12px;color:var(--text3);margin-top:2px}
+.refreshed{font-size:11px;color:var(--text3)}
+.status-pills{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}
+.spill{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:500;color:var(--text2);background:var(--bg2);border:.5px solid var(--border);border-radius:20px;padding:2px 8px}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.dot-on{background:var(--green)}.dot-warn{background:var(--amber)}.dot-off{background:var(--red)}
 
-.config { background: var(--bg2); border: .5px solid var(--border2); border-radius: var(--r-lg); padding: 12px; margin-bottom: .6rem; display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; }
-.field { display: flex; flex-direction: column; gap: 3px; }
-.field label { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: .05em; }
-input[type="password"], input[type="number"], select {
-  font-size: 14px; padding: 8px 10px; border-radius: var(--r); border: .5px solid var(--border2);
-  background: var(--bg); color: var(--text); outline: none; font-family: inherit; -webkit-appearance: none;
+/* book chips */
+.bk-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:.6rem}
+.bk-chip{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:16px;font-size:11px;font-weight:700;cursor:pointer;background:transparent;opacity:.35;transition:opacity .15s;font-family:inherit;-webkit-tap-highlight-color:transparent;border-width:1.5px;border-style:solid}
+.bk-chip.active{opacity:1}
+.bk-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.bk-all{font-size:10px;font-weight:700;padding:4px 10px;border-radius:16px;border:.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-family:inherit}
+.bk-all:hover{border-color:var(--green);color:var(--green)}
+
+/* config row */
+.config{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;margin-bottom:.6rem}
+.field{display:flex;flex-direction:column;gap:4px}
+.field label{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em}
+.field input,.field select{font-size:13px;padding:7px 10px;border-radius:var(--r);border:.5px solid var(--border2);background:var(--bg);color:var(--text);outline:none}
+.field input:focus,.field select:focus{border-color:var(--blue)}
+
+/* sport picker */
+.sport-picker-wrap{position:relative}
+.sport-picker-btn{display:flex;align-items:center;gap:6px;font-size:13px;padding:7px 10px;border-radius:var(--r);border:.5px solid var(--border2);background:var(--bg);color:var(--text);cursor:pointer;white-space:nowrap;min-width:160px;user-select:none;-webkit-tap-highlight-color:transparent}
+.sport-picker-dropdown{display:none;position:absolute;top:calc(100% + 4px);left:0;z-index:500;background:var(--bg);border:.5px solid var(--border2);border-radius:var(--r-lg);box-shadow:0 4px 16px rgba(0,0,0,.15);min-width:260px;max-height:380px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.sport-picker-dropdown.open{display:block}
+.sp-group-hd{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);padding:8px 14px 4px;border-top:.5px solid var(--border)}
+.sp-group-hd:first-child{border-top:none}
+.sp-item{display:flex;align-items:center;gap:8px;padding:6px 14px;font-size:13px;cursor:pointer;color:var(--text)}
+.sp-item:hover{background:var(--bg2)}
+.sp-item input{width:14px;height:14px;cursor:pointer;accent-color:var(--blue)}
+.sp-actions{display:flex;gap:6px;padding:10px 14px;border-top:.5px solid var(--border)}
+.sp-action-btn{flex:1;text-align:center;font-size:12px;font-weight:600;padding:6px;border-radius:var(--r);border:.5px solid var(--border2);cursor:pointer;color:var(--text2);background:var(--bg2)}
+.sp-action-btn:hover{border-color:var(--blue);color:var(--blue)}
+.sp-chip{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;background:var(--blue-bg);color:var(--blue);margin:2px}
+.sp-chip-x{cursor:pointer;font-size:13px;margin-left:2px;opacity:.7}
+.sp-selected-chips{display:flex;flex-wrap:wrap;margin-top:4px}
+
+/* toggles */
+.toggle-row{display:flex;align-items:center;gap:0;margin-bottom:.6rem}
+.tgl-pill{display:flex;align-items:center;gap:8px;padding:8px 14px;background:var(--bg2);border:.5px solid var(--border2);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.tgl-pill:first-child{border-radius:var(--r) 0 0 var(--r)}
+.tgl-pill:last-child{border-radius:0 var(--r) var(--r) 0;border-left:none}
+.tgl-track{position:relative;width:36px;height:20px;background:var(--border2);border-radius:10px;transition:background .2s;flex-shrink:0}
+.tgl-thumb{position:absolute;top:2px;left:2px;width:16px;height:16px;background:#fff;border-radius:50%;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.tgl-lbl{font-size:12px;font-weight:600;color:var(--text2);white-space:nowrap;user-select:none}
+.tgl-note{font-size:10px;color:var(--amber);font-weight:700;display:none}
+
+/* fetch buttons */
+.fetch-btn{font-size:13px;font-weight:600;padding:8px 18px;border-radius:var(--r);border:.5px solid var(--border2);background:var(--blue);color:#fff;cursor:pointer;white-space:nowrap;font-family:inherit;-webkit-tap-highlight-color:transparent}
+.fetch-btn:hover{opacity:.9}
+.fetch-btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:.6rem}
+
+/* pre-fetch filters */
+.pre-filters{display:flex;align-items:center;gap:10px;background:var(--bg2);border:.5px solid var(--border2);border-radius:var(--r);padding:8px 12px;margin-bottom:.5rem;flex-wrap:wrap}
+.pf-label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
+.pf-select{font-size:12px;padding:4px 8px;border-radius:6px;border:.5px solid var(--border2);background:var(--bg);color:var(--text)}
+.pf-custom{display:none;align-items:center;gap:6px;flex-wrap:wrap}
+.pf-custom input{font-size:12px;padding:4px 8px;border-radius:6px;border:.5px solid var(--border2);background:var(--bg);color:var(--text)}
+
+/* usage */
+.usage-row{display:flex;align-items:center;gap:10px;margin-bottom:.4rem}
+.usage-bg{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.usage-fill{height:100%;background:var(--green);border-radius:2px;width:0;transition:width .3s}
+.usage-lbl{font-size:11px;color:var(--text3);white-space:nowrap}
+.conn-log,.all-sport-log{font-size:11px;color:var(--text3);font-family:monospace;min-height:14px;margin-bottom:.3rem}
+
+/* info banner */
+.info{padding:10px 14px;border-radius:var(--r);margin-bottom:.75rem;font-size:13px}
+.info.blue{background:var(--blue-bg);color:var(--blue);border:.5px solid var(--blue-border)}
+.info.red{background:var(--red-bg);color:var(--red)}
+.info a{color:inherit}
+
+/* filters */
+.filters{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--bg2);border:.5px solid var(--border2);border-radius:var(--r);padding:9px 14px;margin-bottom:.75rem}
+.filter-group{display:flex;align-items:center;gap:6px}
+.filter-group label{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+.fval{font-size:13px;font-weight:700;min-width:40px}
+.post-status{display:flex;align-items:center;gap:6px}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1rem}
+@media(max-width:600px){.stats{grid-template-columns:repeat(2,1fr)}}
+.stat{background:var(--bg2);border:.5px solid var(--border);border-radius:var(--r);padding:12px 14px}
+.stat-lbl{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+.stat-val{font-size:22px;font-weight:700;color:var(--text)}
+.stat-sub{font-size:11px;color:var(--text3);margin-top:3px}
+
+/* section header */
+.sec-hd{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin:1rem 0 .5rem}
+
+/* arb cards */
+.arb-card{background:var(--bg);border:.5px solid var(--border2);border-radius:var(--r-lg);margin-bottom:.75rem;overflow:visible}
+.arb-hd{padding:12px 14px;border-bottom:.5px solid var(--border)}
+.arb-event{font-size:15px;font-weight:700;color:var(--text)}
+.arb-meta{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+.bet-leg{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:.5px solid var(--border);gap:10px;flex-wrap:wrap}
+.bet-leg:last-of-type{border-bottom:none}
+.leg-book{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3)}
+.leg-name{font-size:14px;font-weight:600;color:var(--text);margin:2px 0}
+.leg-labels{display:flex;gap:16px;flex-wrap:wrap}
+.leg-lbl-row{display:flex;flex-direction:column;gap:1px}
+.lbl{font-size:10px;color:var(--text3)}
+.val{font-size:14px;font-weight:700;color:var(--text)}
+.val.pos{color:var(--green)}
+.val.blue{color:var(--blue)}
+.arb-footer{display:flex;gap:16px;flex-wrap:wrap;padding:8px 14px;background:var(--bg2);border-top:.5px solid var(--border);border-radius:0 0 var(--r-lg) var(--r-lg)}
+.foot-item{display:flex;flex-direction:column}
+.foot-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text3)}
+.foot-val{font-size:13px;font-weight:700;color:var(--text)}
+
+/* ev cards */
+.ev-card{background:var(--bg);border:.5px solid var(--border2);border-radius:var(--r-lg);margin-bottom:.5rem}
+.ev-row{padding:11px 14px}
+.ev-row-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;flex-wrap:wrap}
+.ev-event{font-size:13px;font-weight:700;color:var(--text)}
+.leg-grid{display:flex;gap:16px;flex-wrap:wrap}
+
+/* tags */
+.tag{font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;white-space:nowrap}
+.tag-sport{background:var(--bg3);color:var(--text3);border:.5px solid var(--border)}
+.tag-mkt{background:var(--blue-bg);color:var(--blue)}
+.tag-arb{background:var(--blue-bg);color:var(--blue)}
+.tag-profit{background:var(--green-bg);color:var(--green)}
+.tag-ev{background:var(--green-bg);color:var(--green)}
+.tag-live{background:#fee2e2;color:#991b1b;animation:pulse 1.5s infinite}
+.tag-upcoming{background:var(--blue-bg);color:var(--blue)}
+.tag-past{background:var(--bg3);color:var(--text3)}
+
+/* book buttons */
+.book-btn{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:5px 10px;border-radius:var(--r);border:.5px solid var(--border2);background:var(--bg2);color:var(--text2);cursor:pointer;text-decoration:none;white-space:nowrap;-webkit-tap-highlight-color:transparent;flex-shrink:0}
+.book-btn:hover{background:var(--bg3);color:var(--text)}
+.btn-fanduel{border-color:#1890ff;color:#1890ff;background:rgba(24,144,255,.08)}
+.btn-draftkings{border-color:#53c028;color:#53c028;background:rgba(83,192,40,.08)}
+.btn-betmgm{border-color:#b8960c;color:#b8960c;background:rgba(184,150,12,.08)}
+.btn-caesars{border-color:#0c7c3e;color:#0c7c3e;background:rgba(12,124,62,.08)}
+.btn-bovada{border-color:#c8960a;color:#c8960a;background:rgba(200,150,10,.08)}
+.btn-betonline{border-color:#0a6b9e;color:#0a6b9e;background:rgba(10,107,158,.08)}
+.btn-hardrock{border-color:#b0174e;color:#b0174e;background:rgba(176,23,78,.08)}
+.btn-default{border-color:var(--border2);color:var(--text2)}
+
+/* hamburger menu */
+.arb-menu-wrap{position:relative;flex-shrink:0}
+.arb-menu-btn{background:none;border:.5px solid var(--border2);border-radius:var(--r);width:32px;height:32px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:0;color:var(--text2)}
+.arb-menu-btn span{display:block;width:14px;height:1.5px;background:currentColor;border-radius:2px}
+.arb-menu-dropdown{display:none;position:absolute;top:calc(100% + 4px);right:0;background:var(--bg);border:.5px solid var(--border2);border-radius:var(--r-lg);min-width:190px;z-index:300;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.2)}
+.arb-menu-dropdown.open{display:block}
+.arb-menu-item{display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;border-bottom:.5px solid var(--border)}
+.arb-menu-item:last-child{border-bottom:none}
+.arb-menu-item:hover{background:var(--bg2)}
+.arb-menu-icon{font-size:14px;flex-shrink:0;width:20px;text-align:center}
+.arb-menu-item.clr-green{color:var(--green)}
+.arb-menu-item.clr-blue{color:var(--blue)}
+.arb-menu-item.clr-x{color:#1DA1F2}
+.log-bet-btn{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:5px 10px;border-radius:var(--r);border:1.5px solid var(--green);color:var(--green);background:var(--green-bg);cursor:pointer;white-space:nowrap;font-family:inherit}
+
+/* empty state */
+.empty{padding:28px;text-align:center;color:var(--text3);font-size:13px}
+
+/* mobile bar */
+@media(max-width:600px){
+  .mob-bar{display:flex;position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:.5px solid var(--border2);padding:10px 12px;gap:8px;z-index:200;align-items:center}
+  .mob-bar .fetch-btn{flex:1}
 }
-input:focus, select:focus { border-color: #3a8cdd; box-shadow: 0 0 0 3px rgba(58,140,221,.15); }
-#f-key { min-width: 200px; font-family: monospace; font-size: 12px; flex: 1; }
-#f-unit { width: 70px; text-align: right; }
-select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; padding-right: 26px; }
-.fetch-btn { font-size: 14px; font-weight: 700; padding: 9px 20px; border-radius: var(--r); border: none; background: var(--blue); color: #fff; cursor: pointer; white-space: nowrap; -webkit-tap-highlight-color: transparent; touch-action: manipulation; align-self: flex-end; }
-.fetch-btn:active { opacity: .8; }
-.fetch-btn:disabled { opacity: .5; cursor: default; }
+@media(min-width:601px){.mob-bar{display:none}}
 
-.usage-row { display: flex; align-items: center; gap: 8px; margin-bottom: .6rem; }
-.usage-bg { flex: 1; height: 5px; background: var(--bg2); border-radius: 3px; overflow: hidden; border: .5px solid var(--border); }
-.usage-fill { height: 100%; background: #52a020; border-radius: 3px; width: 0%; transition: width .4s, background .4s; }
-.usage-lbl { font-size: 11px; color: var(--text3); white-space: nowrap; min-width: 80px; text-align: right; }
-.conn-log { font-size: 11px; color: var(--text3); font-family: monospace; min-height: 14px; margin-bottom: .5rem; }
-
-.filters { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: .85rem; }
-.filter-group { display: flex; align-items: center; gap: 6px; }
-.filter-group label { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: .05em; white-space: nowrap; }
-input[type="range"] { width: 80px; accent-color: var(--blue); }
-.fval { font-size: 13px; font-weight: 700; min-width: 38px; color: var(--text); }
-
-.stats { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 8px; margin-bottom: 1rem; }
-@media (max-width: 440px) { .stats { grid-template-columns: repeat(2,1fr); } }
-.stat { background: var(--bg2); border: .5px solid var(--border); border-radius: var(--r); padding: 10px 12px; }
-.stat-lbl { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--text3); margin-bottom: 4px; }
-.stat-val { font-size: 22px; font-weight: 800; color: var(--text); line-height: 1; }
-.stat-sub { font-size: 10px; color: var(--text3); margin-top: 3px; line-height: 1.3; }
-
-.sec-hd { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--text3); margin: 1.1rem 0 .5rem; }
-
-.arb-card { background: var(--bg); border: .5px solid var(--border2); border-radius: var(--r-lg); overflow: hidden; margin-bottom: .75rem; }
-.arb-hd { padding: 11px 14px 9px; border-bottom: .5px solid var(--border); }
-.arb-event { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
-.arb-meta { display: flex; gap: 5px; flex-wrap: wrap; align-items: center; }
-.tag { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 20px; white-space: nowrap; border: .5px solid transparent; }
-.tag-sport  { background: var(--bg2); color: var(--text2); border-color: var(--border2); }
-.tag-mkt    { background: var(--bg2); color: var(--text2); border-color: var(--border2); }
-.tag-arb    { background: var(--blue-bg); color: var(--blue); border-color: var(--blue-border); }
-.tag-profit { background: var(--green-bg); color: var(--green); border-color: var(--green-border); }
-.tag-ev     { background: var(--green-bg); color: var(--green); border-color: var(--green-border); }
-
-.bet-leg { padding: 12px 14px; border-bottom: .5px solid var(--border); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.bet-leg:last-of-type { border-bottom: none; }
-.leg-info { flex: 1; min-width: 0; }
-.leg-book { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text3); margin-bottom: 2px; }
-.leg-name { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.leg-labels { display: grid; grid-template-columns: repeat(3, auto); gap: 0 14px; margin-top: 8px; }
-.leg-lbl-row { display: flex; flex-direction: column; }
-.lbl { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--text3); margin-bottom: 1px; }
-.val { font-size: 15px; font-weight: 800; color: var(--text); }
-.val.pos { color: var(--green); }
-.val.blue { color: var(--blue); }
-.book-btn { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 700; padding: 8px 12px; border-radius: var(--r); text-decoration: none; white-space: nowrap; -webkit-tap-highlight-color: transparent; touch-action: manipulation; border: 1.5px solid; flex-shrink: 0; }
-.book-btn:active { opacity: .7; }
-.btn-bovada    { background: var(--bg); color: var(--bovada);   border-color: var(--bovada); }
-.btn-betonline { background: var(--bg); color: var(--betonline); border-color: var(--betonline); }
-.btn-hardrock  { background: var(--bg); color: var(--hardrock);  border-color: var(--hardrock); }
-.btn-fanduel   { background: var(--bg); color: var(--fanduel);   border-color: var(--fanduel); }
-.btn-draftkings{ background: var(--bg); color: var(--draftkings);border-color: var(--draftkings); }
-.btn-betmgm    { background: var(--bg); color: var(--betmgm);    border-color: var(--betmgm); }
-.btn-caesars   { background: var(--bg); color: var(--caesars);   border-color: var(--caesars); }
-.btn-default   { background: var(--bg2); color: var(--text2);    border-color: var(--border2); }
-
-.arb-footer { display: flex; gap: 16px; flex-wrap: wrap; padding: 8px 14px; background: var(--bg2); border-top: .5px solid var(--border); }
-.foot-item { display: flex; flex-direction: column; }
-.foot-lbl { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--text3); }
-.foot-val { font-size: 13px; font-weight: 700; color: var(--text); }
-
-.ev-card { background: var(--bg); border: .5px solid var(--border2); border-radius: var(--r-lg); overflow: hidden; margin-bottom: .75rem; }
-.ev-row { padding: 12px 14px; border-bottom: .5px solid var(--border); }
-.ev-row:last-child { border-bottom: none; }
-.ev-row-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
-.ev-event { font-size: 13px; font-weight: 700; flex: 1; min-width: 0; }
-.ev-numbers { display: grid; grid-template-columns: repeat(5, auto); gap: 0 14px; margin-top: 4px; }
-
-.info { border-radius: var(--r); padding: 12px 14px; font-size: 13px; margin-bottom: .75rem; line-height: 1.7; border: .5px solid; }
-.info.blue { background: var(--blue-bg); color: var(--blue); border-color: var(--blue-border); }
-.info.red  { background: var(--red-bg);  color: var(--red);  border-color: var(--red-border); display: none; }
-.info a { color: inherit; font-weight: 700; }
-.info ol, .info ul { margin: 6px 0 0 18px; }
-.empty { padding: 30px 16px; text-align: center; color: var(--text3); font-size: 13px; }
-
-.books-strip { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: .85rem; }
-.book-chip { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; border: 1.5px solid; }
-.chip-bovada    { color: var(--bovada);    border-color: var(--bovada); }
-.chip-betonline { color: var(--betonline); border-color: var(--betonline); }
-.chip-hardrock  { color: var(--hardrock);  border-color: var(--hardrock); }
-.chip-fanduel   { color: var(--fanduel);   border-color: var(--fanduel); }
-.chip-draftkings{ color: var(--draftkings);border-color: var(--draftkings); }
-.chip-betmgm    { color: var(--betmgm);    border-color: var(--betmgm); }
-.chip-caesars   { color: var(--caesars);   border-color: var(--caesars); }
-.chip-pinnacle  { color: var(--pinnacle);  border-color: var(--pinnacle); }
-
-@media (max-width: 600px) {
-  .mob-bar { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg); border-top: .5px solid var(--border2); padding: 10px 12px; gap: 8px; z-index: 200; }
-  .mob-bar select { flex: 1; font-size: 13px; }
-  .mob-bar .fetch-btn { font-size: 13px; padding: 8px 16px; }
-  .page { padding-bottom: 5.5rem; }
-}
-@media (min-width: 601px) { .mob-bar { display: none; } }
-
-.bk-chip { display:inline-flex; align-items:center; padding:4px 10px; border-radius:16px; font-size:11px; font-weight:700; cursor:pointer; background:transparent; opacity:.35; transition:opacity .15s; font-family:inherit; -webkit-tap-highlight-color:transparent; }
-.bk-chip.active { opacity:1; }
-
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
 </style>
 </head>
 <body>
@@ -169,242 +216,204 @@ input[type="range"] { width: 80px; accent-color: var(--blue); }
     </div>
     <div>
       <div class="refreshed" id="refreshed"></div>
-      <div class="status-pills" id="status-pills" style="margin-top:5px;">
-        <span class="spill"><span class="dot dot-off"></span>FanDuel</span>
-        <span class="spill"><span class="dot dot-off"></span>DraftKings</span>
-        <span class="spill"><span class="dot dot-off"></span>BetMGM</span>
-        <span class="spill"><span class="dot dot-off"></span>Caesars</span>
-        <span class="spill"><span class="dot dot-off"></span>Bovada</span>
-        <span class="spill"><span class="dot dot-off"></span>BetOnline</span>
-        <span class="spill"><span class="dot dot-off"></span>Hard Rock</span>
-        <span class="spill"><span class="dot dot-off"></span>Pinnacle</span>
+      <div class="status-pills" id="status-pills">
+        <span class="spill"><span class="dot dot-off"></span>FanDuel</span><span class="spill"><span class="dot dot-off"></span>DraftKings</span><span class="spill"><span class="dot dot-off"></span>BetMGM</span><span class="spill"><span class="dot dot-off"></span>Caesars</span><span class="spill"><span class="dot dot-off"></span>Bovada</span><span class="spill"><span class="dot dot-off"></span>BetOnline</span><span class="spill"><span class="dot dot-off"></span>Hard Rock</span><span class="spill"><span class="dot dot-off"></span>Pinnacle (EV ref)</span>
       </div>
     </div>
   </div>
 
-  <div class="info blue" id="help">
-    Get your free API key at <a href="https://the-odds-api.com" target="_blank">the-odds-api.com</a> and paste it below. This dashboard scans <strong>28 book combinations</strong> simultaneously for arb opportunities, and uses Pinnacle as the sharp-line EV benchmark. Tap any book button to open that sportsbook and place your bet.
+  <div class="info blue" id="help">Get your free API key at <a href="https://the-odds-api.com" target="_blank">the-odds-api.com</a> and paste it below. This dashboard scans <strong>28 book combinations</strong> simultaneously for arb opportunities, and uses Pinnacle as the sharp-line EV benchmark.</div>
+  <div class="info red" id="err" style="display:none;"></div>
+  <div id="all-sport-log" class="all-sport-log"></div>
+
+  <!-- Book selector -->
+  <div class="bk-row">
+  <button class="bk-chip active" id="bchip-fanduel" data-key="fanduel" style="border-color:#1890ff;color:#1890ff;" onclick="toggleBook('fanduel')"><span class="bk-dot" style="background:#1890ff;"></span>FanDuel</button>
+  <button class="bk-chip active" id="bchip-draftkings" data-key="draftkings" style="border-color:#53c028;color:#53c028;" onclick="toggleBook('draftkings')"><span class="bk-dot" style="background:#53c028;"></span>DraftKings</button>
+  <button class="bk-chip active" id="bchip-betmgm" data-key="betmgm" style="border-color:#b8960c;color:#b8960c;" onclick="toggleBook('betmgm')"><span class="bk-dot" style="background:#b8960c;"></span>BetMGM</button>
+  <button class="bk-chip active" id="bchip-williamhill_us" data-key="williamhill_us" style="border-color:#0c7c3e;color:#0c7c3e;" onclick="toggleBook('williamhill_us')"><span class="bk-dot" style="background:#0c7c3e;"></span>Caesars</button>
+  <button class="bk-chip active" id="bchip-bovada" data-key="bovada" style="border-color:#c8960a;color:#c8960a;" onclick="toggleBook('bovada')"><span class="bk-dot" style="background:#c8960a;"></span>Bovada</button>
+  <button class="bk-chip active" id="bchip-betonlineag" data-key="betonlineag" style="border-color:#0a6b9e;color:#0a6b9e;" onclick="toggleBook('betonlineag')"><span class="bk-dot" style="background:#0a6b9e;"></span>BetOnline</button>
+  <button class="bk-chip active" id="bchip-hardrockbet" data-key="hardrockbet" style="border-color:#b0174e;color:#b0174e;" onclick="toggleBook('hardrockbet')"><span class="bk-dot" style="background:#b0174e;"></span>Hard Rock</button>
+  <button class="bk-chip active" id="bchip-pinnacle" data-key="pinnacle" style="border-color:#8b5cf6;color:#8b5cf6;" onclick="toggleBook('pinnacle')"><span class="bk-dot" style="background:#8b5cf6;"></span>Pinnacle (EV ref)</button>
+    <button class="bk-all" onclick="selectAllBooks()">All</button>
   </div>
-  <div class="info red" id="err"></div>
 
-<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:.5rem;padding:8px 0;">
-  <button class="bk-chip active" id="bchip-fanduel" data-key="fanduel" style="border:1.5px solid #1890ff;color:#1890ff;" onclick="toggleBook('fanduel')"><span style="width:6px;height:6px;border-radius:50%;background:#1890ff;display:inline-block;margin-right:4px;"></span>FanDuel</button>
-  <button class="bk-chip active" id="bchip-draftkings" data-key="draftkings" style="border:1.5px solid #53c028;color:#53c028;" onclick="toggleBook('draftkings')"><span style="width:6px;height:6px;border-radius:50%;background:#53c028;display:inline-block;margin-right:4px;"></span>DraftKings</button>
-  <button class="bk-chip active" id="bchip-betmgm" data-key="betmgm" style="border:1.5px solid #b8960c;color:#b8960c;" onclick="toggleBook('betmgm')"><span style="width:6px;height:6px;border-radius:50%;background:#b8960c;display:inline-block;margin-right:4px;"></span>BetMGM</button>
-  <button class="bk-chip active" id="bchip-williamhill_us" data-key="williamhill_us" style="border:1.5px solid #0c7c3e;color:#0c7c3e;" onclick="toggleBook('williamhill_us')"><span style="width:6px;height:6px;border-radius:50%;background:#0c7c3e;display:inline-block;margin-right:4px;"></span>Caesars</button>
-  <button class="bk-chip active" id="bchip-bovada" data-key="bovada" style="border:1.5px solid #c8960a;color:#c8960a;" onclick="toggleBook('bovada')"><span style="width:6px;height:6px;border-radius:50%;background:#c8960a;display:inline-block;margin-right:4px;"></span>Bovada</button>
-  <button class="bk-chip active" id="bchip-betonlineag" data-key="betonlineag" style="border:1.5px solid #0a6b9e;color:#0a6b9e;" onclick="toggleBook('betonlineag')"><span style="width:6px;height:6px;border-radius:50%;background:#0a6b9e;display:inline-block;margin-right:4px;"></span>BetOnline</button>
-  <button class="bk-chip active" id="bchip-hardrockbet" data-key="hardrockbet" style="border:1.5px solid #b0174e;color:#b0174e;" onclick="toggleBook('hardrockbet')"><span style="width:6px;height:6px;border-radius:50%;background:#b0174e;display:inline-block;margin-right:4px;"></span>Hard Rock</button>
-  <button class="bk-chip active" id="bchip-pinnacle" data-key="pinnacle" style="border:1.5px solid #8b5cf6;color:#8b5cf6;" onclick="toggleBook('pinnacle')"><span style="width:6px;height:6px;border-radius:50%;background:#8b5cf6;display:inline-block;margin-right:4px;"></span>Pinnacle (EV ref)</button>
-  <button onclick="selectAllBooks()" style="font-size:11px;font-weight:600;padding:4px 10px;border-radius:16px;border:.5px solid #888;background:none;color:#888;cursor:pointer;">All</button>
-</div>
-
+  <!-- Config row: API key | Sport | Unit | Fetch -->
   <div class="config">
-    <div class="field" style="flex:1;min-width:180px;">
+    <div class="field" style="flex:1.5;min-width:180px;">
       <label for="f-key">API key</label>
       <input type="password" id="f-key" placeholder="paste key from the-odds-api.com" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
     </div>
-    <div class="field">
-      <label for="f-sport">Sport</label>
-      <select id="f-sport">
-        <optgroup label="American Football">
-          <option value="americanfootball_nfl">NFL</option>
-          <option value="americanfootball_nfl_preseason">NFL Preseason</option>
-          <option value="americanfootball_ncaaf">NCAAF</option>
-          <option value="americanfootball_cfl">CFL</option>
-          <option value="americanfootball_ufl">UFL</option>
-        </optgroup>
-        <optgroup label="Baseball">
-          <option value="baseball_mlb">MLB</option>
-          <option value="baseball_mlb_preseason">MLB Preseason</option>
-          <option value="baseball_ncaa">NCAA Baseball</option>
-          <option value="baseball_milb">Minor League Baseball (MiLB)</option>
-          <option value="baseball_kbo">KBO League</option>
-          <option value="baseball_npb">NPB (Japan)</option>
-        </optgroup>
-        <optgroup label="Basketball">
-          <option value="basketball_nba">NBA</option>
-          <option value="basketball_nba_preseason">NBA Preseason</option>
-          <option value="basketball_wnba">WNBA</option>
-          <option value="basketball_ncaab">NCAAB (Men)</option>
-          <option value="basketball_wncaab">WNCAAB (Women)</option>
-          <option value="basketball_euroleague">EuroLeague</option>
-          <option value="basketball_nbl">NBL (Australia)</option>
-          <option value="basketball_nba_summer_league">NBA Summer League</option>
-        </optgroup>
-        <optgroup label="Ice Hockey">
-          <option value="icehockey_nhl">NHL</option>
-          <option value="icehockey_nhl_preseason">NHL Preseason</option>
-          <option value="icehockey_ahl">AHL</option>
-          <option value="icehockey_sweden_hockey_league">SHL (Sweden)</option>
-          <option value="icehockey_sweden_allsvenskan">HockeyAllsvenskan</option>
-          <option value="icehockey_liiga">Finnish Liiga</option>
-          <option value="icehockey_mestis">Finnish Mestis</option>
-        </optgroup>
-        <optgroup label="Soccer — USA &amp; Americas">
-          <option value="soccer_usa_mls">MLS</option>
-          <option value="soccer_mexico_ligamx">Liga MX</option>
-          <option value="soccer_concacaf_leagues_cup">CONCACAF Leagues Cup</option>
-          <option value="soccer_argentina_primera_division">Argentina Primera División</option>
-          <option value="soccer_brazil_campeonato">Brazil Série A</option>
-          <option value="soccer_brazil_serie_b">Brazil Série B</option>
-          <option value="soccer_chile_campeonato">Chile Primera División</option>
-          <option value="soccer_conmebol_copa_libertadores">Copa Libertadores</option>
-          <option value="soccer_conmebol_copa_sudamericana">Copa Sudamericana</option>
-          <option value="soccer_conmebol_copa_america">Copa América</option>
-          <option value="soccer_fifa_world_cup">FIFA World Cup</option>
-          <option value="soccer_fifa_world_cup_womens">FIFA Women's World Cup</option>
-          <option value="soccer_fifa_club_world_cup">FIFA Club World Cup</option>
-        </optgroup>
-        <optgroup label="Soccer — England">
-          <option value="soccer_epl">EPL (Premier League)</option>
-          <option value="soccer_efl_champ">EFL Championship</option>
-          <option value="soccer_england_league1">EFL League 1</option>
-          <option value="soccer_england_league2">EFL League 2</option>
-          <option value="soccer_fa_cup">FA Cup</option>
-          <option value="soccer_england_efl_cup">EFL Cup</option>
-        </optgroup>
-        <optgroup label="Soccer — Europe">
-          <option value="soccer_uefa_champs_league">UEFA Champions League</option>
-          <option value="soccer_uefa_europa_league">UEFA Europa League</option>
-          <option value="soccer_uefa_europa_conference_league">UEFA Europa Conference League</option>
-          <option value="soccer_uefa_nations_league">UEFA Nations League</option>
-          <option value="soccer_germany_bundesliga">Bundesliga (Germany)</option>
-          <option value="soccer_germany_bundesliga2">Bundesliga 2 (Germany)</option>
-          <option value="soccer_germany_liga3">3. Liga (Germany)</option>
-          <option value="soccer_spain_la_liga">La Liga (Spain)</option>
-          <option value="soccer_spain_segunda_division">La Liga 2 (Spain)</option>
-          <option value="soccer_italy_serie_a">Serie A (Italy)</option>
-          <option value="soccer_italy_serie_b">Serie B (Italy)</option>
-          <option value="soccer_france_ligue_one">Ligue 1 (France)</option>
-          <option value="soccer_france_ligue_two">Ligue 2 (France)</option>
-          <option value="soccer_netherlands_eredivisie">Eredivisie (Netherlands)</option>
-          <option value="soccer_portugal_primeira_liga">Primeira Liga (Portugal)</option>
-          <option value="soccer_turkey_super_league">Süper Lig (Turkey)</option>
-          <option value="soccer_greece_super_league">Super League (Greece)</option>
-          <option value="soccer_belgium_first_div">First Division A (Belgium)</option>
-          <option value="soccer_spl">Premiership (Scotland)</option>
-          <option value="soccer_denmark_superliga">Superliga (Denmark)</option>
-          <option value="soccer_sweden_allsvenskan">Allsvenskan (Sweden)</option>
-          <option value="soccer_sweden_superettan">Superettan (Sweden)</option>
-          <option value="soccer_norway_eliteserien">Eliteserien (Norway)</option>
-          <option value="soccer_austria_bundesliga">Bundesliga (Austria)</option>
-          <option value="soccer_switzerland_superleague">Super League (Switzerland)</option>
-          <option value="soccer_russia_premier_league">Premier League (Russia)</option>
-          <option value="soccer_poland_ekstraklasa">Ekstraklasa (Poland)</option>
-          <option value="soccer_finland_veikkausliiga">Veikkausliiga (Finland)</option>
-          <option value="soccer_league_of_ireland">League of Ireland</option>
-        </optgroup>
-        <optgroup label="Soccer — Rest of World">
-          <option value="soccer_australia_aleague">A-League (Australia)</option>
-          <option value="soccer_japan_j_league">J-League (Japan)</option>
-          <option value="soccer_korea_kleague1">K League 1 (South Korea)</option>
-          <option value="soccer_china_superleague">Super League (China)</option>
-          <option value="soccer_saudi_arabia_pro_league">Saudi Pro League</option>
-          <option value="soccer_africa_cup_of_nations">Africa Cup of Nations</option>
-        </optgroup>
-        <optgroup label="Tennis — ATP">
-          <option value="tennis_atp_aus_open_singles">Australian Open (ATP)</option>
-          <option value="tennis_atp_french_open">French Open (ATP)</option>
-          <option value="tennis_atp_wimbledon">Wimbledon (ATP)</option>
-          <option value="tennis_atp_us_open">US Open (ATP)</option>
-          <option value="tennis_atp_miami_open">Miami Open (ATP)</option>
-          <option value="tennis_atp_indian_wells">Indian Wells (ATP)</option>
-          <option value="tennis_atp_madrid_open">Madrid Open (ATP)</option>
-          <option value="tennis_atp_italian_open">Italian Open (ATP)</option>
-          <option value="tennis_atp_canadian_open">Canadian Open (ATP)</option>
-          <option value="tennis_atp_cincinnati_open">Cincinnati Open (ATP)</option>
-          <option value="tennis_atp_monte_carlo_masters">Monte-Carlo Masters (ATP)</option>
-          <option value="tennis_atp_china_open">China Open (ATP)</option>
-          <option value="tennis_atp_dubai">Dubai Championships (ATP)</option>
-          <option value="tennis_atp_paris_masters">Paris Masters (ATP)</option>
-        </optgroup>
-        <optgroup label="Tennis — WTA">
-          <option value="tennis_wta_aus_open_singles">Australian Open (WTA)</option>
-          <option value="tennis_wta_french_open">French Open (WTA)</option>
-          <option value="tennis_wta_wimbledon">Wimbledon (WTA)</option>
-          <option value="tennis_wta_us_open">US Open (WTA)</option>
-          <option value="tennis_wta_miami_open">Miami Open (WTA)</option>
-          <option value="tennis_wta_indian_wells">Indian Wells (WTA)</option>
-          <option value="tennis_wta_madrid_open">Madrid Open (WTA)</option>
-          <option value="tennis_wta_canadian_open">Canadian Open (WTA)</option>
-          <option value="tennis_wta_cincinnati_open">Cincinnati Open (WTA)</option>
-          <option value="tennis_wta_china_open">China Open (WTA)</option>
-          <option value="tennis_wta_dubai">Dubai Championships (WTA)</option>
-        </optgroup>
-        <optgroup label="MMA &amp; Boxing">
-          <option value="mma_mixed_martial_arts">MMA / UFC</option>
-          <option value="boxing_boxing">Boxing</option>
-        </optgroup>
-        <optgroup label="Golf">
-          <option value="golf_masters_tournament_winner">Masters Tournament</option>
-          <option value="golf_pga_championship_winner">PGA Championship</option>
-          <option value="golf_us_open_winner">US Open (Golf)</option>
-          <option value="golf_the_open_championship_winner">The Open Championship</option>
-        </optgroup>
-        <optgroup label="Cricket">
-          <option value="cricket_ipl">IPL</option>
-          <option value="cricket_test_match">Test Matches</option>
-          <option value="cricket_international_t20">International T20</option>
-          <option value="cricket_odi">One Day Internationals</option>
-          <option value="cricket_t20_world_cup">T20 World Cup</option>
-          <option value="cricket_icc_world_cup">ICC World Cup</option>
-          <option value="cricket_big_bash">Big Bash</option>
-          <option value="cricket_psl">Pakistan Super League</option>
-          <option value="cricket_t20_blast">T20 Blast</option>
-          <option value="cricket_the_hundred">The Hundred</option>
-          <option value="cricket_caribbean_premier_league">Caribbean Premier League</option>
-        </optgroup>
-        <optgroup label="Rugby">
-          <option value="rugbyleague_nrl">NRL (Rugby League)</option>
-          <option value="rugbyunion_six_nations">Six Nations (Rugby Union)</option>
-          <option value="rugbyleague_nrl_state_of_origin">NRL State of Origin</option>
-        </optgroup>
-        <optgroup label="Other Sports">
-          <option value="aussierules_afl">AFL (Aussie Rules)</option>
-          <option value="lacrosse_pll">Premier Lacrosse League</option>
-          <option value="lacrosse_ncaa">NCAA Lacrosse</option>
-          <option value="handball_germany_bundesliga">Handball Bundesliga</option>
-        </optgroup>
-      </select>
+    <div class="field" style="min-width:160px;flex:1;">
+      <label>Sport</label>
+      <div class="sport-picker-wrap" id="sport-picker-wrap">
+        <div class="sport-picker-btn" id="sport-picker-btn" onclick="toggleSportPicker()">
+          <span id="sport-picker-label">Select sports…</span>
+        </div>
+        <div class="sport-picker-dropdown" id="sport-picker-dropdown">
+          <div class="sp-group-hd">American Football</div>
+          <label class="sp-item"><input type="checkbox" value="americanfootball_nfl"> NFL</label>
+          <label class="sp-item"><input type="checkbox" value="americanfootball_ncaaf"> NCAAF</label>
+          <label class="sp-item"><input type="checkbox" value="americanfootball_cfl"> CFL</label>
+          <label class="sp-item"><input type="checkbox" value="americanfootball_ufl"> UFL</label>
+          <div class="sp-group-hd">Baseball</div>
+          <label class="sp-item"><input type="checkbox" value="baseball_mlb"> MLB</label>
+          <label class="sp-item"><input type="checkbox" value="baseball_ncaa"> NCAA Baseball</label>
+          <label class="sp-item"><input type="checkbox" value="baseball_milb"> MiLB</label>
+          <label class="sp-item"><input type="checkbox" value="baseball_kbo"> KBO</label>
+          <label class="sp-item"><input type="checkbox" value="baseball_npb"> NPB (Japan)</label>
+          <div class="sp-group-hd">Basketball</div>
+          <label class="sp-item"><input type="checkbox" value="basketball_nba"> NBA</label>
+          <label class="sp-item"><input type="checkbox" value="basketball_wnba"> WNBA</label>
+          <label class="sp-item"><input type="checkbox" value="basketball_ncaab"> NCAAB</label>
+          <label class="sp-item"><input type="checkbox" value="basketball_euroleague"> EuroLeague</label>
+          <div class="sp-group-hd">Ice Hockey</div>
+          <label class="sp-item"><input type="checkbox" value="icehockey_nhl"> NHL</label>
+          <label class="sp-item"><input type="checkbox" value="icehockey_ahl"> AHL</label>
+          <div class="sp-group-hd">Soccer — USA</div>
+          <label class="sp-item"><input type="checkbox" value="soccer_usa_mls"> MLS</label>
+          <label class="sp-item"><input type="checkbox" value="soccer_mexico_ligamx"> Liga MX</label>
+          <div class="sp-group-hd">Soccer — England</div>
+          <label class="sp-item"><input type="checkbox" value="soccer_epl"> EPL (Premier League)</label>
+          <label class="sp-item"><input type="checkbox" value="soccer_efl_champ"> EFL Championship</label>
+          <label class="sp-item"><input type="checkbox" value="soccer_fa_cup"> FA Cup</label>
+          <div class="sp-group-hd">Soccer — Europe</div>
+          <label class="sp-item"><input type="checkbox" value="soccer_uefa_champs_league"> UEFA Champions League</label>
+          <label class="sp-item"><input type="checkbox" value="soccer_uefa_europa_league"> UEFA Europa League</label>
+          <label class="sp-item"><input type="checkbox" value="soccer_germany_bundesliga"> Bundesliga</label>
+          <label class="sp-item"><input type="checkbox" value="soccer_spain_la_liga"> La Liga</label>
+          <label class="sp-item"><input type="checkbox" value="soccer_italy_serie_a"> Serie A</label>
+          <label class="sp-item"><input type="checkbox" value="soccer_france_ligue_one"> Ligue 1</label>
+          <label class="sp-item"><input type="checkbox" value="soccer_netherlands_eredivisie"> Eredivisie</label>
+          <label class="sp-item"><input type="checkbox" value="soccer_portugal_primeira_liga"> Primeira Liga</label>
+          <label class="sp-item"><input type="checkbox" value="soccer_turkey_super_league"> Süper Lig</label>
+          <label class="sp-item"><input type="checkbox" value="soccer_spl"> Scottish Premiership</label>
+          <div class="sp-group-hd">Soccer — Americas</div>
+          <label class="sp-item"><input type="checkbox" value="soccer_argentina_primera_division"> Argentina Primera</label>
+          <label class="sp-item"><input type="checkbox" value="soccer_brazil_campeonato"> Brazil Série A</label>
+          <label class="sp-item"><input type="checkbox" value="soccer_conmebol_copa_libertadores"> Copa Libertadores</label>
+          <div class="sp-group-hd">Tennis — ATP</div>
+          <label class="sp-item"><input type="checkbox" value="tennis_atp_aus_open_singles"> Australian Open</label>
+          <label class="sp-item"><input type="checkbox" value="tennis_atp_french_open"> French Open</label>
+          <label class="sp-item"><input type="checkbox" value="tennis_atp_wimbledon"> Wimbledon</label>
+          <label class="sp-item"><input type="checkbox" value="tennis_atp_us_open"> US Open</label>
+          <label class="sp-item"><input type="checkbox" value="tennis_atp_miami_open"> Miami Open</label>
+          <div class="sp-group-hd">Tennis — WTA</div>
+          <label class="sp-item"><input type="checkbox" value="tennis_wta_aus_open_singles"> Australian Open</label>
+          <label class="sp-item"><input type="checkbox" value="tennis_wta_french_open"> French Open</label>
+          <label class="sp-item"><input type="checkbox" value="tennis_wta_wimbledon"> Wimbledon</label>
+          <label class="sp-item"><input type="checkbox" value="tennis_wta_us_open"> US Open</label>
+          <div class="sp-group-hd">MMA &amp; Boxing</div>
+          <label class="sp-item"><input type="checkbox" value="mma_mixed_martial_arts"> MMA / UFC</label>
+          <label class="sp-item"><input type="checkbox" value="boxing_boxing"> Boxing</label>
+          <div class="sp-group-hd">Cricket</div>
+          <label class="sp-item"><input type="checkbox" value="cricket_ipl"> IPL</label>
+          <label class="sp-item"><input type="checkbox" value="cricket_test_match"> Test Matches</label>
+          <div class="sp-group-hd">Rugby &amp; Other</div>
+          <label class="sp-item"><input type="checkbox" value="rugbyleague_nrl"> NRL (Rugby League)</label>
+          <label class="sp-item"><input type="checkbox" value="rugbyunion_six_nations"> Six Nations</label>
+          <label class="sp-item"><input type="checkbox" value="aussierules_afl"> AFL</label>
+          <div class="sp-actions">
+            <div class="sp-action-btn" onclick="selectAllSports()">Select all</div>
+            <div class="sp-action-btn" onclick="clearAllSports()">Clear all</div>
+            <div class="sp-action-btn" style="background:var(--blue);color:#fff;border-color:var(--blue);" onclick="updateSportChips();closeSportPicker();">Done</div>
+          </div>
+        </div>
+        <div class="sp-selected-chips" id="sport-chips"></div>
+      </div>
     </div>
-    <div class="field">
+    <div class="field" style="max-width:90px;">
       <label for="f-unit">Unit ($)</label>
       <input type="number" id="f-unit" value="50" min="1" max="999999" step="1" inputmode="numeric">
     </div>
-    <button class="fetch-btn" id="fetch-btn" onclick="go()">Fetch odds</button>
-    <button class="fetch-btn" id="fetch-all-btn" onclick="goAll()" style="background:var(--green);margin-left:0;">Fetch all in-season</button>
+    <input type="hidden" id="f-sport" value="">
   </div>
 
+  <!-- Pre-fetch filters -->
+  <div class="pre-filters">
+    <span class="pf-label">Status</span>
+    <select id="status-filter-pre" class="pf-select" onchange="syncFilters('status')">
+      <option value="all">All events</option>
+      <option value="upcoming">Upcoming</option>
+      <option value="live">Live only</option>
+    </select>
+    <span class="pf-label">Date</span>
+    <select id="date-preset-pre" class="pf-select" onchange="syncFilters('date')">
+      <option value="all">All dates</option>
+      <option value="today">Today</option>
+      <option value="tomorrow">Tomorrow</option>
+      <option value="week">Next 7 days</option>
+      <option value="custom">Custom…</option>
+    </select>
+    <div id="custom-date-wrap-pre" class="pf-custom">
+      <span class="pf-label">From</span>
+      <input type="date" id="date-from-pre" onchange="syncFilters('date')">
+      <span class="pf-label">To</span>
+      <input type="date" id="date-to-pre" onchange="syncFilters('date')">
+    </div>
+  </div>
+
+  <!-- Toggles -->
+  <div class="toggle-row" style="margin-bottom:.6rem;">
+    <div class="tgl-pill" onclick="toggleProps(event)">
+      <div class="tgl-track" id="props-track"><div class="tgl-thumb" id="props-thumb"></div></div>
+      <span class="tgl-lbl">Player props</span>
+      <span class="tgl-note" id="props-cost-note">1 req/game</span>
+    </div>
+    <div class="tgl-pill" onclick="toggleT2(event)">
+      <div class="tgl-track" id="t2-track"><div class="tgl-thumb" id="t2-thumb"></div></div>
+      <span class="tgl-lbl">Tier 2 props</span>
+      <span class="tgl-note" id="t2-cost-note">1 req/game</span>
+    </div>
+  </div>
+
+  <!-- Fetch buttons -->
+  <div class="btn-row">
+    <button class="fetch-btn" id="fetch-btn" onclick="go()">Fetch odds</button>
+    <button class="fetch-btn" id="fetch-all-btn" onclick="goAll()" style="background:var(--green);">Fetch all in-season</button>
+  </div>
+
+  <!-- Usage -->
   <div class="usage-row">
     <div class="usage-bg"><div class="usage-fill" id="ufill"></div></div>
     <span class="usage-lbl" id="ulbl">— / 500 req</span>
   </div>
   <div class="conn-log" id="conn-log"></div>
-  <div id="all-sport-log" style="font-size:11px;color:var(--text3);font-family:monospace;min-height:14px;margin-bottom:.4rem;"></div>
 
-  <div class="books-strip">
-    <span class="book-chip chip-fanduel">FanDuel</span>
-    <span class="book-chip chip-draftkings">DraftKings</span>
-    <span class="book-chip chip-betmgm">BetMGM</span>
-    <span class="book-chip chip-caesars">Caesars</span>
-    <span class="book-chip chip-bovada">Bovada</span>
-    <span class="book-chip chip-betonline">BetOnline</span>
-    <span class="book-chip chip-hardrock">Hard Rock Bet</span>
-    <span class="book-chip chip-pinnacle">Pinnacle (EV ref)</span>
-  </div>
-
+  <!-- Post-fetch filters -->
   <div class="filters">
+    <div class="filter-group post-status">
+      <label>Status</label>
+      <select id="status-filter" onchange="const p=document.getElementById('status-filter-pre');if(p)p.value=this.value;renderAll()">
+        <option value="all">All events</option>
+        <option value="upcoming">Upcoming</option>
+        <option value="live">Live only</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Date range</label>
+      <select id="date-preset" onchange="const p=document.getElementById('date-preset-pre');if(p)p.value=this.value;applyDatePreset()">
+        <option value="all">All dates</option>
+        <option value="today">Today</option>
+        <option value="tomorrow">Tomorrow</option>
+        <option value="week">Next 7 days</option>
+        <option value="custom">Custom…</option>
+      </select>
+    </div>
+    <div id="custom-date-wrap" style="display:none;align-items:center;gap:6px;flex-wrap:wrap;">
+      <input type="date" id="date-from" onchange="renderAll()" style="font-size:12px;padding:4px 8px;border-radius:6px;border:.5px solid var(--border2);background:var(--bg);color:var(--text);">
+      <span style="font-size:11px;color:var(--text3);">to</span>
+      <input type="date" id="date-to" onchange="renderAll()" style="font-size:12px;padding:4px 8px;border-radius:6px;border:.5px solid var(--border2);background:var(--bg);color:var(--text);">
+    </div>
     <div class="filter-group">
       <label>Min arb %</label>
-      <input type="range" id="arb-min" min="0" max="10" step="0.1" value="0.5"
-        oninput="document.getElementById('arb-min-v').textContent=parseFloat(this.value).toFixed(1)+'%';renderAll()">
+      <input type="range" id="arb-min" min="0" max="10" step="0.1" value="0.5" oninput="document.getElementById('arb-min-v').textContent=parseFloat(this.value).toFixed(1)+'%';renderAll()">
       <span class="fval" id="arb-min-v">0.5%</span>
     </div>
     <div class="filter-group">
       <label>Min EV %</label>
-      <input type="range" id="ev-min" min="0" max="15" step="0.5" value="2"
-        oninput="document.getElementById('ev-min-v').textContent=parseFloat(this.value).toFixed(1)+'%';renderAll()">
+      <input type="range" id="ev-min" min="0" max="15" step="0.5" value="2" oninput="document.getElementById('ev-min-v').textContent=parseFloat(this.value).toFixed(1)+'%';renderAll()">
       <span class="fval" id="ev-min-v">2.0%</span>
     </div>
     <div class="filter-group">
@@ -414,17 +423,28 @@ input[type="range"] { width: 80px; accent-color: var(--blue); }
         <option value="h2h">Moneyline</option>
         <option value="spreads">Spreads</option>
         <option value="totals">Totals</option>
+        <option value="alternate_spreads">Alt spreads</option>
+        <option value="alternate_totals">Alt totals</option>
+        <option value="btts">Both teams score</option>
+        <option value="draw_no_bet">Draw no bet</option>
+        <option value="h2h_3_way">3-Way (draw)</option>
       </select>
     </div>
     <div class="filter-group">
       <label>Sort</label>
       <select id="sort-by" onchange="renderAll()">
-        <option value="profit">Profit $</option>
-        <option value="pct">Arb %</option>
+        <option value="pct">Arb % (highest first)</option>
+        <option value="profit">Profit $ (highest first)</option>
+        <option value="time_asc">Date &amp; time (soonest first)</option>
+        <option value="time_desc">Date &amp; time (latest first)</option>
+        <option value="sport">Sport A-Z</option>
+        <option value="book">Books A-Z</option>
       </select>
     </div>
+    <span id="event-count-note" style="font-size:11px;color:var(--text3);margin-left:auto;"></span>
   </div>
 
+  <!-- Stats -->
   <div class="stats">
     <div class="stat"><div class="stat-lbl">Arb opps</div><div class="stat-val" id="s-arb">—</div><div class="stat-sub">28 combinations</div></div>
     <div class="stat"><div class="stat-lbl">+EV bets</div><div class="stat-val" id="s-ev">—</div><div class="stat-sub">vs Pinnacle</div></div>
@@ -433,188 +453,27 @@ input[type="range"] { width: 80px; accent-color: var(--blue); }
   </div>
 
   <div class="sec-hd">Arbitrage opportunities</div>
-  <div id="arb-out">
-    <div class="arb-card"><div class="empty">Fetch odds to scan all 28 book combinations for arb opportunities</div></div>
-  </div>
+  <div id="arb-out"><div class="arb-card"><div class="empty">Fetch odds to scan all 28 book combinations for arb opportunities</div></div></div>
 
   <div class="sec-hd" style="margin-top:1.1rem;">+EV opportunities vs Pinnacle</div>
-  <div id="ev-out">
-    <div class="ev-card"><div class="empty">Fetch odds to see +EV bets across all 7 books benchmarked against Pinnacle's sharp line</div></div>
-  </div>
+  <div id="ev-out"><div class="ev-card"><div class="empty">Fetch odds to see +EV bets across all 7 books benchmarked against Pinnacle's sharp line</div></div></div>
 
-
-  <div class="sec-hd" style="margin-top:1.1rem;" id="props-hd" style="display:none;">Player prop +EV opportunities vs Pinnacle</div>
+  <div class="sec-hd" id="props-hd" style="display:none;margin-top:1.1rem;">Player prop +EV opportunities vs Pinnacle</div>
   <div id="props-out"></div>
+
+  <div class="sec-hd" id="t2-hd" style="display:none;margin-top:1.1rem;">Tier 2 prop arb &amp; EV opportunities</div>
+  <div id="t2-out"></div>
 
 </div>
 
 <div class="mob-bar">
-  <select id="mob-sport" onchange="document.getElementById('f-sport').value=this.value">
-        <optgroup label="American Football">
-          <option value="americanfootball_nfl">NFL</option>
-          <option value="americanfootball_nfl_preseason">NFL Preseason</option>
-          <option value="americanfootball_ncaaf">NCAAF</option>
-          <option value="americanfootball_cfl">CFL</option>
-          <option value="americanfootball_ufl">UFL</option>
-        </optgroup>
-        <optgroup label="Baseball">
-          <option value="baseball_mlb">MLB</option>
-          <option value="baseball_mlb_preseason">MLB Preseason</option>
-          <option value="baseball_ncaa">NCAA Baseball</option>
-          <option value="baseball_milb">Minor League Baseball (MiLB)</option>
-          <option value="baseball_kbo">KBO League</option>
-          <option value="baseball_npb">NPB (Japan)</option>
-        </optgroup>
-        <optgroup label="Basketball">
-          <option value="basketball_nba">NBA</option>
-          <option value="basketball_nba_preseason">NBA Preseason</option>
-          <option value="basketball_wnba">WNBA</option>
-          <option value="basketball_ncaab">NCAAB (Men)</option>
-          <option value="basketball_wncaab">WNCAAB (Women)</option>
-          <option value="basketball_euroleague">EuroLeague</option>
-          <option value="basketball_nbl">NBL (Australia)</option>
-          <option value="basketball_nba_summer_league">NBA Summer League</option>
-        </optgroup>
-        <optgroup label="Ice Hockey">
-          <option value="icehockey_nhl">NHL</option>
-          <option value="icehockey_nhl_preseason">NHL Preseason</option>
-          <option value="icehockey_ahl">AHL</option>
-          <option value="icehockey_sweden_hockey_league">SHL (Sweden)</option>
-          <option value="icehockey_sweden_allsvenskan">HockeyAllsvenskan</option>
-          <option value="icehockey_liiga">Finnish Liiga</option>
-          <option value="icehockey_mestis">Finnish Mestis</option>
-        </optgroup>
-        <optgroup label="Soccer — USA &amp; Americas">
-          <option value="soccer_usa_mls">MLS</option>
-          <option value="soccer_mexico_ligamx">Liga MX</option>
-          <option value="soccer_concacaf_leagues_cup">CONCACAF Leagues Cup</option>
-          <option value="soccer_argentina_primera_division">Argentina Primera División</option>
-          <option value="soccer_brazil_campeonato">Brazil Série A</option>
-          <option value="soccer_brazil_serie_b">Brazil Série B</option>
-          <option value="soccer_chile_campeonato">Chile Primera División</option>
-          <option value="soccer_conmebol_copa_libertadores">Copa Libertadores</option>
-          <option value="soccer_conmebol_copa_sudamericana">Copa Sudamericana</option>
-          <option value="soccer_conmebol_copa_america">Copa América</option>
-          <option value="soccer_fifa_world_cup">FIFA World Cup</option>
-          <option value="soccer_fifa_world_cup_womens">FIFA Women's World Cup</option>
-          <option value="soccer_fifa_club_world_cup">FIFA Club World Cup</option>
-        </optgroup>
-        <optgroup label="Soccer — England">
-          <option value="soccer_epl">EPL (Premier League)</option>
-          <option value="soccer_efl_champ">EFL Championship</option>
-          <option value="soccer_england_league1">EFL League 1</option>
-          <option value="soccer_england_league2">EFL League 2</option>
-          <option value="soccer_fa_cup">FA Cup</option>
-          <option value="soccer_england_efl_cup">EFL Cup</option>
-        </optgroup>
-        <optgroup label="Soccer — Europe">
-          <option value="soccer_uefa_champs_league">UEFA Champions League</option>
-          <option value="soccer_uefa_europa_league">UEFA Europa League</option>
-          <option value="soccer_uefa_europa_conference_league">UEFA Europa Conference League</option>
-          <option value="soccer_uefa_nations_league">UEFA Nations League</option>
-          <option value="soccer_germany_bundesliga">Bundesliga (Germany)</option>
-          <option value="soccer_germany_bundesliga2">Bundesliga 2 (Germany)</option>
-          <option value="soccer_germany_liga3">3. Liga (Germany)</option>
-          <option value="soccer_spain_la_liga">La Liga (Spain)</option>
-          <option value="soccer_spain_segunda_division">La Liga 2 (Spain)</option>
-          <option value="soccer_italy_serie_a">Serie A (Italy)</option>
-          <option value="soccer_italy_serie_b">Serie B (Italy)</option>
-          <option value="soccer_france_ligue_one">Ligue 1 (France)</option>
-          <option value="soccer_france_ligue_two">Ligue 2 (France)</option>
-          <option value="soccer_netherlands_eredivisie">Eredivisie (Netherlands)</option>
-          <option value="soccer_portugal_primeira_liga">Primeira Liga (Portugal)</option>
-          <option value="soccer_turkey_super_league">Süper Lig (Turkey)</option>
-          <option value="soccer_greece_super_league">Super League (Greece)</option>
-          <option value="soccer_belgium_first_div">First Division A (Belgium)</option>
-          <option value="soccer_spl">Premiership (Scotland)</option>
-          <option value="soccer_denmark_superliga">Superliga (Denmark)</option>
-          <option value="soccer_sweden_allsvenskan">Allsvenskan (Sweden)</option>
-          <option value="soccer_sweden_superettan">Superettan (Sweden)</option>
-          <option value="soccer_norway_eliteserien">Eliteserien (Norway)</option>
-          <option value="soccer_austria_bundesliga">Bundesliga (Austria)</option>
-          <option value="soccer_switzerland_superleague">Super League (Switzerland)</option>
-          <option value="soccer_russia_premier_league">Premier League (Russia)</option>
-          <option value="soccer_poland_ekstraklasa">Ekstraklasa (Poland)</option>
-          <option value="soccer_finland_veikkausliiga">Veikkausliiga (Finland)</option>
-          <option value="soccer_league_of_ireland">League of Ireland</option>
-        </optgroup>
-        <optgroup label="Soccer — Rest of World">
-          <option value="soccer_australia_aleague">A-League (Australia)</option>
-          <option value="soccer_japan_j_league">J-League (Japan)</option>
-          <option value="soccer_korea_kleague1">K League 1 (South Korea)</option>
-          <option value="soccer_china_superleague">Super League (China)</option>
-          <option value="soccer_saudi_arabia_pro_league">Saudi Pro League</option>
-          <option value="soccer_africa_cup_of_nations">Africa Cup of Nations</option>
-        </optgroup>
-        <optgroup label="Tennis — ATP">
-          <option value="tennis_atp_aus_open_singles">Australian Open (ATP)</option>
-          <option value="tennis_atp_french_open">French Open (ATP)</option>
-          <option value="tennis_atp_wimbledon">Wimbledon (ATP)</option>
-          <option value="tennis_atp_us_open">US Open (ATP)</option>
-          <option value="tennis_atp_miami_open">Miami Open (ATP)</option>
-          <option value="tennis_atp_indian_wells">Indian Wells (ATP)</option>
-          <option value="tennis_atp_madrid_open">Madrid Open (ATP)</option>
-          <option value="tennis_atp_italian_open">Italian Open (ATP)</option>
-          <option value="tennis_atp_canadian_open">Canadian Open (ATP)</option>
-          <option value="tennis_atp_cincinnati_open">Cincinnati Open (ATP)</option>
-          <option value="tennis_atp_monte_carlo_masters">Monte-Carlo Masters (ATP)</option>
-          <option value="tennis_atp_china_open">China Open (ATP)</option>
-          <option value="tennis_atp_dubai">Dubai Championships (ATP)</option>
-          <option value="tennis_atp_paris_masters">Paris Masters (ATP)</option>
-        </optgroup>
-        <optgroup label="Tennis — WTA">
-          <option value="tennis_wta_aus_open_singles">Australian Open (WTA)</option>
-          <option value="tennis_wta_french_open">French Open (WTA)</option>
-          <option value="tennis_wta_wimbledon">Wimbledon (WTA)</option>
-          <option value="tennis_wta_us_open">US Open (WTA)</option>
-          <option value="tennis_wta_miami_open">Miami Open (WTA)</option>
-          <option value="tennis_wta_indian_wells">Indian Wells (WTA)</option>
-          <option value="tennis_wta_madrid_open">Madrid Open (WTA)</option>
-          <option value="tennis_wta_canadian_open">Canadian Open (WTA)</option>
-          <option value="tennis_wta_cincinnati_open">Cincinnati Open (WTA)</option>
-          <option value="tennis_wta_china_open">China Open (WTA)</option>
-          <option value="tennis_wta_dubai">Dubai Championships (WTA)</option>
-        </optgroup>
-        <optgroup label="MMA &amp; Boxing">
-          <option value="mma_mixed_martial_arts">MMA / UFC</option>
-          <option value="boxing_boxing">Boxing</option>
-        </optgroup>
-        <optgroup label="Golf">
-          <option value="golf_masters_tournament_winner">Masters Tournament</option>
-          <option value="golf_pga_championship_winner">PGA Championship</option>
-          <option value="golf_us_open_winner">US Open (Golf)</option>
-          <option value="golf_the_open_championship_winner">The Open Championship</option>
-        </optgroup>
-        <optgroup label="Cricket">
-          <option value="cricket_ipl">IPL</option>
-          <option value="cricket_test_match">Test Matches</option>
-          <option value="cricket_international_t20">International T20</option>
-          <option value="cricket_odi">One Day Internationals</option>
-          <option value="cricket_t20_world_cup">T20 World Cup</option>
-          <option value="cricket_icc_world_cup">ICC World Cup</option>
-          <option value="cricket_big_bash">Big Bash</option>
-          <option value="cricket_psl">Pakistan Super League</option>
-          <option value="cricket_t20_blast">T20 Blast</option>
-          <option value="cricket_the_hundred">The Hundred</option>
-          <option value="cricket_caribbean_premier_league">Caribbean Premier League</option>
-        </optgroup>
-        <optgroup label="Rugby">
-          <option value="rugbyleague_nrl">NRL (Rugby League)</option>
-          <option value="rugbyunion_six_nations">Six Nations (Rugby Union)</option>
-          <option value="rugbyleague_nrl_state_of_origin">NRL State of Origin</option>
-        </optgroup>
-        <optgroup label="Other Sports">
-          <option value="aussierules_afl">AFL (Aussie Rules)</option>
-          <option value="lacrosse_pll">Premier Lacrosse League</option>
-          <option value="lacrosse_ncaa">NCAA Lacrosse</option>
-          <option value="handball_germany_bundesliga">Handball Bundesliga</option>
-        </optgroup>
-  </select>
+  <span style="font-size:12px;color:var(--text2);padding:4px 8px;" id="mob-sport-label">Select sport above</span>
   <button class="fetch-btn" id="mob-btn" onclick="go()">Fetch odds</button>
   <button class="fetch-btn" id="mob-all-btn" onclick="goAll()" style="background:var(--green);">All sports</button>
 </div>
 
 <script>
+
 const BOOK_NAMES = {
   fanduel:'FanDuel', draftkings:'DraftKings', betmgm:'BetMGM',
   williamhill_us:'Caesars', bovada:'Bovada', betonlineag:'BetOnline',
@@ -641,7 +500,7 @@ const BOOK_BTN = {
 };
 const MKT_LABEL = { h2h:'Moneyline', spreads:'Spread', totals:'Total', alternate_spreads:'Alt Spread', alternate_totals:'Alt Total', btts:'Both Teams Score', draw_no_bet:'Draw No Bet', h2h_3_way:'3-Way (Draw)' };
 const TARGETS = ['fanduel','draftkings','betmgm','williamhill_us','bovada','betonlineag','hardrockbet'];
-const ALL_BOOKS = [...TARGETS, 'pinnacle'];
+const ALL_BOOKS = ['fanduel','draftkings','betmgm','williamhill_us','bovada','betonlineag','hardrockbet','pinnacle'];
 
 let data = [];
 const $ = id => document.getElementById(id);
@@ -1310,7 +1169,6 @@ function closeSportPicker() {
 function getSelectedSports() {
   const checked = Array.from(document.querySelectorAll('#sport-picker-dropdown input[type="checkbox"]:checked')).map(cb => cb.value);
   if (checked.length > 0) return checked;
-  // Fallback to simple select dropdown
   const sel = document.getElementById('f-sport');
   return sel && sel.value ? [sel.value] : [];
 }
@@ -1438,7 +1296,6 @@ function logEVById(evId) {
 
 
 
-var openMenuId=null;
 function toggleArbMenu(id,ev){ev.stopPropagation();var m=document.getElementById('menu-'+id);if(!m)return;if(openMenuId&&openMenuId!==id){var p=document.getElementById('menu-'+openMenuId);if(p)p.classList.remove('open');}m.classList.toggle('open');openMenuId=m.classList.contains('open')?id:null;}
 document.addEventListener('click',function(){if(openMenuId){var m=document.getElementById('menu-'+openMenuId);if(m)m.classList.remove('open');openMenuId=null;}});
 
@@ -1946,9 +1803,6 @@ async function fetchAndRenderT2(key) {
 // ═════════════════════════════════════════════════════════════════════════════
 
 // ═══ Book selector + Toggles ═════════════════════════════════════════════
-let selectedBooks = new Set(['fanduel', 'draftkings', 'betmgm', 'williamhill_us', 'bovada', 'betonlineag', 'hardrockbet', 'pinnacle']);
-let propsEnabled = false;
-let t2Enabled = false;
 
 function toggleBook(key) {
   var chip = document.getElementById('bchip-' + key);
@@ -1996,6 +1850,51 @@ function toggleT2(e) {
 }
 // ═════════════════════════════════════════════════════════════════════════
 
+
+
+// ═══ INTERACTION LAYER ═══════════════════════════════════════════════════
+let selectedBooks = new Set(['fanduel', 'draftkings', 'betmgm', 'williamhill_us', 'bovada', 'betonlineag', 'hardrockbet', 'pinnacle']);
+let propsEnabled  = false;
+let t2Enabled     = false;
+var openMenuId    = null;
+
+function toggleBook(key) {
+  var chip = document.getElementById('bchip-' + key);
+  if (selectedBooks.has(key)) {
+    if (selectedBooks.size <= 1) return;
+    selectedBooks.delete(key);
+    if (chip) chip.classList.remove('active');
+  } else {
+    selectedBooks.add(key);
+    if (chip) chip.classList.add('active');
+  }
+}
+function selectAllBooks() {
+  document.querySelectorAll('.bk-chip').forEach(function(c) {
+    var k = c.dataset.key;
+    if (k) { selectedBooks.add(k); c.classList.add('active'); }
+  });
+}
+function getSelectedBookmarks() {
+  return Array.from(selectedBooks).join(',');
+}
+function toggleProps(e) {
+  if (e) e.stopPropagation();
+  propsEnabled = !propsEnabled;
+  var tr=document.getElementById('props-track'),th=document.getElementById('props-thumb'),nt=document.getElementById('props-cost-note');
+  if (tr) tr.style.background = propsEnabled ? 'var(--green)' : 'var(--border2)';
+  if (th) th.style.left = propsEnabled ? '18px' : '2px';
+  if (nt) nt.style.display = propsEnabled ? 'inline' : 'none';
+}
+function toggleT2(e) {
+  if (e) e.stopPropagation();
+  t2Enabled = !t2Enabled;
+  var tr=document.getElementById('t2-track'),th=document.getElementById('t2-thumb'),nt=document.getElementById('t2-cost-note');
+  if (tr) tr.style.background = t2Enabled ? 'var(--blue)' : 'var(--border2)';
+  if (th) th.style.left = t2Enabled ? '18px' : '2px';
+  if (nt) nt.style.display = t2Enabled ? 'inline' : 'none';
+}
+// ═════════════════════════════════════════════════════════════════════════
 </script>
 </body>
 </html>
