@@ -863,8 +863,6 @@ function renderLeg(leg) {
   </div>`;
 }
 
-const arbStore = {};
-const evStore = {};
 function renderAll() {
   if(!data.length) return;
   const unit=parseFloat($('f-unit').value)||50;
@@ -1284,19 +1282,16 @@ function closeSportPicker() {
   const dd = $('sport-picker-dropdown');
   if (dd) dd.classList.remove('open');
   document.removeEventListener('click', closeSportPickerOutside);
-  updateSportChips();
-}
+  }
 function getSelectedSports() {
   return Array.from(document.querySelectorAll('#sport-picker-dropdown input[type="checkbox"]:checked')).map(cb => cb.value);
 }
 function selectAllSports() {
   document.querySelectorAll('#sport-picker-dropdown input[type="checkbox"]').forEach(cb => cb.checked = true);
-  updateSportChips();
-}
+  }
 function clearAllSports() {
   document.querySelectorAll('#sport-picker-dropdown input[type="checkbox"]').forEach(cb => cb.checked = false);
-  updateSportChips();
-}
+  }
 function updateSportChips() {
   const selected = getSelectedSports();
   // Build label map from checkboxes
@@ -1341,15 +1336,14 @@ function updateSportChips() {
 }
 function removeSport(val) {
   const cb = document.querySelector(`#sport-picker-dropdown input[value="${val}"]`);
-  if (cb) { cb.checked = false; updateSportChips(); }
+  if (cb) { cb.checked = false;  }
 }
 // Use event delegation for checkbox changes — more reliable
 const spDropdown = document.getElementById('sport-picker-dropdown');
 if (spDropdown) {
   spDropdown.addEventListener('change', function(e) {
     if (e.target && e.target.type === 'checkbox') {
-      updateSportChips();
-    }
+          }
   });
 }
 
@@ -1893,52 +1887,11 @@ async function fetchAndRenderT2(key, sports) {
 }
 
 
-// ── Book selector ──────────────────────────────────────────────────────────
-
-
-// ── Toggle functions (called directly from HTML) ──────────────────────────
 
 
 
 
 
-// ── Book chip toggle ──────────────────────────────────────────────────────
-
-
-// Auto-check NBA on load and update label
-(function() {
-  var nba = document.querySelector('#sport-picker-dropdown input[value="basketball_nba"]');
-  if (nba && !document.querySelector('#sport-picker-dropdown input:checked')) {
-    nba.checked = true;
-  }
-  updateSportChips();
-})();
-
-// ═══ INTERACTION LAYER ═══════════════════════════════════════════════════════
-
-
-
-
-
-
-
-
-
-
-// ═════════════════════════════════════════════════════════════════════════════
-
-// ═══ Book selector + Toggles ═════════════════════════════════════════════
-
-
-
-
-
-
-
-
-
-
-// ═════════════════════════════════════════════════════════════════════════
 
 
 
@@ -1949,11 +1902,29 @@ async function fetchAndRenderT2(key, sports) {
   if (nba && !document.querySelector('#sport-picker-dropdown input:checked')) {
     nba.checked = true;
   }
-  updateSportChips();
-})();
+  })();
+
+
+
+
+
+
+// Auto-check NBA on load and update label
+(function() {
+  var nba = document.querySelector('#sport-picker-dropdown input[value="basketball_nba"]');
+  if (nba && !document.querySelector('#sport-picker-dropdown input:checked')) {
+    nba.checked = true;
+  }
+  })();
 
 // ═══ INTERACTION LAYER ═══════════════════════════════════════════════════
-var openMenuId    = null;
+const arbStore = {};
+const evStore  = {};
+let selectedBooks   = new Set(['fanduel','draftkings','betmgm','williamhill_us','bovada','betonlineag','hardrockbet','pinnacle']);
+let pfSelectedBooks = new Set(['fanduel','draftkings','betmgm','williamhill_us','bovada','betonlineag','hardrockbet','pinnacle']);
+let propsEnabled    = false;
+let t2Enabled       = false;
+var openMenuId      = null;
 
 function toggleBook(key) {
   var chip = document.getElementById('bchip-' + key);
@@ -1967,13 +1938,45 @@ function toggleBook(key) {
   }
 }
 function selectAllBooks() {
-  document.querySelectorAll('.bk-chip').forEach(function(c) {
-    var k = c.dataset.key;
-    if (k) { selectedBooks.add(k); c.classList.add('active'); }
+  document.querySelectorAll('[id^="bchip-"]').forEach(function(ch) {
+    var k = ch.dataset.key; if (!k) return;
+    selectedBooks.add(k); ch.classList.add('active');
+  });
+}
+function deselectAllBooks() {
+  document.querySelectorAll('[id^="bchip-"]').forEach(function(ch) {
+    var k = ch.dataset.key; if (!k || k === 'pinnacle') return;
+    selectedBooks.delete(k); ch.classList.remove('active');
   });
 }
 function getSelectedBookmarks() {
   return Array.from(selectedBooks).join(',');
+}
+function pfToggleBook(key) {
+  var chip = document.getElementById('pf-bchip-' + key);
+  if (pfSelectedBooks.has(key)) {
+    if (pfSelectedBooks.size <= 1) return;
+    pfSelectedBooks.delete(key);
+    if (chip) chip.classList.remove('active');
+  } else {
+    pfSelectedBooks.add(key);
+    if (chip) chip.classList.add('active');
+  }
+  renderAll();
+}
+function pfSelectAll() {
+  document.querySelectorAll('[id^="pf-bchip-"]').forEach(function(ch) {
+    var k = ch.dataset.key; if (!k) return;
+    pfSelectedBooks.add(k); ch.classList.add('active');
+  });
+  renderAll();
+}
+function pfDeselectAll() {
+  document.querySelectorAll('[id^="pf-bchip-"]').forEach(function(ch) {
+    var k = ch.dataset.key; if (!k || k === 'pinnacle') return;
+    pfSelectedBooks.delete(k); ch.classList.remove('active');
+  });
+  renderAll();
 }
 function toggleProps(e) {
   if (e) e.stopPropagation();
@@ -1991,138 +1994,10 @@ function toggleT2(e) {
   if (th) th.style.left = t2Enabled ? '18px' : '2px';
   if (nt) nt.style.display = t2Enabled ? 'inline' : 'none';
 }
-// ═════════════════════════════════════════════════════════════════════════
 
-
-// ═══ INTERACTION LAYER ════════════════════════════════════════════════════
-
-function toggleBook(key) {
-  var chip = document.getElementById('bchip-' + key);
-  if (selectedBooks.has(key)) {
-    if (selectedBooks.size <= 1) return;
-    selectedBooks.delete(key);
-    if (chip) chip.classList.remove('active');
-  } else {
-    selectedBooks.add(key);
-    if (chip) chip.classList.add('active');
-  }
-}
-function selectAllBooks() {
-  document.querySelectorAll('.bk-chip').forEach(function(ch) {
-    var k = ch.dataset.key;
-    if (k) { selectedBooks.add(k); ch.classList.add('active'); }
-  });
-}
-function getSelectedBookmarks() {
-  return Array.from(selectedBooks).join(',');
-}
-function toggleProps(e) {
-  if (e) e.stopPropagation();
-  propsEnabled = !propsEnabled;
-  var tr=document.getElementById('props-track'), th=document.getElementById('props-thumb'), nt=document.getElementById('props-cost-note');
-  if (tr) tr.style.background = propsEnabled ? 'var(--green)' : '';
-  if (th) th.style.left = propsEnabled ? '17px' : '2px';
-  if (nt) nt.style.display = propsEnabled ? 'inline' : 'none';
-}
-function toggleT2(e) {
-  if (e) e.stopPropagation();
-  t2Enabled = !t2Enabled;
-  var tr=document.getElementById('t2-track'), th=document.getElementById('t2-thumb'), nt=document.getElementById('t2-cost-note');
-  if (tr) tr.style.background = t2Enabled ? 'var(--blue)' : '';
-  if (th) th.style.left = t2Enabled ? '17px' : '2px';
-  if (nt) nt.style.display = t2Enabled ? 'inline' : 'none';
-}
-
-// Init: update sport chips label on load
-(function() { updateSportChips(); })();
-// ═════════════════════════════════════════════════════════════════════════
-
-// ═══ INTERACTION LAYER ════════════════════════════════════════════════════
-let selectedBooks = new Set(['fanduel','draftkings','betmgm','williamhill_us','bovada','betonlineag','hardrockbet','pinnacle']);
-let pfSelectedBooks = new Set(['fanduel','draftkings','betmgm','williamhill_us','bovada','betonlineag','hardrockbet','pinnacle']);
-let propsEnabled = false;
-let t2Enabled    = false;
-
-// Pre-fetch book chips
-function toggleBook(key) {
-  var chip = document.getElementById('bchip-' + key);
-  if (selectedBooks.has(key)) {
-    if (selectedBooks.size <= 1) return;
-    selectedBooks.delete(key);
-    if (chip) chip.classList.remove('active');
-  } else {
-    selectedBooks.add(key);
-    if (chip) chip.classList.add('active');
-  }
-}
-function selectAllBooks() {
-  document.querySelectorAll('[id^="bchip-"]').forEach(function(c) {
-    var k = c.dataset.key; if (!k) return;
-    selectedBooks.add(k); c.classList.add('active');
-  });
-}
-function deselectAllBooks() {
-  var pinnacle = 'pinnacle';
-  document.querySelectorAll('[id^="bchip-"]').forEach(function(c) {
-    var k = c.dataset.key; if (!k || k === pinnacle) return;
-    selectedBooks.delete(k); c.classList.remove('active');
-  });
-}
-function getSelectedBookmarks() {
-  return Array.from(selectedBooks).join(',');
-}
-
-// Post-fetch book chips (filter results only, no re-fetch)
-function pfToggleBook(key) {
-  var chip = document.getElementById('pf-bchip-' + key);
-  if (pfSelectedBooks.has(key)) {
-    if (pfSelectedBooks.size <= 1) return;
-    pfSelectedBooks.delete(key);
-    if (chip) chip.classList.remove('active');
-  } else {
-    pfSelectedBooks.add(key);
-    if (chip) chip.classList.add('active');
-  }
-  renderAll();
-}
-function pfSelectAll() {
-  document.querySelectorAll('[id^="pf-bchip-"]').forEach(function(c) {
-    var k = c.dataset.key; if (!k) return;
-    pfSelectedBooks.add(k); c.classList.add('active');
-  });
-  renderAll();
-}
-function pfDeselectAll() {
-  var pinnacle = 'pinnacle';
-  document.querySelectorAll('[id^="pf-bchip-"]').forEach(function(c) {
-    var k = c.dataset.key; if (!k || k === pinnacle) return;
-    pfSelectedBooks.delete(k); c.classList.remove('active');
-  });
-  renderAll();
-}
-
-// Toggles
-function toggleProps(e) {
-  if (e) e.stopPropagation();
-  propsEnabled = !propsEnabled;
-  var tr=document.getElementById('props-track'), th=document.getElementById('props-thumb'), nt=document.getElementById('props-cost-note');
-  if (tr) tr.style.background = propsEnabled ? 'var(--green)' : '';
-  if (th) th.style.left = propsEnabled ? '17px' : '2px';
-  if (nt) nt.style.display = propsEnabled ? 'inline' : 'none';
-}
-function toggleT2(e) {
-  if (e) e.stopPropagation();
-  t2Enabled = !t2Enabled;
-  var tr=document.getElementById('t2-track'), th=document.getElementById('t2-thumb'), nt=document.getElementById('t2-cost-note');
-  if (tr) tr.style.background = t2Enabled ? 'var(--blue)' : '';
-  if (th) th.style.left = t2Enabled ? '17px' : '2px';
-  if (nt) nt.style.display = t2Enabled ? 'inline' : 'none';
-}
-
-// Init — DOM already parsed since script is at end of body
+// Init
 updateSportChips();
 // ═════════════════════════════════════════════════════════════════════════
-
 </script>
 </body>
 </html>
