@@ -290,6 +290,25 @@ svg.chart{width:100%;height:100%;overflow:visible;}
         <label>Book 2</label>
         <input type="text" id="f-book2" placeholder="e.g. BetOnline">
       </div>
+      <!-- ARB CALCULATOR -->
+      <div class="form-group" id="fg-arb-calc">
+        <label>Arb calculator</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;">
+          <div style="display:flex;flex-direction:column;gap:3px;flex:1;min-width:80px;">
+            <span style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">Leg 1 odds</span>
+            <input type="text" id="calc-odds1" placeholder="+150" oninput="calcArb()" style="font-size:13px;padding:6px 8px;border-radius:6px;border:.5px solid var(--border);background:var(--bg-input);color:var(--text);">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:3px;flex:1;min-width:80px;">
+            <span style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">Leg 2 odds</span>
+            <input type="text" id="calc-odds2" placeholder="-140" oninput="calcArb()" style="font-size:13px;padding:6px 8px;border-radius:6px;border:.5px solid var(--border);background:var(--bg-input);color:var(--text);">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:3px;flex:1;min-width:80px;">
+            <span style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">Unit ($)</span>
+            <input type="number" id="calc-unit" placeholder="50" oninput="calcArb()" style="font-size:13px;padding:6px 8px;border-radius:6px;border:.5px solid var(--border);background:var(--bg-input);color:var(--text);">
+          </div>
+        </div>
+        <div id="calc-result" style="display:none;margin-top:8px;padding:8px 10px;background:var(--bg-card);border:.5px solid var(--border);border-radius:6px;font-size:12px;color:var(--text-muted);"></div>
+      </div>
       <div class="form-group" id="fg-stake">
         <label>Total staked ($)</label>
         <input type="number" id="f-stake" placeholder="50">
@@ -305,7 +324,7 @@ svg.chart{width:100%;height:100%;overflow:visible;}
       </div>
       <div class="form-group" id="fg-odds" style="display:none;">
         <label>Odds (American)</label>
-        <input type="text" id="f-odds" placeholder="e.g. +145">
+        <input type="text" id="f-odds" placeholder="e.g. +145" oninput="calcEVProfit()">
       </div>
       <div class="form-group" id="fg-ev-pct" style="display:none;">
         <label>EV % edge</label>
@@ -313,7 +332,11 @@ svg.chart{width:100%;height:100%;overflow:visible;}
       </div>
       <div class="form-group" id="fg-ev-stake" style="display:none;">
         <label>Stake ($)</label>
-        <input type="number" id="f-ev-stake" placeholder="50">
+        <input type="number" id="f-ev-stake" placeholder="50" oninput="calcEVProfit()">
+      </div>
+      <div class="form-group" id="fg-ev-profit" style="display:none;">
+        <label>Profit if wins ($)</label>
+        <input type="number" id="f-ev-profit" placeholder="auto-calculated" readonly style="opacity:.7;">
       </div>
       <div class="form-group">
         <label>Game date (optional)</label>
@@ -573,7 +596,7 @@ function renderLog(pool) {
 function toggleBetType() {
   const t=document.getElementById('f-type').value;
   ['fg-book1','fg-book2','fg-stake','fg-profit'].forEach(id=>document.getElementById(id).style.display=t==='arb'?'':'none');
-  ['fg-book-ev','fg-odds','fg-ev-pct','fg-ev-stake'].forEach(id=>document.getElementById(id).style.display=t==='ev'?'':'none');
+  ['fg-book-ev','fg-odds','fg-ev-pct','fg-ev-stake','fg-ev-profit'].forEach(id=>document.getElementById(id).style.display=t==='ev'?'':'none');
 }
 function openForm(prefill={}) {
   editingId = prefill.id || null;
@@ -782,6 +805,70 @@ window.logBetFromDashboard = function(prefill) {
 })();
 
 render();
+
+// ── Auto-calculators ──────────────────────────────────────────────────────
+function toDecimal(american) {
+  var n = parseFloat(american);
+  if (isNaN(n)) return null;
+  return n >= 0 ? (n / 100) + 1 : (100 / Math.abs(n)) + 1;
+}
+
+function calcArb() {
+  var d1 = toDecimal(document.getElementById('calc-odds1').value);
+  var d2 = toDecimal(document.getElementById('calc-odds2').value);
+  var unit = parseFloat(document.getElementById('calc-unit').value);
+  var result = document.getElementById('calc-result');
+
+  if (!d1 || !d2 || !unit || unit <= 0) {
+    if (result) result.style.display = 'none';
+    return;
+  }
+
+  var impl = (1/d1) + (1/d2);
+  if (impl >= 1) {
+    if (result) { result.style.display = 'block'; result.textContent = 'No arb — combined implied probability ≥ 100%'; result.style.color = 'var(--loss)'; }
+    return;
+  }
+
+  var s1 = (1/d1 / impl) * unit;
+  var s2 = (1/d2 / impl) * unit;
+  var profit = (s1 * d1) - unit;
+  var pct = (1 - impl) * 100;
+
+  // Auto-fill stake and profit fields
+  var stakeEl = document.getElementById('f-stake');
+  var profitEl = document.getElementById('f-profit');
+  if (stakeEl) stakeEl.value = (s1 + s2).toFixed(2);
+  if (profitEl) profitEl.value = profit.toFixed(2);
+
+  if (result) {
+    result.style.display = 'block';
+    result.style.color = 'var(--profit)';
+    result.innerHTML =
+      'Arb: <strong>' + pct.toFixed(2) + '%</strong> &nbsp;|&nbsp; ' +
+      'Leg 1 stake: <strong>$' + s1.toFixed(2) + '</strong> &nbsp;|&nbsp; ' +
+      'Leg 2 stake: <strong>$' + s2.toFixed(2) + '</strong> &nbsp;|&nbsp; ' +
+      'Profit: <strong>$' + profit.toFixed(2) + '</strong>';
+  }
+}
+
+function calcEVProfit() {
+  var odds = document.getElementById('f-odds') ? document.getElementById('f-odds').value : '';
+  var stake = parseFloat(document.getElementById('f-ev-stake') ? document.getElementById('f-ev-stake').value : '');
+  var profitEl = document.getElementById('f-ev-profit');
+  if (!profitEl) return;
+
+  var dec = toDecimal(odds);
+  if (!dec || !stake || stake <= 0) {
+    profitEl.value = '';
+    return;
+  }
+
+  var profit = (dec - 1) * stake;
+  profitEl.value = profit.toFixed(2);
+}
+// ──────────────────────────────────────────────────────────────────────────
+
 </script>
 </body>
 </html>
