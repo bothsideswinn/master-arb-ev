@@ -1041,7 +1041,7 @@ async function goAll() {
   $('all-sport-log').textContent = `Loaded ${allEvents.length} events across ${activeSports.length} sports. Used ${fetched} API requests.`;
   updateDots(data);
   renderAll();
-  if(propsEnabled){ if($('props-hd')) $('props-hd').style.display='block'; fetchAndRenderProps(key, $('f-sport').value); }
+  if(propsEnabled){ if($('props-hd')) $('props-hd').style.display='block'; fetchAndRenderProps(key, getSelectedSports()[0]||'basketball_nba'); }
 }
 
 
@@ -1122,7 +1122,7 @@ async function fetchAndRenderProps(key, sport) {
 
   // Only fetch props for sports that support them
   const propSports = ['basketball_nba','americanfootball_nfl','baseball_mlb','icehockey_nhl','soccer_epl','soccer_usa_mls'];
-  const sportKey = typeof sport === 'string' ? sport : $('f-sport').value;
+  const sportKey = typeof sport === 'string' ? sport : (getSelectedSports()[0]||'basketball_nba');
   if (!propSports.includes(sportKey)) {
     propsOut.innerHTML = '<div class="ev-card"><div class="empty">Player props are not available for this sport via the API.</div></div>';
     return;
@@ -1333,9 +1333,6 @@ function updateSportChips() {
     chips.innerHTML = `<span class="sp-chip">${selected.length} sports selected<span class="sp-chip-x" onclick="clearAllSports()">×</span></span>`;
     setLabel(selected.length + ' sports');
   }
-  // Sync legacy f-sport
-  const fs = document.getElementById('f-sport');
-  if (fs && selected.length > 0) fs.value = selected[0];
 }
 function removeSport(val) {
   const cb = document.querySelector(`#sport-picker-dropdown input[value="${val}"]`);
