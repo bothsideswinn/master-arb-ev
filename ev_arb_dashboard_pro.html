@@ -1007,9 +1007,7 @@ function renderAll() {
         +'<div class="leg-lbl-row"><span class="lbl">EV edge</span><span class="val" style="color:var(--green)">+'+(e.ev||0).toFixed(1)+'%</span></div>'
         +'<div class="leg-lbl-row"><span class="lbl">Win on $'+unit+'</span><span class="val blue">$'+win+'</span></div>'
       +'</div>'
-      +'<div style="padding:8px 14px 4px;">'
-        +'<button class="log-bet-btn" onclick="logEVById(&quot;'+evId+'&quot;)">↗ Log this EV bet</button>'
-      +'</div>'
+      
       +'</div></div>';
   }).join('')
   : '<div class="ev-card"><div class="empty">No +EV bets above '+et.toFixed(1)+'% — lower the EV threshold</div></div>';
