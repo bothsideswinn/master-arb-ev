@@ -302,7 +302,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
             <label class="sp-item"><input type="checkbox" value="baseball_milb"> MiLB</label>
             <label class="sp-item"><input type="checkbox" value="baseball_kbo"> KBO</label>
             <div class="sp-grp">Basketball</div>
-            <label class="sp-item"><input type="checkbox" value="basketball_nba" checked> NBA</label>
+            <label class="sp-item"><input type="checkbox" value="basketball_nba"> NBA</label>
             <label class="sp-item"><input type="checkbox" value="basketball_wnba"> WNBA</label>
             <label class="sp-item"><input type="checkbox" value="basketball_ncaab"> NCAAB</label>
             <label class="sp-item"><input type="checkbox" value="basketball_euroleague"> EuroLeague</label>
@@ -658,7 +658,7 @@ async function go() {
   const selectedSports = getSelectedSports();
   if(!selectedSports.length){ setErr('Please select at least one sport.'); return; }
   const btns = [$('fetch-btn'),$('mob-btn')];
-  btns.forEach(b=>{b.textContent='Loading…';b.disabled=true;});
+  btns.forEach(b=>{if(b){b.textContent='Loading…';b.disabled=true;}});
   data=[];
 
   const bookList = getSelectedBookmarks();
@@ -1282,11 +1282,7 @@ function closeSportPicker() {
   updateSportChips();
 }
 function getSelectedSports() {
-  const checked = Array.from(document.querySelectorAll('#sport-picker-dropdown input[type="checkbox"]:checked')).map(cb => cb.value);
-  if (checked.length > 0) return checked;
-  // Fallback: return first checkbox value or NBA
-  const first = document.querySelector('#sport-picker-dropdown input[type="checkbox"]');
-  return first ? [first.value] : ['basketball_nba'];
+  return Array.from(document.querySelectorAll('#sport-picker-dropdown input[type="checkbox"]:checked')).map(cb => cb.value);
 }
 function selectAllSports() {
   document.querySelectorAll('#sport-picker-dropdown input[type="checkbox"]').forEach(cb => cb.checked = true);
