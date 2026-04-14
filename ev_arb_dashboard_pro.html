@@ -330,7 +330,7 @@ input[type="range"] { width: 80px; accent-color: var(--blue); }
           <div class="sp-actions">
             <div class="sp-action-btn" onclick="selectAllSports()">Select all</div>
             <div class="sp-action-btn" onclick="clearAllSports()">Clear all</div>
-            <div class="sp-action-btn" style="background:var(--blue);color:#fff;border-color:var(--blue);" onclick="closeSportPicker()">Done</div>
+            <div class="sp-action-btn" style="background:var(--blue);color:#fff;border-color:var(--blue);" onclick="updateSportChips();closeSportPicker();">Done</div>
           </div>
         </div>
       </div>
@@ -1172,6 +1172,7 @@ function closeSportPicker() {
   const dd = $('sport-picker-dropdown');
   if (dd) dd.classList.remove('open');
   document.removeEventListener('click', closeSportPickerOutside);
+  updateSportChips();
 }
 function getSelectedSports() {
   return Array.from(document.querySelectorAll('#sport-picker-dropdown input[type="checkbox"]:checked')).map(cb => cb.value);
