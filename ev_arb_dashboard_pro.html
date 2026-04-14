@@ -1395,7 +1395,7 @@ function logArbById(arbId, tracker) {
   const a = arbStore[arbId];
   if (!a) { alert('Could not find arb data. Please re-fetch odds and try again.'); return; }
   const trackerUrl = (tracker === 'personal')
-    ? 'https://bothsideswinn.github.io/arb-ev/personal_tracker.html'
+    ? 'https://bothsideswinn.github.io/master-arb-ev/personal_tracker.html'
     : 'https://bothsideswinn.github.io/master-arb-ev/public_tracker.html';
   const ctDate = a.commenceTime ? new Date(a.commenceTime) : null;
   const gamedate = ctDate ? ctDate.toISOString().split('T')[0] : '';
@@ -1425,7 +1425,7 @@ function logEVById(evId, tracker) {
   const e = evStore[evId];
   if (!e) { alert('Could not find EV data. Please re-fetch and try again.'); return; }
   const trackerUrl = (tracker === 'personal')
-    ? 'https://bothsideswinn.github.io/arb-ev/personal_tracker.html'
+    ? 'https://bothsideswinn.github.io/master-arb-ev/personal_tracker.html'
     : 'https://bothsideswinn.github.io/master-arb-ev/public_tracker.html';
   const ctDate2 = e.commenceTime ? new Date(e.commenceTime) : null;
   const gamedate2 = ctDate2 ? ctDate2.toISOString().split('T')[0] : '';
