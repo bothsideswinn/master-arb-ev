@@ -1308,7 +1308,11 @@ function closeSportPicker() {
   updateSportChips();
 }
 function getSelectedSports() {
-  return Array.from(document.querySelectorAll('#sport-picker-dropdown input[type="checkbox"]:checked')).map(cb => cb.value);
+  const checked = Array.from(document.querySelectorAll('#sport-picker-dropdown input[type="checkbox"]:checked')).map(cb => cb.value);
+  if (checked.length > 0) return checked;
+  // Fallback to simple select dropdown
+  const sel = document.getElementById('f-sport');
+  return sel && sel.value ? [sel.value] : [];
 }
 function selectAllSports() {
   document.querySelectorAll('#sport-picker-dropdown input[type="checkbox"]').forEach(cb => cb.checked = true);
