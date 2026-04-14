@@ -693,8 +693,8 @@ async function go() {
   $('refreshed').textContent = 'Updated '+new Date().toLocaleTimeString();
   updateDots();
   renderAll();
-  fetchAndRenderProps(key, selectedSports[0]||'basketball_nba');
-  fetchAndRenderT2(key);
+  if(propsEnabled) fetchAndRenderProps(key, selectedSports[0]||'basketball_nba');
+  if(t2Enabled) fetchAndRenderT2(key);
   if(!data.length) setErr('No events found — this sport may be off-season. Try NBA, MLB, or NHL.');
 }
 
