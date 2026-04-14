@@ -937,34 +937,37 @@ function renderAll() {
   }).join('')
   : `<div class="arb-card"><div class="empty">No arb opportunities above ${at.toFixed(1)}% — lower the threshold or switch sports</div></div>`;
 
-  $('ev-out').innerHTML = fe.length ? fe.map((e,evIdx)=>{ const evId='ev_'+evIdx; evStore[evId]=e;
-    const dec=aDec(e.odds), win=((dec-1)*e.unit).toFixed(2);
-    return `<div class="ev-card"><div class="ev-row">
-      <div class="ev-row-top">
-        <div>
-          <div class="ev-event">${e.event}</div>
-          ${(()=>{ const t=fmtEventTime(e.commenceTime); return t?`<span style="font-size:10px;color:var(--text3);">${t.status==='live'?'🔴 LIVE · ':''}${t.label}</span>`:''; })()}
-        </div>
-        <div style="display:flex;gap:5px;flex-wrap:wrap;flex-shrink:0;">${bookBtn(e.bk)}</div>
-      </div>
-      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;">
-        <span class="tag tag-sport">${e.sport}</span>
-        <span class="tag tag-mkt">${e.mkt}</span>
-        <span class="tag tag-ev">+${e.ev.toFixed(1)}% EV</span>
-      </div>
-      <div class="leg-labels" style="grid-template-columns:repeat(5,auto);">
-        <div class="leg-lbl-row"><span class="lbl">Bet</span><span class="val">${e.bet}</span></div>
-        <div class="leg-lbl-row"><span class="lbl">Book odds</span><span class="val ${e.odds>=0?'pos':''}">${fmt(e.odds)}</span></div>
-        <div class="leg-lbl-row"><span class="lbl">Pinnacle (fair)</span><span class="val" style="color:var(--text2)">${fmt(e.pinnOdds)}</span></div>
-        <div class="leg-lbl-row"><span class="lbl">EV edge</span><span class="val" style="color:var(--green)">+${e.ev.toFixed(1)}%</span></div>
-        <div class="leg-lbl-row"><span class="lbl">Win on $${e.unit}</span><span class="val blue">$${win}</span></div>
-        <div class="leg-lbl-row" style="margin-top:6px;">
-          <button class="log-bet-btn" onclick="logEVById('${evId}')">↗ Log this EV bet</button>
-        </div>
-      </div>
-    </div></div>`;
+  $('ev-out').innerHTML = fe.length ? fe.map(function(e,evIdx){
+    var evId='ev_'+evIdx;
+    evStore[evId]=e;
+    var dec=aDec(e.odds);
+    var unit=e.unit||parseFloat($('f-unit').value)||50;
+    var win=((dec-1)*unit).toFixed(2);
+    var timeTag='';
+    try{ var t=fmtEventTime(e.commenceTime); if(t) timeTag='<span style="font-size:10px;color:var(--text3);">'+(t.status==='live'?'🔴 LIVE · ':'')+t.label+'</span>'; }catch(ex){}
+    return '<div class="ev-card"><div class="ev-row">'
+      +'<div class="ev-row-top">'
+        +'<div><div class="ev-event">'+e.event+'</div>'+timeTag+'</div>'
+        +'<div style="display:flex;gap:5px;flex-wrap:wrap;flex-shrink:0;">'+bookBtn(e.bk)+'</div>'
+      +'</div>'
+      +'<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;">'
+        +'<span class="tag tag-sport">'+(e.sport||'')+'</span>'
+        +'<span class="tag tag-mkt">'+(e.mkt||'')+'</span>'
+        +'<span class="tag tag-ev">+'+(e.ev||0).toFixed(1)+'% EV</span>'
+      +'</div>'
+      +'<div class="leg-labels">'
+        +'<div class="leg-lbl-row"><span class="lbl">Bet</span><span class="val">'+(e.bet||'')+'</span></div>'
+        +'<div class="leg-lbl-row"><span class="lbl">Book odds</span><span class="val '+(e.odds>=0?'pos':'')+'">'+(e.odds>=0?'+':'')+e.odds+'</span></div>'
+        +'<div class="leg-lbl-row"><span class="lbl">Pinnacle</span><span class="val" style="color:var(--text2)">'+(e.pinnOdds>=0?'+':'')+e.pinnOdds+'</span></div>'
+        +'<div class="leg-lbl-row"><span class="lbl">EV edge</span><span class="val" style="color:var(--green)">+'+(e.ev||0).toFixed(1)+'%</span></div>'
+        +'<div class="leg-lbl-row"><span class="lbl">Win on $'+unit+'</span><span class="val blue">$'+win+'</span></div>'
+      +'</div>'
+      +'<div style="padding:8px 14px 4px;">'
+        +'<button class="log-bet-btn" onclick="logEVById(&quot;'+evId+'&quot;)">↗ Log this EV bet</button>'
+      +'</div>'
+      +'</div></div>';
   }).join('')
-  : `<div class="ev-card"><div class="empty">No +EV bets above ${et.toFixed(1)}% — lower the EV threshold</div></div>`;
+  : '<div class="ev-card"><div class="empty">No +EV bets above '+et.toFixed(1)+'% — lower the EV threshold</div></div>';
 }
 
 $('f-unit').addEventListener('input',function(){$('s-unit').textContent='$'+(parseFloat(this.value)||50).toLocaleString();renderAll();});
