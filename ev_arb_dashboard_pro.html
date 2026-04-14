@@ -587,6 +587,11 @@ function updateDots() {
   const found={};
   ALL_BOOKS.forEach(k=>found[k]=false);
   data.forEach(e=>(e.bookmakers||[]).forEach(b=>{if(b.key in found)found[b.key]=true;}));
+  // Offshore books (Bovada, BetOnline, Hard Rock) don't cover every sport.
+  // If data came back at all, mark them as connected — they're live, just sport-selective.
+  if (data.length > 0) {
+    ['bovada','betonlineag','hardrockbet'].forEach(k=>{ if(!found[k]) found[k]='partial'; });
+  }
   const cfg = [
     ['fanduel','FanDuel'],['draftkings','DraftKings'],['betmgm','BetMGM'],
     ['williamhill_us','Caesars'],['bovada','Bovada'],['betonlineag','BetOnline'],
