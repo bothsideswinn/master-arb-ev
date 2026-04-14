@@ -1219,10 +1219,15 @@ function removeSport(val) {
   const cb = document.querySelector(`#sport-picker-dropdown input[value="${val}"]`);
   if (cb) { cb.checked = false; updateSportChips(); }
 }
-// Attach change listeners to all checkboxes
-document.querySelectorAll('#sport-picker-dropdown input[type="checkbox"]').forEach(cb => {
-  cb.addEventListener('change', updateSportChips);
-});
+// Use event delegation for checkbox changes — more reliable
+const spDropdown = document.getElementById('sport-picker-dropdown');
+if (spDropdown) {
+  spDropdown.addEventListener('change', function(e) {
+    if (e.target && e.target.type === 'checkbox') {
+      updateSportChips();
+    }
+  });
+}
 
 
 // ── Log bet to tracker ──
