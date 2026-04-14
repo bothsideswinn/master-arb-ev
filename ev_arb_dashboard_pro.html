@@ -213,6 +213,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .arb-menu-item.clr-x{color:#1DA1F2}
 .log-bet-btn{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:5px 10px;border-radius:var(--r);border:1.5px solid var(--green);color:var(--green);background:var(--green-bg);cursor:pointer;white-space:nowrap;font-family:inherit}
 
+.results-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:.75rem;}
+@media(max-width:768px){.results-grid{grid-template-columns:1fr;}}
+.results-col{display:flex;flex-direction:column;gap:.5rem;min-width:0;}
+.col-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.col-filter-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--bg2);border:.5px solid var(--border2);border-radius:var(--r);padding:8px 12px;}
+
 /* empty */
 .empty{padding:28px;text-align:center;color:var(--text3);font-size:13px}
 
@@ -504,23 +510,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     </div>
   </div>
 
-  <!-- 10. MIN ARB% | MIN EV% | UNIT -->
+  <!-- 10. UNIT ONLY — min arb% and min ev% moved to columns -->
   <div class="pf-row">
     <div class="row-mid">
-      <div class="field">
-        <span class="slbl">Min arb %</span>
-        <div style="display:flex;align-items:center;gap:6px;">
-          <input type="range" id="arb-min" min="0" max="10" step="0.1" value="0.5" oninput="document.getElementById('arb-min-v').textContent=parseFloat(this.value).toFixed(1)+'%';renderAll()">
-          <span class="fval" id="arb-min-v">0.5%</span>
-        </div>
-      </div>
-      <div class="field">
-        <span class="slbl">Min EV %</span>
-        <div style="display:flex;align-items:center;gap:6px;">
-          <input type="range" id="ev-min" min="0" max="15" step="0.5" value="2" oninput="document.getElementById('ev-min-v').textContent=parseFloat(this.value).toFixed(1)+'%';renderAll()">
-          <span class="fval" id="ev-min-v">2.0%</span>
-        </div>
-      </div>
       <div class="field">
         <span class="slbl">Unit ($)</span>
         <input class="inp-sm" type="number" id="f-unit" value="50" min="1" max="999999" style="width:80px;" oninput="renderAll()">
@@ -530,43 +522,77 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 </div><!-- /post-fetch panel -->
 
-<!-- 11. STATS -->
-<div class="stats">
-  <div class="stat"><div class="stat-lbl">Arb opps</div><div class="stat-val" id="s-arb">&mdash;</div><div class="stat-sub">28 combinations</div></div>
-  <div class="stat"><div class="stat-lbl">+EV bets</div><div class="stat-val" id="s-ev">&mdash;</div><div class="stat-sub">vs Pinnacle</div></div>
-  <div class="stat"><div class="stat-lbl">Best profit</div><div class="stat-val" id="s-best">&mdash;</div><div class="stat-sub" id="s-best-sub">on unit</div></div>
-  <div class="stat"><div class="stat-lbl">Unit size</div><div class="stat-val" id="s-unit">$50</div><div class="stat-sub">per arb total</div></div>
-</div>
+<!-- TWO COLUMN LAYOUT -->
+<div class="results-grid">
 
-<!-- 12. SORT — pinned right -->
-<div class="sort-row">
-  <span class="sort-lbl">
-    <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M3 3h10v1.5L9 9v4l-2-1V9L3 4.5V3z"/></svg>
-    Sort by
-  </span>
-  <select class="sel-sm" id="sort-by" onchange="renderAll()">
-    <option value="pct">Arb % (highest first)</option>
-    <option value="profit">Profit $ (highest first)</option>
-    <option value="time_asc">Date — soonest first</option>
-    <option value="time_desc">Date — latest first</option>
-    <option value="sport">Sport A–Z</option>
-    <option value="book">Book A–Z</option>
-  </select>
-  <span id="event-count-note" style="font-size:11px;color:var(--text3);margin-left:auto;"></span>
-</div>
+  <!-- LEFT: ARB COLUMN -->
+  <div class="results-col">
+    <div class="col-filter-row">
+      <span class="slbl">Min arb %</span>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <input type="range" id="arb-min" min="0" max="10" step="0.1" value="0.5" oninput="document.getElementById('arb-min-v').textContent=parseFloat(this.value).toFixed(1)+'%';renderAll()">
+        <span class="fval" id="arb-min-v">0.5%</span>
+      </div>
+    </div>
+    <div class="col-stats">
+      <div class="stat"><div class="stat-lbl">Arb opps</div><div class="stat-val" id="s-arb">&mdash;</div><div class="stat-sub">28 combinations</div></div>
+      <div class="stat"><div class="stat-lbl">Best profit</div><div class="stat-val" id="s-best">&mdash;</div><div class="stat-sub" id="s-best-sub">on unit</div></div>
+      <div class="stat"><div class="stat-lbl">Unit size</div><div class="stat-val" id="s-unit">$50</div><div class="stat-sub">per arb total</div></div>
+    </div>
+    <div class="sort-row">
+      <span class="sort-lbl">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M3 3h10v1.5L9 9v4l-2-1V9L3 4.5V3z"/></svg>
+        Sort by
+      </span>
+      <select class="sel-sm" id="sort-by" onchange="renderAll()">
+        <option value="pct">Arb % (highest first)</option>
+        <option value="profit">Profit $ (highest first)</option>
+        <option value="time_asc">Date — soonest first</option>
+        <option value="time_desc">Date — latest first</option>
+        <option value="sport">Sport A&ndash;Z</option>
+        <option value="book">Book A&ndash;Z</option>
+      </select>
+    </div>
+    <div class="sec-hd">Arbitrage opportunities</div>
+    <div id="arb-out"><div class="arb-card"><div class="empty">Fetch odds to scan all 28 book combinations for arb opportunities</div></div></div>
+    <div class="sec-hd" id="t2-hd" style="display:none;margin-top:1.1rem;">Tier 2 arb &amp; EV opportunities</div>
+    <div id="t2-out"></div>
+  </div>
 
-<!-- 13. RESULTS -->
-<div class="sec-hd">Arbitrage opportunities</div>
-<div id="arb-out"><div class="arb-card"><div class="empty">Fetch odds to scan all 28 book combinations for arb opportunities</div></div></div>
+  <!-- RIGHT: EV COLUMN -->
+  <div class="results-col">
+    <div class="col-filter-row">
+      <span class="slbl">Min EV %</span>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <input type="range" id="ev-min" min="0" max="15" step="0.5" value="2" oninput="document.getElementById('ev-min-v').textContent=parseFloat(this.value).toFixed(1)+'%';renderAll()">
+        <span class="fval" id="ev-min-v">2.0%</span>
+      </div>
+    </div>
+    <div class="col-stats">
+      <div class="stat"><div class="stat-lbl">+EV bets</div><div class="stat-val" id="s-ev">&mdash;</div><div class="stat-sub">vs Pinnacle</div></div>
+      <div class="stat"><div class="stat-lbl">Best EV %</div><div class="stat-val" id="s-ev-best">&mdash;</div><div class="stat-sub">highest edge</div></div>
+      <div class="stat"><div class="stat-lbl">Best win</div><div class="stat-val" id="s-ev-win">&mdash;</div><div class="stat-sub">on unit size</div></div>
+    </div>
+    <div class="sort-row">
+      <span class="sort-lbl">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M3 3h10v1.5L9 9v4l-2-1V9L3 4.5V3z"/></svg>
+        Sort by
+      </span>
+      <select class="sel-sm" id="ev-sort-by" onchange="renderAll()">
+        <option value="ev_desc">EV % (highest first)</option>
+        <option value="time_asc">Date — soonest first</option>
+        <option value="time_desc">Date — latest first</option>
+        <option value="sport">Sport A&ndash;Z</option>
+        <option value="book">Book A&ndash;Z</option>
+      </select>
+    </div>
+    <div class="sec-hd">+EV opportunities vs Pinnacle</div>
+    <div id="ev-out"><div class="ev-card"><div class="empty">Fetch odds to see +EV bets benchmarked against Pinnacle</div></div></div>
+    <div class="sec-hd" id="props-hd" style="display:none;margin-top:1.1rem;">Player prop +EV vs Pinnacle</div>
+    <div id="props-out"></div>
+  </div>
 
-<div class="sec-hd" style="margin-top:1.1rem;">+EV opportunities vs Pinnacle</div>
-<div id="ev-out"><div class="ev-card"><div class="empty">Fetch odds to see +EV bets across all 7 books benchmarked against Pinnacle</div></div></div>
-
-<div class="sec-hd" id="props-hd" style="display:none;margin-top:1.1rem;">Player prop +EV vs Pinnacle</div>
-<div id="props-out"></div>
-
-<div class="sec-hd" id="t2-hd" style="display:none;margin-top:1.1rem;">Tier 2 arb &amp; EV opportunities</div>
-<div id="t2-out"></div>
+</div><!-- /results-grid -->
 
 </div><!-- /page -->
 
@@ -880,16 +906,26 @@ function renderAll() {
     if(sb==='book')      return (BOOK_NAMES[a.leg1?.bk]||a.leg1?.book||'').localeCompare(BOOK_NAMES[b.leg1?.bk]||b.leg1?.book||'');
     return b.pct - a.pct;
   });
+  const evSb = $('ev-sort-by') ? $('ev-sort-by').value : 'ev_desc';
   const fe=evs.filter(e=>e.ev>=et && eventPassesFilters(e.commenceTime) && pfSelectedBooks.has(e.bk)).sort((a,b)=>{
-    if(sb==='time_asc')  return new Date(a.commenceTime||0) - new Date(b.commenceTime||0);
-    if(sb==='time_desc') return new Date(b.commenceTime||0) - new Date(a.commenceTime||0);
-    if(sb==='sport')     return (a.sport||'').localeCompare(b.sport||'');
-    if(sb==='book')      return (a.book||'').localeCompare(b.book||'');
+    if(evSb==='time_asc')  return new Date(a.commenceTime||0) - new Date(b.commenceTime||0);
+    if(evSb==='time_desc') return new Date(b.commenceTime||0) - new Date(a.commenceTime||0);
+    if(evSb==='sport')     return (a.sport||'').localeCompare(b.sport||'');
+    if(evSb==='book')      return (a.bk||'').localeCompare(b.bk||'');
     return b.ev - a.ev;
   });
 
   $('s-arb').textContent=fa.length;
   $('s-ev').textContent=fe.length;
+  if(fe.length){
+    var bestEv=fe[0].ev||0;
+    var bestWin=((aDec(fe[0].odds)-1)*(fe[0].unit||unit)).toFixed(2);
+    if($('s-ev-best')) $('s-ev-best').textContent='+'+bestEv.toFixed(1)+'%';
+    if($('s-ev-win'))  $('s-ev-win').textContent='$'+bestWin;
+  } else {
+    if($('s-ev-best')) $('s-ev-best').textContent='—';
+    if($('s-ev-win'))  $('s-ev-win').textContent='—';
+  }
   if($('event-count-note')) $('event-count-note').textContent = fa.length || fe.length ? `${fa.length} arbs · ${fe.length} EV bets shown` : '';
   if(fa.length){
     $('s-best').textContent='$'+fa[0].profit.toFixed(2);
