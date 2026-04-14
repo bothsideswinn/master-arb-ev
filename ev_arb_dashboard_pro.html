@@ -222,15 +222,15 @@ input[type="range"] { width: 80px; accent-color: var(--blue); }
 
 
 /* ── Input panel ──────────────────────────────────────── */
-.ipanel { display:flex; flex-direction:column; gap:6px; margin-bottom:6px; }
-.irow { display:flex; align-items:center; gap:8px; }
+.ipanel { display:flex; flex-direction:column; gap:6px; margin-bottom:6px; overflow:visible; }
+.irow { display:flex; align-items:center; gap:8px; overflow:visible; }
 .ifield { display:flex; flex-direction:column; gap:3px; }
 .ilbl { font-size:10px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.07em; }
 .iinput { font-size:13px; padding:5px 9px; border-radius:var(--r); border:.5px solid var(--border2); background:var(--bg); color:var(--text); width:100%; box-sizing:border-box; }
 /* Book row */
 .bk-row { flex-wrap:wrap; gap:5px; }
 .bk-chip { display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:16px; font-size:11px; font-weight:700; cursor:pointer; border:1.5px solid var(--bk,#888); background:transparent; color:var(--bk,#888); opacity:.3; transition:opacity .15s,background .15s; font-family:inherit; -webkit-tap-highlight-color:transparent; }
-.bk-chip.active { opacity:1; background:color-mix(in srgb,var(--bk) 13%,transparent); }
+.bk-chip.active { opacity:1; background:rgba(128,128,128,0.13); }
 .bk-dot { width:5px; height:5px; border-radius:50%; background:var(--bk,#888); flex-shrink:0; }
 .bk-all { font-size:10px; font-weight:700; padding:4px 10px; border-radius:16px; border:.5px solid var(--border2); background:transparent; color:var(--text2); cursor:pointer; font-family:inherit; letter-spacing:.03em; }
 .bk-all:hover { border-color:var(--green); color:var(--green); }
@@ -241,6 +241,8 @@ input[type="range"] { width: 80px; accent-color: var(--blue); }
 .tgl-track { position:relative; width:36px; height:20px; background:var(--border2); border-radius:10px; transition:background .2s; flex-shrink:0; }
 .tgl-thumb { position:absolute; top:2px; left:2px; width:16px; height:16px; background:#fff; border-radius:50%; transition:left .2s; box-shadow:0 1px 3px rgba(0,0,0,.25); }
 .tgl-note { font-size:10px; color:var(--amber); font-weight:700; display:none; }
+.tgl-lbl-text { font-size:12px; font-weight:600; color:var(--text2); white-space:nowrap; cursor:pointer; }
+.tgl-pill { cursor:pointer; }
 
 </style>
 </head>
@@ -430,19 +432,15 @@ input[type="range"] { width: 80px; accent-color: var(--blue); }
     </div>
 
     <div class="irow" style="gap:0;flex-wrap:wrap;">
-      <div class="tgl-pill">
-        <label class="tgl-lbl">
-          <div class="tgl-track" id="props-track"><div class="tgl-thumb" id="props-thumb"></div></div>
-          Player props
-        </label>
+      <div class="tgl-pill" onclick="document.getElementById('props-track').click()">
+        <div class="tgl-track" id="props-track"><div class="tgl-thumb" id="props-thumb"></div></div>
+        <span class="tgl-lbl-text">Player props</span>
         <span class="tgl-note" id="props-cost-note">1 req/game</span>
       </div>
       <div class="tgl-sep"></div>
-      <div class="tgl-pill">
-        <label class="tgl-lbl">
-          <div class="tgl-track" id="t2-track"><div class="tgl-thumb" id="t2-thumb"></div></div>
-          Tier 2 props
-        </label>
+      <div class="tgl-pill" onclick="document.getElementById('t2-track').click()">
+        <div class="tgl-track" id="t2-track"><div class="tgl-thumb" id="t2-thumb"></div></div>
+        <span class="tgl-lbl-text">Tier 2 props</span>
         <span class="tgl-note" id="t2-cost-note">1 req/game</span>
       </div>
     </div>
@@ -1922,73 +1920,6 @@ async function fetchAndRenderT2(key) {
 
   t2Out.innerHTML = html;
 }
-
-
-// ── Book selector ─────────────────────────────────────────────────────────────
-const BOOK_CONFIG = [{key:'fanduel',name:'FanDuel',color:'#1890ff',bg:'#1890ff'},{key:'draftkings',name:'DraftKings',color:'#53c028',bg:'#53c028'},{key:'betmgm',name:'BetMGM',color:'#b8960c',bg:'#b8960c'},{key:'williamhill_us',name:'Caesars',color:'#0c7c3e',bg:'#0c7c3e'},{key:'bovada',name:'Bovada',color:'#c8960a',bg:'#c8960a'},{key:'betonlineag',name:'BetOnline',color:'#0a6b9e',bg:'#0a6b9e'},{key:'hardrockbet',name:'Hard Rock',color:'#b0174e',bg:'#b0174e'},{key:'pinnacle',name:'Pinnacle',color:'#8b5cf6',bg:'#8b5cf6'}];
-
-let selectedBooks = new Set(BOOK_CONFIG.map(b => b.key));
-
-function initBookSelector() {
-  const row = document.getElementById('book-selector-row');
-  if (!row) return;
-  row.innerHTML = '';
-
-  BOOK_CONFIG.forEach(b => {
-    const chip = document.createElement('span');
-    chip.className = 'book-chip active';
-    chip.id = 'bchip-' + b.key;
-    chip.style.background = b.bg + '22';
-    chip.style.color = b.color;
-    chip.style.borderColor = b.color;
-    chip.innerHTML = `<span class="book-chip-dot" style="background:${b.color};"></span>${b.name}`;
-    chip.onclick = () => toggleBook(b.key);
-    row.appendChild(chip);
-  });
-
-  // Divider
-  const div = document.createElement('span');
-  div.className = 'book-sel-divider';
-  row.appendChild(div);
-
-  // Select All button
-  const all = document.createElement('button');
-  all.className = 'book-sel-all';
-  all.textContent = 'Select all';
-  all.onclick = selectAllBooks;
-  row.appendChild(all);
-}
-
-function toggleBook(key) {
-  const chip = document.getElementById('bchip-' + key);
-  if (selectedBooks.has(key)) {
-    if (selectedBooks.size <= 1) return; // must keep at least 1
-    selectedBooks.delete(key);
-    if (chip) chip.classList.remove('active');
-  } else {
-    selectedBooks.add(key);
-    if (chip) chip.classList.add('active');
-  }
-}
-
-function selectAllBooks() {
-  BOOK_CONFIG.forEach(b => {
-    selectedBooks.add(b.key);
-    const chip = document.getElementById('bchip-' + b.key);
-    if (chip) chip.classList.add('active');
-  });
-}
-
-function getSelectedBookmarks() {
-  // Always include pinnacle for EV reference if available
-  const bks = [...selectedBooks];
-  return bks.join(',');
-}
-
-// Init on load
-document.addEventListener('DOMContentLoaded', initBookSelector);
-// Also init immediately in case DOM is already ready
-initBookSelector();
 
 
 // ── Book selector ──────────────────────────────────────────────────────────
