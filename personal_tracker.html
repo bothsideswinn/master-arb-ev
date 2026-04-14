@@ -20,6 +20,9 @@
   --amber:#d97706;--amber-bg:#fef9c3;
   --profit:#16a34a;--loss:#dc2626;
   --r:8px;--r-lg:12px;
+
+  --yellow:#d97706;--yellow-bg:#fffbeb;
+  --profit:#16a34a;--loss:#dc2626;
 }
 body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:13px;line-height:1.5;-webkit-text-size-adjust:100%}
 
@@ -84,21 +87,21 @@ h1{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
 
 /* ── Bet log ── */
 .log-wrap{background:var(--bg-card);border:.5px solid var(--border);border-radius:var(--r-lg);margin:0 24px 16px;overflow:hidden}
-.log-header{display:grid;grid-template-columns:100px 1fr 70px 80px 80px 60px 80px 80px;gap:8px;padding:9px 16px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);border-bottom:.5px solid var(--border);background:var(--bg)}
-.bet-row{display:grid;grid-template-columns:100px 1fr 70px 80px 80px 60px 80px 80px;gap:8px;padding:11px 16px;border-bottom:.5px solid var(--border);align-items:center;font-size:13px;transition:background .1s}
+
+
 .bet-row:last-child{border-bottom:none}
 .bet-row:hover{background:#fafafa}
 .bet-date{font-family:'Space Mono',monospace;font-size:10px;color:var(--text-muted)}
 .bet-game{font-weight:600;color:var(--text);line-height:1.3}
 .bet-meta{font-size:10px;color:var(--text-muted);margin-top:2px}
 .type-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:5px;display:inline-block}
-.type-arb{background:var(--blue-bg);color:var(--blue)}
-.type-ev{background:var(--green-bg);color:var(--green)}
+
+
 .status-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:5px;display:inline-block;cursor:pointer;white-space:nowrap}
 .status-pending{background:var(--amber-bg);color:var(--amber)}
 .status-settled{background:var(--green-bg);color:var(--green)}
 .status-void{background:#f3f4f6;color:var(--text-muted)}
-.profit{font-weight:700;font-family:'Space Mono',monospace;font-size:12px}
+
 .profit.pos{color:var(--green)}
 .profit.neg{color:var(--red)}
 .profit.pending{color:var(--blue)}
@@ -125,6 +128,36 @@ h1{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
 .form-actions{display:flex;gap:8px;margin-top:18px}
 .form-actions .btn{flex:1;padding:10px;text-align:center;font-size:13px}
 
+
+/* ── Bet log rows ── */
+.log-header{display:grid;grid-template-columns:100px 1fr 60px 70px 80px 65px 100px 70px;gap:8px;padding:9px 16px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);border-bottom:.5px solid var(--border);background:var(--bg)}
+.log-row{display:grid;grid-template-columns:100px 1fr 60px 70px 80px 65px 100px 70px;gap:8px;padding:11px 16px;border-bottom:.5px solid var(--border);align-items:center;transition:background .1s}
+.log-row:last-child{border-bottom:none}
+.log-row:hover{background:#fafafa}
+.log-date{font-family:'Space Mono',monospace;font-size:10px;color:var(--text-muted);line-height:1.4}
+.log-game-title{font-size:13px;font-weight:600;color:var(--text)}
+.log-game-sub{font-size:10px;color:var(--text-muted);margin-top:2px}
+.log-cell{font-size:13px;color:var(--text)}
+.type-arb{font-size:10px;font-weight:700;padding:2px 8px;border-radius:5px;display:inline-block;background:var(--blue-bg);color:var(--blue)}
+.type-ev{font-size:10px;font-weight:700;padding:2px 8px;border-radius:5px;display:inline-block;background:var(--green-bg);color:var(--green)}
+.status-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;display:inline-block;white-space:nowrap}
+.s-pending{background:var(--yellow-bg);color:var(--yellow)}
+.s-settled{background:var(--green-bg);color:var(--green)}
+.s-void{background:#f3f4f6;color:var(--text-muted)}
+.profit{font-weight:700;color:var(--profit)}
+.loss{font-weight:700;color:var(--loss)}
+.edit-status-btn{font-size:10px;font-weight:600;padding:3px 7px;border-radius:5px;border:.5px solid var(--border);background:var(--bg);cursor:pointer;color:var(--text-secondary);font-family:inherit;display:block;margin-top:4px;white-space:nowrap}
+.edit-status-btn:hover{border-color:var(--blue);color:var(--blue)}
+.edit-row-btn,.delete-btn{font-size:11px;font-weight:600;padding:4px 7px;border-radius:5px;border:.5px solid var(--border);background:var(--bg);cursor:pointer;color:var(--text-secondary);font-family:inherit}
+.edit-row-btn:hover{border-color:var(--blue);color:var(--blue)}
+.delete-btn:hover{border-color:var(--red);color:var(--red)}
+@media(max-width:900px){
+  .log-header,.log-row{grid-template-columns:80px 1fr 55px 65px 70px 55px 90px 60px;font-size:11px}
+}
+@media(max-width:700px){
+  .log-header{display:none}
+  .log-row{grid-template-columns:1fr 1fr;gap:6px}
+}
 </style>
 <body>
 
