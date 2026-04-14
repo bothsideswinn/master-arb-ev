@@ -1226,11 +1226,7 @@ async function fetchAndRenderProps(key, sports) {
         <div class="leg-lbl-row"><span class="lbl">Book odds</span><span class="val ${e.odds>=0?'pos':''}">${fmt(e.odds)}</span></div>
         <div class="leg-lbl-row"><span class="lbl">Pinnacle</span><span class="val" style="color:var(--text2)">${fmt(e.pinnOdds)}</span></div>
         <div class="leg-lbl-row"><span class="lbl">Win on $${e.unit}</span><span class="val blue">$${win}</span></div>
-        <div class="leg-lbl-row" style="margin-top:6px;">
-          <button class="log-bet-btn" onclick="logEV('${e.event}','${e.sport}','${e.mkt}','${e.bet}','${e.book}',${e.odds},${e.ev},${e.unit},'${e.commenceTime||''}')">
-            ↗ Log this EV bet
-          </button>
-        </div>
+
       </div>
     </div></div>`;
   }).join('');
@@ -1919,9 +1915,6 @@ async function fetchAndRenderT2(key, sports) {
           <div class="leg-lbl-row"><span class="lbl">Bet</span><span class="val">${e.bet}</span></div>
           <div class="leg-lbl-row"><span class="lbl">Odds</span><span class="val">${e.odds >= 0 ? '+' : ''}${e.odds}</span></div>
           <div class="leg-lbl-row"><span class="lbl">Stake $${e.unit}</span><span class="val blue">+$${win}</span></div>
-          <div class="leg-lbl-row" style="margin-top:6px;">
-            <button class="log-bet-btn" onclick="logEVById('${evId}')">↗ Log this EV bet</button>
-          </div>
         </div>
       </div></div>`;
     }).join('');
