@@ -666,7 +666,7 @@ async function go() {
   for(let si=0; si<selectedSports.length; si++){
     const sport = selectedSports[si];
     log(`Fetching ${sport} (${si+1}/${selectedSports.length})…`);
-    const api = `https://api.the-odds-api.com/v4/sports/${sport}/odds/?apiKey=${key}&regions=us,us2,eu&markets=h2h,spreads,totals&bookmakers=${bookList}&oddsFormat=american`;
+    const api = `https://api.the-odds-api.com/v4/sports/${sport}/odds/?apiKey=${key}&regions=us,us2,eu&markets=h2h,spreads,totals,alternate_spreads,alternate_totals&bookmakers=${bookList}&oddsFormat=american`;
     const res = await tryFetch(api);
     if(res.json && Array.isArray(res.json)) {
       allEvents.push(...res.json);
@@ -1018,7 +1018,7 @@ async function goAll() {
   let fetched = 0;
   for (const sport of activeSports) {
     $('all-sport-log').textContent = `Fetching ${sport.title} (${fetched + 1} / ${activeSports.length})…`;
-    const apiUrl = `https://api.the-odds-api.com/v4/sports/${sport.key}/odds/?apiKey=${key}&regions=us,us2,eu&markets=h2h,spreads,totals&bookmakers=${getSelectedBookmarks()}&oddsFormat=american`;
+    const apiUrl = `https://api.the-odds-api.com/v4/sports/${sport.key}/odds/?apiKey=${key}&regions=us,us2,eu&markets=h2h,spreads,totals,alternate_spreads,alternate_totals&bookmakers=${getSelectedBookmarks()}&oddsFormat=american`;
     const res = await tryFetch(apiUrl);
     if (res.json && Array.isArray(res.json)) {
       allEvents.push(...res.json);
@@ -2116,10 +2116,8 @@ function toggleT2(e) {
   if (nt) nt.style.display = t2Enabled ? 'inline' : 'none';
 }
 
-// Init — run after DOM is ready
-document.addEventListener('DOMContentLoaded', function() {
-  updateSportChips();
-});
+// Init — DOM already parsed since script is at end of body
+updateSportChips();
 // ═════════════════════════════════════════════════════════════════════════
 
 </script>
