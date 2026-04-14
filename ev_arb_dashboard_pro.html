@@ -693,8 +693,8 @@ async function go() {
   $('refreshed').textContent = 'Updated '+new Date().toLocaleTimeString();
   updateDots();
   renderAll();
-  if(propsEnabled) fetchAndRenderProps(key, selectedSports[0]||'basketball_nba');
-  if(t2Enabled) fetchAndRenderT2(key);
+  if(propsEnabled) fetchAndRenderProps(key, selectedSports);
+  if(t2Enabled) fetchAndRenderT2(key, selectedSports);
   if(!data.length) setErr('No events found — this sport may be off-season. Try NBA, MLB, or NHL.');
 }
 
@@ -1113,7 +1113,7 @@ function calcPropsEV(eventData, unit) {
   return propEvs;
 }
 
-async function fetchAndRenderProps(key, sport) {
+async function fetchAndRenderProps(key, sports) {
   if (!propsEnabled) return;
   if (!data.length) return;
   const unit = parseFloat($('f-unit').value) || 50;
@@ -1122,16 +1122,17 @@ async function fetchAndRenderProps(key, sport) {
 
   // Only fetch props for sports that support them
   const propSports = ['basketball_nba','americanfootball_nfl','baseball_mlb','icehockey_nhl','soccer_epl','soccer_usa_mls'];
-  const sportKey = typeof sport === 'string' ? sport : (getSelectedSports()[0]||'basketball_nba');
-  if (!propSports.includes(sportKey)) {
-    propsOut.innerHTML = '<div class="ev-card"><div class="empty">Player props are not available for this sport via the API.</div></div>';
+  const sportsArr = Array.isArray(sports) ? sports : [sports];
+  const validSports = sportsArr.filter(s => propSports.includes(s));
+  if (!validSports.length) {
+    propsOut.innerHTML = '<div class="ev-card"><div class="empty">Player props are not available for the selected sport(s) via the API.</div></div>';
     return;
   }
 
   propsOut.innerHTML = '<div class="ev-card"><div class="empty" id="props-loading">Fetching player props for each game… this uses 1 API request per game.</div></div>';
 
-  // Filter events by date/status before fetching props — saves API requests
-  const filteredEvents = getFilteredEventsForProps(data).filter(e => e.sport_key === sportKey);
+  // Filter events by date/status and valid prop sports
+  const filteredEvents = getFilteredEventsForProps(data).filter(e => validSports.includes(e.sport_key));
   const totalPropGames = filteredEvents.length;
   if (!totalPropGames) {
     propsOut.innerHTML = '<div class="ev-card"><div class="empty">No games match your current date/status filter — adjust the pre-fetch filters above and try again.</div></div>';
@@ -1144,7 +1145,7 @@ async function fetchAndRenderProps(key, sport) {
     if ($('props-loading')) {
       $('props-loading').textContent = `Fetching props: ${event.home_team} vs ${event.away_team} (${count+1}/${totalPropGames})…`;
     }
-    const propData = await fetchPropsForEvent(key, event.id, sportKey);
+    const propData = await fetchPropsForEvent(key, event.id, event.sport_key);
     if (propData) {
       const evs = calcPropsEV(propData, unit);
       allPropEvs.push(...evs);
@@ -1765,7 +1766,7 @@ function calcT2Opps(eventData, unit, targetBks, pinnEnabled) {
 }
 
 // Main Tier 2 fetch and render
-async function fetchAndRenderT2(key) {
+async function fetchAndRenderT2(key, sports) {
   if (!t2Enabled) return;
   if (!data.length) return;
   const unit = parseFloat($('f-unit').value) || 50;
@@ -1774,7 +1775,8 @@ async function fetchAndRenderT2(key) {
   if (!t2Out) return;
   if (t2Hd) t2Hd.style.display = 'block';
 
-  const filteredEvents = getFilteredEventsForProps(data);
+  const t2Sports = Array.isArray(sports) ? sports : getSelectedSports();
+  const filteredEvents = getFilteredEventsForProps(data).filter(e => !t2Sports.length || t2Sports.includes(e.sport_key));
   if (!filteredEvents.length) {
     t2Out.innerHTML = '<div class="ev-card"><div class="empty">No games match your current filter.</div></div>';
     return;
