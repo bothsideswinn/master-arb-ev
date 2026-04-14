@@ -892,7 +892,7 @@ function renderLeg(leg) {
 function renderAll() {
   if(!data.length) return;
   const unit=parseFloat($('f-unit').value)||50;
-  $('s-unit').textContent='$'+unit.toLocaleString();
+  if($('s-unit')) $('s-unit').textContent='$'+unit.toLocaleString();
   const at=parseFloat($('arb-min').value), et=parseFloat($('ev-min').value), sb=$('sort-by').value;
   const {arbs,evs}=buildOpps();
   const pfSport = document.getElementById('pf-sport') ? document.getElementById('pf-sport').value : 'all';
@@ -1019,7 +1019,7 @@ function renderAll() {
   : '<div class="ev-card"><div class="empty">No +EV bets above '+et.toFixed(1)+'% — lower the EV threshold</div></div>';
 }
 
-$('f-unit').addEventListener('input',function(){$('s-unit').textContent='$'+(parseFloat(this.value)||50).toLocaleString();renderAll();});
+$('f-unit').addEventListener('input',function(){if($('s-unit')) $('s-unit').textContent='$'+(parseFloat(this.value)||50).toLocaleString();renderAll();});
 $('f-key').addEventListener('keydown',e=>{if(e.key==='Enter')go();});
 
 
