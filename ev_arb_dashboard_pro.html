@@ -179,6 +179,10 @@ input[type="range"] { width: 80px; accent-color: var(--blue); }
 .sp-chip-x { cursor: pointer; font-size: 12px; line-height: 1; opacity: .7; }
 .sp-chip-x:hover { opacity: 1; }
 
+
+.log-bet-btn { display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:6px 12px;border-radius:var(--r);border:1.5px solid #00E676;color:#00E676;background:rgba(0,230,118,.08);cursor:pointer;text-decoration:none;white-space:nowrap;-webkit-tap-highlight-color:transparent;font-family:inherit; }
+.log-bet-btn:active{opacity:.7;}
+
 </style>
 </head>
 <body>
@@ -793,6 +797,11 @@ function renderAll() {
         <div class="foot-item"><span class="foot-lbl">Combined implied</span><span class="foot-val">${ci}%</span></div>
         <div class="foot-item"><span class="foot-lbl">Guaranteed profit</span><span class="foot-val" style="color:var(--green)">$${a.profit.toFixed(2)}</span></div>
         <div class="foot-item"><span class="foot-lbl">Return on unit</span><span class="foot-val">${((a.profit/a.unit)*100).toFixed(2)}%</span></div>
+        <div style="margin-left:auto;display:flex;align-items:center;">
+          <button class="log-bet-btn" onclick="logArb('${a.event}','${a.sport}','${a.mkt}',${JSON.stringify(a.leg1)},${JSON.stringify(a.leg2)},${a.profit},${a.leg1.stake+a.leg2.stake},'${a.commenceTime||''}')">
+            ↗ Log this arb
+          </button>
+        </div>
       </div>
     </div>`;
   }).join('')
@@ -819,6 +828,11 @@ function renderAll() {
         <div class="leg-lbl-row"><span class="lbl">Pinnacle (fair)</span><span class="val" style="color:var(--text2)">${fmt(e.pinnOdds)}</span></div>
         <div class="leg-lbl-row"><span class="lbl">EV edge</span><span class="val" style="color:var(--green)">+${e.ev.toFixed(1)}%</span></div>
         <div class="leg-lbl-row"><span class="lbl">Win on $${e.unit}</span><span class="val blue">$${win}</span></div>
+        <div class="leg-lbl-row" style="margin-top:6px;">
+          <button class="log-bet-btn" onclick="logEV('${e.event}','${e.sport}','${e.mkt}','${e.bet}','${e.book}',${e.odds},${e.ev},${e.unit},'${e.commenceTime||''}')">
+            ↗ Log this EV bet
+          </button>
+        </div>
       </div>
     </div></div>`;
   }).join('')
@@ -1053,6 +1067,11 @@ async function fetchAndRenderProps(key, sport) {
         <div class="leg-lbl-row"><span class="lbl">Book odds</span><span class="val ${e.odds>=0?'pos':''}">${fmt(e.odds)}</span></div>
         <div class="leg-lbl-row"><span class="lbl">Pinnacle</span><span class="val" style="color:var(--text2)">${fmt(e.pinnOdds)}</span></div>
         <div class="leg-lbl-row"><span class="lbl">Win on $${e.unit}</span><span class="val blue">$${win}</span></div>
+        <div class="leg-lbl-row" style="margin-top:6px;">
+          <button class="log-bet-btn" onclick="logEV('${e.event}','${e.sport}','${e.mkt}','${e.bet}','${e.book}',${e.odds},${e.ev},${e.unit},'${e.commenceTime||''}')">
+            ↗ Log this EV bet
+          </button>
+        </div>
       </div>
     </div></div>`;
   }).join('');
@@ -1191,6 +1210,41 @@ function removeSport(val) {
 document.querySelectorAll('#sport-picker-dropdown input[type="checkbox"]').forEach(cb => {
   cb.addEventListener('change', updateSportChips);
 });
+
+
+// ── Log bet to tracker ──
+function logArb(event, sport, mkt, leg1, leg2, profit, stake, commenceTime) {
+  const trackerUrl = 'https://bothsideswinn.github.io/master-arb-ev/public_tracker.html';
+  const params = new URLSearchParams({
+    type: 'arb',
+    game: event,
+    sport: sport,
+    mkt: mkt,
+    book1: leg1.book,
+    book2: leg2.book,
+    stake: stake.toFixed(2),
+    profit: profit.toFixed(2),
+    gametime: commenceTime ? new Date(commenceTime).toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' · ' + new Date(commenceTime).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true}) : '',
+    notes: leg1.name + ' / ' + leg2.name
+  });
+  window.open(trackerUrl + '?' + params.toString(), '_blank');
+}
+
+function logEV(event, sport, mkt, bet, book, odds, evPct, unit, commenceTime) {
+  const trackerUrl = 'https://bothsideswinn.github.io/master-arb-ev/public_tracker.html';
+  const params = new URLSearchParams({
+    type: 'ev',
+    game: event,
+    sport: sport,
+    bookEv: book,
+    odds: odds,
+    evPct: evPct.toFixed(1),
+    stake: unit,
+    gametime: commenceTime ? new Date(commenceTime).toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' · ' + new Date(commenceTime).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true}) : '',
+    notes: bet + ' · +' + evPct.toFixed(1) + '% EV'
+  });
+  window.open(trackerUrl + '?' + params.toString(), '_blank');
+}
 
 </script>
 </body>
