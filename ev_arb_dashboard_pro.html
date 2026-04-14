@@ -4,9 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>Arb Dashboard Pro — 8 Books</title>
 <style>
@@ -157,92 +154,8 @@ input[type="range"] { width: 80px; accent-color: var(--blue); }
 }
 @media (min-width: 601px) { .mob-bar { display: none; } }
 
-.tag-live     { background:#fce8e8; color:#8a1010; border-color:#f0a0a0; animation: pulse 1.5s infinite; }
-.tag-upcoming { background:var(--blue-bg); color:var(--blue); border-color:var(--blue-border); }
-.tag-past     { background:var(--bg2); color:var(--text3); border-color:var(--border2); }
-.event-time   { font-size:11px; color:var(--text3); margin-top:2px; }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }
-
-
-.sport-picker-wrap { position: relative; }
-.sport-picker-btn { display: flex; align-items: center; gap: 6px; font-size: 13px; padding: 7px 10px; border-radius: var(--r); border: .5px solid var(--border2); background: var(--bg); color: var(--text); cursor: pointer; white-space: nowrap; min-width: 160px; user-select: none; -webkit-tap-highlight-color: transparent; }
-.sport-picker-btn:after { content: '▾'; margin-left: auto; font-size: 10px; color: var(--text3); }
-.sport-picker-dropdown { display: none; position: absolute; top: calc(100% + 4px); left: 0; z-index: 500; background: var(--bg); border: .5px solid var(--border2); border-radius: var(--r-lg); box-shadow: 0 4px 16px rgba(0,0,0,.15); min-width: 260px; max-height: 380px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-.sport-picker-dropdown.open { display: block; }
-.sp-group-hd { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text3); padding: 8px 12px 4px; border-top: .5px solid var(--border); }
-.sp-group-hd:first-child { border-top: none; }
-.sp-item { display: flex; align-items: center; gap: 8px; padding: 6px 12px; cursor: pointer; font-size: 13px; color: var(--text); -webkit-tap-highlight-color: transparent; }
-.sp-item:hover { background: var(--bg2); }
-.sp-item input[type="checkbox"] { width: 14px; height: 14px; accent-color: var(--blue); flex-shrink: 0; cursor: pointer; }
-.sp-actions { display: flex; gap: 6px; padding: 8px 12px; border-top: .5px solid var(--border); position: sticky; bottom: 0; background: var(--bg); }
-.sp-action-btn { flex: 1; font-size: 11px; font-weight: 600; padding: 5px 8px; border-radius: var(--r); border: .5px solid var(--border2); background: var(--bg2); color: var(--text2); cursor: pointer; text-align: center; }
-.sp-action-btn:hover { background: var(--bg3); }
-.sp-selected-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
-.sp-chip { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; background: var(--blue-bg); color: var(--blue); border: .5px solid var(--blue-border); display: flex; align-items: center; gap: 4px; }
-.sp-chip-x { cursor: pointer; font-size: 12px; line-height: 1; opacity: .7; }
-.sp-chip-x:hover { opacity: 1; }
-
-
-.log-bet-btn { display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:6px 12px;border-radius:var(--r);border:1.5px solid #00E676;color:#00E676;background:rgba(0,230,118,.08);cursor:pointer;text-decoration:none;white-space:nowrap;-webkit-tap-highlight-color:transparent;font-family:inherit; }
-.log-bet-btn:active{opacity:.7;}
-
-
-.arb-menu-wrap{position:relative;flex-shrink:0;}
-.arb-menu-btn{background:none;border:.5px solid var(--border2);border-radius:var(--r);width:32px;height:32px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:0;color:var(--text2);-webkit-tap-highlight-color:transparent;}
-.arb-menu-btn:hover{background:var(--bg2);}
-.arb-menu-btn span{display:block;width:14px;height:1.5px;background:currentColor;border-radius:2px;}
-.arb-menu-dropdown{display:none;position:absolute;top:calc(100% + 4px);right:0;background:var(--bg);border:.5px solid var(--border2);border-radius:var(--r-lg);min-width:190px;z-index:300;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.25);}
-.arb-menu-dropdown.open{display:block;}
-.arb-menu-item{display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;border-bottom:.5px solid var(--border);-webkit-tap-highlight-color:transparent;}
-.arb-menu-item:last-child{border-bottom:none;}
-.arb-menu-item:hover{background:var(--bg2);}
-.arb-menu-item:active{opacity:.7;}
-.arb-menu-icon{font-size:14px;flex-shrink:0;width:20px;text-align:center;}
-.arb-menu-item.clr-green{color:var(--green);}
-.arb-menu-item.clr-blue{color:var(--blue);}
-.arb-menu-item.clr-x{color:#1DA1F2;}
-
-
-/* ── Book selector ── */
-.book-selector-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:.5rem; }
-.book-chip { display:inline-flex; align-items:center; gap:5px; padding:5px 10px; border-radius:20px; font-size:12px; font-weight:700; cursor:pointer; border:2px solid transparent; transition:all .15s; -webkit-tap-highlight-color:transparent; user-select:none; opacity:.45; }
-.book-chip.active { opacity:1; }
-.book-chip:active { transform:scale(.96); }
-.book-chip-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
-.book-sel-all { font-family:inherit; font-size:11px; font-weight:700; padding:5px 12px; border-radius:20px; border:1px solid var(--border2); background:var(--bg2); color:var(--text2); cursor:pointer; letter-spacing:.03em; -webkit-tap-highlight-color:transparent; }
-.book-sel-all:hover { border-color:var(--green); color:var(--green); }
-.book-sel-divider { width:.5px; height:18px; background:var(--border2); margin:0 2px; }
-
-
-
-
-
-
-
-
-
-/* ── Input panel ──────────────────────────────────────── */
-.ipanel { display:flex; flex-direction:column; gap:6px; margin-bottom:6px; overflow:visible; }
-.irow { display:flex; align-items:center; gap:8px; overflow:visible; }
-.ifield { display:flex; flex-direction:column; gap:3px; }
-.ilbl { font-size:10px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.07em; }
-.iinput { font-size:13px; padding:5px 9px; border-radius:var(--r); border:.5px solid var(--border2); background:var(--bg); color:var(--text); width:100%; box-sizing:border-box; }
-/* Book row */
-.bk-row { flex-wrap:wrap; gap:5px; }
-.bk-chip { display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:16px; font-size:11px; font-weight:700; cursor:pointer; border:1.5px solid var(--bk,#888); background:transparent; color:var(--bk,#888); opacity:.3; transition:opacity .15s,background .15s; font-family:inherit; -webkit-tap-highlight-color:transparent; }
-.bk-chip.active { opacity:1; background:rgba(128,128,128,0.13); }
-.bk-dot { width:5px; height:5px; border-radius:50%; background:var(--bk,#888); flex-shrink:0; }
-.bk-all { font-size:10px; font-weight:700; padding:4px 10px; border-radius:16px; border:.5px solid var(--border2); background:transparent; color:var(--text2); cursor:pointer; font-family:inherit; letter-spacing:.03em; }
-.bk-all:hover { border-color:var(--green); color:var(--green); }
-/* Toggles */
-.tgl-pill { display:flex; align-items:center; gap:7px; padding:7px 12px; background:var(--bg2); border:.5px solid var(--border2); border-radius:var(--r); }
-.tgl-sep { width:.5px; height:26px; background:var(--border2); }
-.tgl-lbl { display:flex; align-items:center; gap:7px; cursor:pointer; font-size:12px; font-weight:600; color:var(--text2); white-space:nowrap; }
-.tgl-track { position:relative; width:36px; height:20px; background:var(--border2); border-radius:10px; transition:background .2s; flex-shrink:0; }
-.tgl-thumb { position:absolute; top:2px; left:2px; width:16px; height:16px; background:#fff; border-radius:50%; transition:left .2s; box-shadow:0 1px 3px rgba(0,0,0,.25); }
-.tgl-note { font-size:10px; color:var(--amber); font-weight:700; display:none; }
-.tgl-lbl-text { font-size:12px; font-weight:600; color:var(--text2); white-space:nowrap; cursor:pointer; }
-.tgl-pill { cursor:pointer; }
+.bk-chip { display:inline-flex; align-items:center; padding:4px 10px; border-radius:16px; font-size:11px; font-weight:700; cursor:pointer; background:transparent; opacity:.35; transition:opacity .15s; font-family:inherit; -webkit-tap-highlight-color:transparent; }
+.bk-chip.active { opacity:1; }
 
 </style>
 </head>
@@ -269,187 +182,198 @@ input[type="range"] { width: 80px; accent-color: var(--blue); }
     </div>
   </div>
 
-  <!-- Input panel -->
-  <div class="ipanel">
+  <div class="info blue" id="help">
+    Get your free API key at <a href="https://the-odds-api.com" target="_blank">the-odds-api.com</a> and paste it below. This dashboard scans <strong>28 book combinations</strong> simultaneously for arb opportunities, and uses Pinnacle as the sharp-line EV benchmark. Tap any book button to open that sportsbook and place your bet.
+  </div>
+  <div class="info red" id="err"></div>
 
-    <div class="irow">
-      <div class="ifield" style="flex:1;">
-        <span class="ilbl">API key</span>
-        <input type="password" id="f-key" class="iinput" placeholder="paste key from the-odds-api.com" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
-      </div>
+<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:.5rem;padding:8px 0;">
+  <button class="bk-chip active" id="bchip-fanduel" data-key="fanduel" style="border:1.5px solid #1890ff;color:#1890ff;" onclick="toggleBook('fanduel')"><span style="width:6px;height:6px;border-radius:50%;background:#1890ff;display:inline-block;margin-right:4px;"></span>FanDuel</button>
+  <button class="bk-chip active" id="bchip-draftkings" data-key="draftkings" style="border:1.5px solid #53c028;color:#53c028;" onclick="toggleBook('draftkings')"><span style="width:6px;height:6px;border-radius:50%;background:#53c028;display:inline-block;margin-right:4px;"></span>DraftKings</button>
+  <button class="bk-chip active" id="bchip-betmgm" data-key="betmgm" style="border:1.5px solid #b8960c;color:#b8960c;" onclick="toggleBook('betmgm')"><span style="width:6px;height:6px;border-radius:50%;background:#b8960c;display:inline-block;margin-right:4px;"></span>BetMGM</button>
+  <button class="bk-chip active" id="bchip-williamhill_us" data-key="williamhill_us" style="border:1.5px solid #0c7c3e;color:#0c7c3e;" onclick="toggleBook('williamhill_us')"><span style="width:6px;height:6px;border-radius:50%;background:#0c7c3e;display:inline-block;margin-right:4px;"></span>Caesars</button>
+  <button class="bk-chip active" id="bchip-bovada" data-key="bovada" style="border:1.5px solid #c8960a;color:#c8960a;" onclick="toggleBook('bovada')"><span style="width:6px;height:6px;border-radius:50%;background:#c8960a;display:inline-block;margin-right:4px;"></span>Bovada</button>
+  <button class="bk-chip active" id="bchip-betonlineag" data-key="betonlineag" style="border:1.5px solid #0a6b9e;color:#0a6b9e;" onclick="toggleBook('betonlineag')"><span style="width:6px;height:6px;border-radius:50%;background:#0a6b9e;display:inline-block;margin-right:4px;"></span>BetOnline</button>
+  <button class="bk-chip active" id="bchip-hardrockbet" data-key="hardrockbet" style="border:1.5px solid #b0174e;color:#b0174e;" onclick="toggleBook('hardrockbet')"><span style="width:6px;height:6px;border-radius:50%;background:#b0174e;display:inline-block;margin-right:4px;"></span>Hard Rock</button>
+  <button class="bk-chip active" id="bchip-pinnacle" data-key="pinnacle" style="border:1.5px solid #8b5cf6;color:#8b5cf6;" onclick="toggleBook('pinnacle')"><span style="width:6px;height:6px;border-radius:50%;background:#8b5cf6;display:inline-block;margin-right:4px;"></span>Pinnacle (EV ref)</button>
+  <button onclick="selectAllBooks()" style="font-size:11px;font-weight:600;padding:4px 10px;border-radius:16px;border:.5px solid #888;background:none;color:#888;cursor:pointer;">All</button>
+</div>
+
+  <div class="config">
+    <div class="field" style="flex:1;min-width:180px;">
+      <label for="f-key">API key</label>
+      <input type="password" id="f-key" placeholder="paste key from the-odds-api.com" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
     </div>
-
-    <div class="irow bk-row">
-      <button class="bk-chip active" id="bchip-fanduel" data-key="fanduel" style="--bk:#1890ff;" onclick="toggleBook('fanduel')"><span class="bk-dot"></span>FanDuel</button> <button class="bk-chip active" id="bchip-draftkings" data-key="draftkings" style="--bk:#53c028;" onclick="toggleBook('draftkings')"><span class="bk-dot"></span>DraftKings</button> <button class="bk-chip active" id="bchip-betmgm" data-key="betmgm" style="--bk:#b8960c;" onclick="toggleBook('betmgm')"><span class="bk-dot"></span>BetMGM</button> <button class="bk-chip active" id="bchip-williamhill_us" data-key="williamhill_us" style="--bk:#0c7c3e;" onclick="toggleBook('williamhill_us')"><span class="bk-dot"></span>Caesars</button> <button class="bk-chip active" id="bchip-bovada" data-key="bovada" style="--bk:#c8960a;" onclick="toggleBook('bovada')"><span class="bk-dot"></span>Bovada</button> <button class="bk-chip active" id="bchip-betonlineag" data-key="betonlineag" style="--bk:#0a6b9e;" onclick="toggleBook('betonlineag')"><span class="bk-dot"></span>BetOnline</button> <button class="bk-chip active" id="bchip-hardrockbet" data-key="hardrockbet" style="--bk:#b0174e;" onclick="toggleBook('hardrockbet')"><span class="bk-dot"></span>Hard Rock</button> <button class="bk-chip active" id="bchip-pinnacle" data-key="pinnacle" style="--bk:#8b5cf6;" onclick="toggleBook('pinnacle')"><span class="bk-dot"></span>Pinnacle (EV ref)</button>
-      <button class="bk-all" onclick="selectAllBooks()">All</button>
+    <div class="field">
+      <label for="f-sport">Sport</label>
+      <select id="f-sport">
+        <optgroup label="American Football">
+          <option value="americanfootball_nfl">NFL</option>
+          <option value="americanfootball_nfl_preseason">NFL Preseason</option>
+          <option value="americanfootball_ncaaf">NCAAF</option>
+          <option value="americanfootball_cfl">CFL</option>
+          <option value="americanfootball_ufl">UFL</option>
+        </optgroup>
+        <optgroup label="Baseball">
+          <option value="baseball_mlb">MLB</option>
+          <option value="baseball_mlb_preseason">MLB Preseason</option>
+          <option value="baseball_ncaa">NCAA Baseball</option>
+          <option value="baseball_milb">Minor League Baseball (MiLB)</option>
+          <option value="baseball_kbo">KBO League</option>
+          <option value="baseball_npb">NPB (Japan)</option>
+        </optgroup>
+        <optgroup label="Basketball">
+          <option value="basketball_nba">NBA</option>
+          <option value="basketball_nba_preseason">NBA Preseason</option>
+          <option value="basketball_wnba">WNBA</option>
+          <option value="basketball_ncaab">NCAAB (Men)</option>
+          <option value="basketball_wncaab">WNCAAB (Women)</option>
+          <option value="basketball_euroleague">EuroLeague</option>
+          <option value="basketball_nbl">NBL (Australia)</option>
+          <option value="basketball_nba_summer_league">NBA Summer League</option>
+        </optgroup>
+        <optgroup label="Ice Hockey">
+          <option value="icehockey_nhl">NHL</option>
+          <option value="icehockey_nhl_preseason">NHL Preseason</option>
+          <option value="icehockey_ahl">AHL</option>
+          <option value="icehockey_sweden_hockey_league">SHL (Sweden)</option>
+          <option value="icehockey_sweden_allsvenskan">HockeyAllsvenskan</option>
+          <option value="icehockey_liiga">Finnish Liiga</option>
+          <option value="icehockey_mestis">Finnish Mestis</option>
+        </optgroup>
+        <optgroup label="Soccer — USA &amp; Americas">
+          <option value="soccer_usa_mls">MLS</option>
+          <option value="soccer_mexico_ligamx">Liga MX</option>
+          <option value="soccer_concacaf_leagues_cup">CONCACAF Leagues Cup</option>
+          <option value="soccer_argentina_primera_division">Argentina Primera División</option>
+          <option value="soccer_brazil_campeonato">Brazil Série A</option>
+          <option value="soccer_brazil_serie_b">Brazil Série B</option>
+          <option value="soccer_chile_campeonato">Chile Primera División</option>
+          <option value="soccer_conmebol_copa_libertadores">Copa Libertadores</option>
+          <option value="soccer_conmebol_copa_sudamericana">Copa Sudamericana</option>
+          <option value="soccer_conmebol_copa_america">Copa América</option>
+          <option value="soccer_fifa_world_cup">FIFA World Cup</option>
+          <option value="soccer_fifa_world_cup_womens">FIFA Women's World Cup</option>
+          <option value="soccer_fifa_club_world_cup">FIFA Club World Cup</option>
+        </optgroup>
+        <optgroup label="Soccer — England">
+          <option value="soccer_epl">EPL (Premier League)</option>
+          <option value="soccer_efl_champ">EFL Championship</option>
+          <option value="soccer_england_league1">EFL League 1</option>
+          <option value="soccer_england_league2">EFL League 2</option>
+          <option value="soccer_fa_cup">FA Cup</option>
+          <option value="soccer_england_efl_cup">EFL Cup</option>
+        </optgroup>
+        <optgroup label="Soccer — Europe">
+          <option value="soccer_uefa_champs_league">UEFA Champions League</option>
+          <option value="soccer_uefa_europa_league">UEFA Europa League</option>
+          <option value="soccer_uefa_europa_conference_league">UEFA Europa Conference League</option>
+          <option value="soccer_uefa_nations_league">UEFA Nations League</option>
+          <option value="soccer_germany_bundesliga">Bundesliga (Germany)</option>
+          <option value="soccer_germany_bundesliga2">Bundesliga 2 (Germany)</option>
+          <option value="soccer_germany_liga3">3. Liga (Germany)</option>
+          <option value="soccer_spain_la_liga">La Liga (Spain)</option>
+          <option value="soccer_spain_segunda_division">La Liga 2 (Spain)</option>
+          <option value="soccer_italy_serie_a">Serie A (Italy)</option>
+          <option value="soccer_italy_serie_b">Serie B (Italy)</option>
+          <option value="soccer_france_ligue_one">Ligue 1 (France)</option>
+          <option value="soccer_france_ligue_two">Ligue 2 (France)</option>
+          <option value="soccer_netherlands_eredivisie">Eredivisie (Netherlands)</option>
+          <option value="soccer_portugal_primeira_liga">Primeira Liga (Portugal)</option>
+          <option value="soccer_turkey_super_league">Süper Lig (Turkey)</option>
+          <option value="soccer_greece_super_league">Super League (Greece)</option>
+          <option value="soccer_belgium_first_div">First Division A (Belgium)</option>
+          <option value="soccer_spl">Premiership (Scotland)</option>
+          <option value="soccer_denmark_superliga">Superliga (Denmark)</option>
+          <option value="soccer_sweden_allsvenskan">Allsvenskan (Sweden)</option>
+          <option value="soccer_sweden_superettan">Superettan (Sweden)</option>
+          <option value="soccer_norway_eliteserien">Eliteserien (Norway)</option>
+          <option value="soccer_austria_bundesliga">Bundesliga (Austria)</option>
+          <option value="soccer_switzerland_superleague">Super League (Switzerland)</option>
+          <option value="soccer_russia_premier_league">Premier League (Russia)</option>
+          <option value="soccer_poland_ekstraklasa">Ekstraklasa (Poland)</option>
+          <option value="soccer_finland_veikkausliiga">Veikkausliiga (Finland)</option>
+          <option value="soccer_league_of_ireland">League of Ireland</option>
+        </optgroup>
+        <optgroup label="Soccer — Rest of World">
+          <option value="soccer_australia_aleague">A-League (Australia)</option>
+          <option value="soccer_japan_j_league">J-League (Japan)</option>
+          <option value="soccer_korea_kleague1">K League 1 (South Korea)</option>
+          <option value="soccer_china_superleague">Super League (China)</option>
+          <option value="soccer_saudi_arabia_pro_league">Saudi Pro League</option>
+          <option value="soccer_africa_cup_of_nations">Africa Cup of Nations</option>
+        </optgroup>
+        <optgroup label="Tennis — ATP">
+          <option value="tennis_atp_aus_open_singles">Australian Open (ATP)</option>
+          <option value="tennis_atp_french_open">French Open (ATP)</option>
+          <option value="tennis_atp_wimbledon">Wimbledon (ATP)</option>
+          <option value="tennis_atp_us_open">US Open (ATP)</option>
+          <option value="tennis_atp_miami_open">Miami Open (ATP)</option>
+          <option value="tennis_atp_indian_wells">Indian Wells (ATP)</option>
+          <option value="tennis_atp_madrid_open">Madrid Open (ATP)</option>
+          <option value="tennis_atp_italian_open">Italian Open (ATP)</option>
+          <option value="tennis_atp_canadian_open">Canadian Open (ATP)</option>
+          <option value="tennis_atp_cincinnati_open">Cincinnati Open (ATP)</option>
+          <option value="tennis_atp_monte_carlo_masters">Monte-Carlo Masters (ATP)</option>
+          <option value="tennis_atp_china_open">China Open (ATP)</option>
+          <option value="tennis_atp_dubai">Dubai Championships (ATP)</option>
+          <option value="tennis_atp_paris_masters">Paris Masters (ATP)</option>
+        </optgroup>
+        <optgroup label="Tennis — WTA">
+          <option value="tennis_wta_aus_open_singles">Australian Open (WTA)</option>
+          <option value="tennis_wta_french_open">French Open (WTA)</option>
+          <option value="tennis_wta_wimbledon">Wimbledon (WTA)</option>
+          <option value="tennis_wta_us_open">US Open (WTA)</option>
+          <option value="tennis_wta_miami_open">Miami Open (WTA)</option>
+          <option value="tennis_wta_indian_wells">Indian Wells (WTA)</option>
+          <option value="tennis_wta_madrid_open">Madrid Open (WTA)</option>
+          <option value="tennis_wta_canadian_open">Canadian Open (WTA)</option>
+          <option value="tennis_wta_cincinnati_open">Cincinnati Open (WTA)</option>
+          <option value="tennis_wta_china_open">China Open (WTA)</option>
+          <option value="tennis_wta_dubai">Dubai Championships (WTA)</option>
+        </optgroup>
+        <optgroup label="MMA &amp; Boxing">
+          <option value="mma_mixed_martial_arts">MMA / UFC</option>
+          <option value="boxing_boxing">Boxing</option>
+        </optgroup>
+        <optgroup label="Golf">
+          <option value="golf_masters_tournament_winner">Masters Tournament</option>
+          <option value="golf_pga_championship_winner">PGA Championship</option>
+          <option value="golf_us_open_winner">US Open (Golf)</option>
+          <option value="golf_the_open_championship_winner">The Open Championship</option>
+        </optgroup>
+        <optgroup label="Cricket">
+          <option value="cricket_ipl">IPL</option>
+          <option value="cricket_test_match">Test Matches</option>
+          <option value="cricket_international_t20">International T20</option>
+          <option value="cricket_odi">One Day Internationals</option>
+          <option value="cricket_t20_world_cup">T20 World Cup</option>
+          <option value="cricket_icc_world_cup">ICC World Cup</option>
+          <option value="cricket_big_bash">Big Bash</option>
+          <option value="cricket_psl">Pakistan Super League</option>
+          <option value="cricket_t20_blast">T20 Blast</option>
+          <option value="cricket_the_hundred">The Hundred</option>
+          <option value="cricket_caribbean_premier_league">Caribbean Premier League</option>
+        </optgroup>
+        <optgroup label="Rugby">
+          <option value="rugbyleague_nrl">NRL (Rugby League)</option>
+          <option value="rugbyunion_six_nations">Six Nations (Rugby Union)</option>
+          <option value="rugbyleague_nrl_state_of_origin">NRL State of Origin</option>
+        </optgroup>
+        <optgroup label="Other Sports">
+          <option value="aussierules_afl">AFL (Aussie Rules)</option>
+          <option value="lacrosse_pll">Premier Lacrosse League</option>
+          <option value="lacrosse_ncaa">NCAA Lacrosse</option>
+          <option value="handball_germany_bundesliga">Handball Bundesliga</option>
+        </optgroup>
+      </select>
     </div>
-
-    <div class="irow" style="flex-wrap:wrap;">
-      <div class="ifield" style="flex:1;min-width:130px;">
-        <span class="ilbl">Sport</span>
-        <div class="sport-picker-wrap" id="sport-picker-wrap">
-          <div class="sport-picker-btn" id="sport-picker-btn" onclick="toggleSportPicker()">
-            <span id="sport-picker-label">Select sports…</span>
-          </div>
-          <div class="sport-picker-dropdown" id="sport-picker-dropdown">
-
-          <div class="sp-group-hd">American Football</div>
-          <label class="sp-item"><input type="checkbox" value="americanfootball_nfl"> NFL</label>
-          <label class="sp-item"><input type="checkbox" value="americanfootball_ncaaf"> NCAAF</label>
-          <label class="sp-item"><input type="checkbox" value="americanfootball_cfl"> CFL</label>
-          <label class="sp-item"><input type="checkbox" value="americanfootball_ufl"> UFL</label>
-
-          <div class="sp-group-hd">Baseball</div>
-          <label class="sp-item"><input type="checkbox" value="baseball_mlb"> MLB</label>
-          <label class="sp-item"><input type="checkbox" value="baseball_ncaa"> NCAA Baseball</label>
-          <label class="sp-item"><input type="checkbox" value="baseball_milb"> MiLB</label>
-          <label class="sp-item"><input type="checkbox" value="baseball_kbo"> KBO</label>
-          <label class="sp-item"><input type="checkbox" value="baseball_npb"> NPB (Japan)</label>
-
-          <div class="sp-group-hd">Basketball</div>
-          <label class="sp-item"><input type="checkbox" value="basketball_nba"> NBA</label>
-          <label class="sp-item"><input type="checkbox" value="basketball_wnba"> WNBA</label>
-          <label class="sp-item"><input type="checkbox" value="basketball_ncaab"> NCAAB (Men)</label>
-          <label class="sp-item"><input type="checkbox" value="basketball_wncaab"> WNCAAB (Women)</label>
-          <label class="sp-item"><input type="checkbox" value="basketball_euroleague"> EuroLeague</label>
-          <label class="sp-item"><input type="checkbox" value="basketball_nbl"> NBL (Australia)</label>
-
-          <div class="sp-group-hd">Ice Hockey</div>
-          <label class="sp-item"><input type="checkbox" value="icehockey_nhl"> NHL</label>
-          <label class="sp-item"><input type="checkbox" value="icehockey_ahl"> AHL</label>
-          <label class="sp-item"><input type="checkbox" value="icehockey_sweden_hockey_league"> SHL (Sweden)</label>
-          <label class="sp-item"><input type="checkbox" value="icehockey_liiga"> Finnish Liiga</label>
-
-          <div class="sp-group-hd">Soccer — USA &amp; Americas</div>
-          <label class="sp-item"><input type="checkbox" value="soccer_usa_mls"> MLS</label>
-          <label class="sp-item"><input type="checkbox" value="soccer_mexico_ligamx"> Liga MX</label>
-          <label class="sp-item"><input type="checkbox" value="soccer_argentina_primera_division"> Argentina Primera</label>
-          <label class="sp-item"><input type="checkbox" value="soccer_brazil_campeonato"> Brazil Série A</label>
-          <label class="sp-item"><input type="checkbox" value="soccer_conmebol_copa_libertadores"> Copa Libertadores</label>
-          <label class="sp-item"><input type="checkbox" value="soccer_conmebol_copa_america"> Copa América</label>
-          <label class="sp-item"><input type="checkbox" value="soccer_fifa_world_cup"> FIFA World Cup</label>
-          <label class="sp-item"><input type="checkbox" value="soccer_fifa_club_world_cup"> FIFA Club World Cup</label>
-
-          <div class="sp-group-hd">Soccer — England</div>
-          <label class="sp-item"><input type="checkbox" value="soccer_epl"> EPL (Premier League)</label>
-          <label class="sp-item"><input type="checkbox" value="soccer_efl_champ"> EFL Championship</label>
-          <label class="sp-item"><input type="checkbox" value="soccer_england_league1"> EFL League 1</label>
-          <label class="sp-item"><input type="checkbox" value="soccer_england_league2"> EFL League 2</label>
-          <label class="sp-item"><input type="checkbox" value="soccer_fa_cup"> FA Cup</label>
-
-          <div class="sp-group-hd">Soccer — Europe</div>
-          <label class="sp-item"><input type="checkbox" value="soccer_uefa_champs_league"> UEFA Champions League</label>
-          <label class="sp-item"><input type="checkbox" value="soccer_uefa_europa_league"> UEFA Europa League</label>
-          <label class="sp-item"><input type="checkbox" value="soccer_uefa_europa_conference_league"> UEFA Conference League</label>
-          <label class="sp-item"><input type="checkbox" value="soccer_germany_bundesliga"> Bundesliga (Germany)</label>
-          <label class="sp-item"><input type="checkbox" value="soccer_germany_bundesliga2"> Bundesliga 2 (Germany)</label>
-          <label class="sp-item"><input type="checkbox" value="soccer_spain_la_liga"> La Liga (Spain)</label>
-          <label class="sp-item"><input type="checkbox" value="soccer_italy_serie_a"> Serie A (Italy)</label>
-          <label class="sp-item"><input type="checkbox" value="soccer_france_ligue_one"> Ligue 1 (France)</label>
-          <label class="sp-item"><input type="checkbox" value="soccer_netherlands_eredivisie"> Eredivisie (Netherlands)</label>
-          <label class="sp-item"><input type="checkbox" value="soccer_portugal_primeira_liga"> Primeira Liga (Portugal)</label>
-          <label class="sp-item"><input type="checkbox" value="soccer_turkey_super_league"> Süper Lig (Turkey)</label>
-          <label class="sp-item"><input type="checkbox" value="soccer_belgium_first_div"> First Division A (Belgium)</label>
-          <label class="sp-item"><input type="checkbox" value="soccer_spl"> Premiership (Scotland)</label>
-          <label class="sp-item"><input type="checkbox" value="soccer_denmark_superliga"> Superliga (Denmark)</label>
-          <label class="sp-item"><input type="checkbox" value="soccer_sweden_allsvenskan"> Allsvenskan (Sweden)</label>
-          <label class="sp-item"><input type="checkbox" value="soccer_norway_eliteserien"> Eliteserien (Norway)</label>
-
-          <div class="sp-group-hd">Soccer — Rest of World</div>
-          <label class="sp-item"><input type="checkbox" value="soccer_australia_aleague"> A-League (Australia)</label>
-          <label class="sp-item"><input type="checkbox" value="soccer_japan_j_league"> J-League (Japan)</label>
-          <label class="sp-item"><input type="checkbox" value="soccer_korea_kleague1"> K League 1 (Korea)</label>
-          <label class="sp-item"><input type="checkbox" value="soccer_saudi_arabia_pro_league"> Saudi Pro League</label>
-
-          <div class="sp-group-hd">Tennis — ATP</div>
-          <label class="sp-item"><input type="checkbox" value="tennis_atp_aus_open_singles"> Australian Open</label>
-          <label class="sp-item"><input type="checkbox" value="tennis_atp_french_open"> French Open</label>
-          <label class="sp-item"><input type="checkbox" value="tennis_atp_wimbledon"> Wimbledon</label>
-          <label class="sp-item"><input type="checkbox" value="tennis_atp_us_open"> US Open</label>
-          <label class="sp-item"><input type="checkbox" value="tennis_atp_miami_open"> Miami Open</label>
-          <label class="sp-item"><input type="checkbox" value="tennis_atp_indian_wells"> Indian Wells</label>
-
-          <div class="sp-group-hd">Tennis — WTA</div>
-          <label class="sp-item"><input type="checkbox" value="tennis_wta_aus_open_singles"> Australian Open</label>
-          <label class="sp-item"><input type="checkbox" value="tennis_wta_french_open"> French Open</label>
-          <label class="sp-item"><input type="checkbox" value="tennis_wta_wimbledon"> Wimbledon</label>
-          <label class="sp-item"><input type="checkbox" value="tennis_wta_us_open"> US Open</label>
-
-          <div class="sp-group-hd">MMA &amp; Boxing</div>
-          <label class="sp-item"><input type="checkbox" value="mma_mixed_martial_arts"> MMA / UFC</label>
-          <label class="sp-item"><input type="checkbox" value="boxing_boxing"> Boxing</label>
-
-          <div class="sp-group-hd">Cricket</div>
-          <label class="sp-item"><input type="checkbox" value="cricket_ipl"> IPL</label>
-          <label class="sp-item"><input type="checkbox" value="cricket_test_match"> Test Matches</label>
-          <label class="sp-item"><input type="checkbox" value="cricket_international_t20"> International T20</label>
-          <label class="sp-item"><input type="checkbox" value="cricket_icc_world_cup"> ICC World Cup</label>
-
-          <div class="sp-group-hd">Rugby &amp; Other</div>
-          <label class="sp-item"><input type="checkbox" value="rugbyleague_nrl"> NRL (Rugby League)</label>
-          <label class="sp-item"><input type="checkbox" value="rugbyunion_six_nations"> Six Nations</label>
-          <label class="sp-item"><input type="checkbox" value="aussierules_afl"> AFL (Aussie Rules)</label>
-          <label class="sp-item"><input type="checkbox" value="lacrosse_pll"> Premier Lacrosse League</label>
-
-          <div class="sp-actions">
-            <div class="sp-action-btn" onclick="selectAllSports()">Select all</div>
-            <div class="sp-action-btn" onclick="clearAllSports()">Clear all</div>
-            <div class="sp-action-btn" style="background:var(--blue);color:#fff;border-color:var(--blue);" onclick="updateSportChips();closeSportPicker();">Done</div>
-          </div>
-        </div>
-      </div>
-          <div class="sp-selected-chips" id="sport-chips"></div>
-        </div>
-      </div>
-      <div class="ifield">
-        <span class="ilbl">Status</span>
-        <select id="status-filter-pre" class="iinput" onchange="syncFilters('status')">
-          <option value="all">All events</option>
-          <option value="upcoming">Upcoming</option>
-          <option value="live">Live only</option>
-        </select>
-      </div>
-      <div class="ifield">
-        <span class="ilbl">Date</span>
-        <select id="date-preset-pre" class="iinput" onchange="syncFilters('date')">
-          <option value="all">All dates</option>
-          <option value="today">Today</option>
-          <option value="tomorrow">Tomorrow</option>
-          <option value="week">Next 7 days</option>
-          <option value="custom">Custom…</option>
-        </select>
-      </div>
-      <div id="custom-date-wrap-pre" style="display:none;align-items:center;gap:6px;flex-wrap:wrap;">
-        <span class="ilbl">From</span>
-        <input type="date" id="date-from-pre" class="iinput" onchange="syncFilters('date')">
-        <span class="ilbl">To</span>
-        <input type="date" id="date-to-pre" class="iinput" onchange="syncFilters('date')">
-      </div>
-      <div class="ifield" style="max-width:90px;">
-        <span class="ilbl">Unit ($)</span>
-        <input type="number" id="f-unit" class="iinput" value="50" min="1" max="999999" step="1" inputmode="numeric">
-      </div>
+    <div class="field">
+      <label for="f-unit">Unit ($)</label>
+      <input type="number" id="f-unit" value="50" min="1" max="999999" step="1" inputmode="numeric">
     </div>
-
-    <div class="irow" style="gap:0;flex-wrap:wrap;">
-      <div class="tgl-pill" onclick="toggleProps(event)" style="cursor:pointer;">
-        <div class="tgl-track" id="props-track" onclick="toggleProps(event)" style="cursor:pointer;"><div class="tgl-thumb" id="props-thumb"></div></div>
-        <span class="tgl-lbl-text">Player props</span>
-        <span class="tgl-note" id="props-cost-note">1 req/game</span>
-      </div>
-      <div class="tgl-sep"></div>
-      <div class="tgl-pill" onclick="toggleT2(event)" style="cursor:pointer;">
-        <div class="tgl-track" id="t2-track" onclick="toggleT2(event)" style="cursor:pointer;"><div class="tgl-thumb" id="t2-thumb"></div></div>
-        <span class="tgl-lbl-text">Tier 2 props</span>
-        <span class="tgl-note" id="t2-cost-note">1 req/game</span>
-      </div>
-    </div>
-
-    <div class="irow">
-      <button class="fetch-btn" id="fetch-btn" onclick="go()">Fetch odds</button>
-      <button class="fetch-btn" id="fetch-all-btn" onclick="goAll()" style="background:var(--green);">Fetch all in-season</button>
-    </div>
-
+    <button class="fetch-btn" id="fetch-btn" onclick="go()">Fetch odds</button>
+    <button class="fetch-btn" id="fetch-all-btn" onclick="goAll()" style="background:var(--green);margin-left:0;">Fetch all in-season</button>
   </div>
 
   <div class="usage-row">
@@ -468,46 +392,6 @@ input[type="range"] { width: 80px; accent-color: var(--blue); }
     <span class="book-chip chip-betonline">BetOnline</span>
     <span class="book-chip chip-hardrock">Hard Rock Bet</span>
     <span class="book-chip chip-pinnacle">Pinnacle (EV ref)</span>
-  </div>
-
-
-  <!-- Date / status filters -->
-  <div id="event-filter-row" style="display:flex;align-items:center;gap:10px;background:var(--bg2);border:.5px solid var(--border2);border-radius:var(--r);padding:9px 14px;margin-bottom:.75rem;flex-wrap:wrap;">
-
-    <div style="display:flex;align-items:center;gap:6px;">
-      <span style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;">Status</span>
-      <select id="status-filter" onchange="const pf=document.getElementById('status-filter-pre');if(pf)pf.value=this.value;renderAll()" style="font-size:12px;padding:5px 8px;">
-        <option value="all">All events</option>
-        <option value="upcoming">Upcoming only</option>
-        <option value="live">Live only</option>
-      </select>
-    </div>
-
-    <div style="display:flex;align-items:center;gap:6px;">
-      <span style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;">Date range</span>
-      <select id="date-preset" onchange="const pp=document.getElementById('date-preset-pre');if(pp)pp.value=this.value;applyDatePreset()" style="font-size:12px;padding:5px 8px;">
-        <option value="all">All dates</option>
-        <option value="today">Today</option>
-        <option value="tomorrow">Tomorrow</option>
-        <option value="week">Next 7 days</option>
-        <option value="custom">Custom range…</option>
-      </select>
-    </div>
-
-    <div id="custom-date-wrap" style="display:none;align-items:center;gap:6px;flex-wrap:wrap;">
-      <span style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;">From</span>
-      <input type="date" id="date-from" onchange="renderAll()" style="font-size:12px;padding:5px 8px;border-radius:var(--r);border:.5px solid var(--border2);background:var(--bg);color:var(--text);">
-      <span style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;">To</span>
-      <input type="date" id="date-to" onchange="renderAll()" style="font-size:12px;padding:5px 8px;border-radius:var(--r);border:.5px solid var(--border2);background:var(--bg);color:var(--text);">
-    </div>
-
-    <span id="event-count-note" style="font-size:11px;color:var(--text3);margin-left:auto;"></span>
-  </div>
-      </div>
-      <span style="font-size:12px;font-weight:600;color:var(--text2);">Include player props</span>
-    </label>
-    <span style="font-size:11px;color:var(--text3);">Off by default — each game fetches a separate API request. Best on a paid plan.</span>
-    <span id="props-cost-note" style="font-size:11px;color:var(--amber);font-weight:600;display:none;"></span>
   </div>
 
   <div class="filters">
@@ -530,23 +414,13 @@ input[type="range"] { width: 80px; accent-color: var(--blue); }
         <option value="h2h">Moneyline</option>
         <option value="spreads">Spreads</option>
         <option value="totals">Totals</option>
-        <option value="alternate_spreads">Alt spreads</option>
-        <option value="alternate_totals">Alt totals</option>
-        <option value="btts">Both teams score</option>
-        <option value="draw_no_bet">Draw no bet</option>
-        <option value="h2h_3_way">3-Way (incl. draw)</option>
       </select>
     </div>
     <div class="filter-group">
       <label>Sort</label>
       <select id="sort-by" onchange="renderAll()">
-        <option value="pct">Arb % (highest first)</option>
-        <option value="profit">Profit $ (highest first)</option>
-        <option value="time_asc">Date &amp; time (soonest first)</option>
-        <option value="time_desc">Date &amp; time (latest first)</option>
-        <option value="sport">Sport (A–Z)</option>
-        <option value="ev_desc">EV % (highest first)</option>
-        <option value="book">Books involved (A–Z)</option>
+        <option value="profit">Profit $</option>
+        <option value="pct">Arb %</option>
       </select>
     </div>
   </div>
@@ -570,16 +444,172 @@ input[type="range"] { width: 80px; accent-color: var(--blue); }
 
 
   <div class="sec-hd" style="margin-top:1.1rem;" id="props-hd" style="display:none;">Player prop +EV opportunities vs Pinnacle</div>
-  <div class="sec-hd" id="props-hd" style="display:none;margin-top:1.1rem;">Player prop +EV opportunities vs Pinnacle</div>
   <div id="props-out"></div>
-
-  <div class="sec-hd" id="t2-hd" style="display:none;margin-top:1.1rem;">Tier 2 prop arb &amp; EV opportunities</div>
-  <div id="t2-out"></div>
 
 </div>
 
 <div class="mob-bar">
-  <span style="font-size:12px;color:var(--text2);padding:4px 8px;" id="mob-sport-label">Select sports above</span>
+  <select id="mob-sport" onchange="document.getElementById('f-sport').value=this.value">
+        <optgroup label="American Football">
+          <option value="americanfootball_nfl">NFL</option>
+          <option value="americanfootball_nfl_preseason">NFL Preseason</option>
+          <option value="americanfootball_ncaaf">NCAAF</option>
+          <option value="americanfootball_cfl">CFL</option>
+          <option value="americanfootball_ufl">UFL</option>
+        </optgroup>
+        <optgroup label="Baseball">
+          <option value="baseball_mlb">MLB</option>
+          <option value="baseball_mlb_preseason">MLB Preseason</option>
+          <option value="baseball_ncaa">NCAA Baseball</option>
+          <option value="baseball_milb">Minor League Baseball (MiLB)</option>
+          <option value="baseball_kbo">KBO League</option>
+          <option value="baseball_npb">NPB (Japan)</option>
+        </optgroup>
+        <optgroup label="Basketball">
+          <option value="basketball_nba">NBA</option>
+          <option value="basketball_nba_preseason">NBA Preseason</option>
+          <option value="basketball_wnba">WNBA</option>
+          <option value="basketball_ncaab">NCAAB (Men)</option>
+          <option value="basketball_wncaab">WNCAAB (Women)</option>
+          <option value="basketball_euroleague">EuroLeague</option>
+          <option value="basketball_nbl">NBL (Australia)</option>
+          <option value="basketball_nba_summer_league">NBA Summer League</option>
+        </optgroup>
+        <optgroup label="Ice Hockey">
+          <option value="icehockey_nhl">NHL</option>
+          <option value="icehockey_nhl_preseason">NHL Preseason</option>
+          <option value="icehockey_ahl">AHL</option>
+          <option value="icehockey_sweden_hockey_league">SHL (Sweden)</option>
+          <option value="icehockey_sweden_allsvenskan">HockeyAllsvenskan</option>
+          <option value="icehockey_liiga">Finnish Liiga</option>
+          <option value="icehockey_mestis">Finnish Mestis</option>
+        </optgroup>
+        <optgroup label="Soccer — USA &amp; Americas">
+          <option value="soccer_usa_mls">MLS</option>
+          <option value="soccer_mexico_ligamx">Liga MX</option>
+          <option value="soccer_concacaf_leagues_cup">CONCACAF Leagues Cup</option>
+          <option value="soccer_argentina_primera_division">Argentina Primera División</option>
+          <option value="soccer_brazil_campeonato">Brazil Série A</option>
+          <option value="soccer_brazil_serie_b">Brazil Série B</option>
+          <option value="soccer_chile_campeonato">Chile Primera División</option>
+          <option value="soccer_conmebol_copa_libertadores">Copa Libertadores</option>
+          <option value="soccer_conmebol_copa_sudamericana">Copa Sudamericana</option>
+          <option value="soccer_conmebol_copa_america">Copa América</option>
+          <option value="soccer_fifa_world_cup">FIFA World Cup</option>
+          <option value="soccer_fifa_world_cup_womens">FIFA Women's World Cup</option>
+          <option value="soccer_fifa_club_world_cup">FIFA Club World Cup</option>
+        </optgroup>
+        <optgroup label="Soccer — England">
+          <option value="soccer_epl">EPL (Premier League)</option>
+          <option value="soccer_efl_champ">EFL Championship</option>
+          <option value="soccer_england_league1">EFL League 1</option>
+          <option value="soccer_england_league2">EFL League 2</option>
+          <option value="soccer_fa_cup">FA Cup</option>
+          <option value="soccer_england_efl_cup">EFL Cup</option>
+        </optgroup>
+        <optgroup label="Soccer — Europe">
+          <option value="soccer_uefa_champs_league">UEFA Champions League</option>
+          <option value="soccer_uefa_europa_league">UEFA Europa League</option>
+          <option value="soccer_uefa_europa_conference_league">UEFA Europa Conference League</option>
+          <option value="soccer_uefa_nations_league">UEFA Nations League</option>
+          <option value="soccer_germany_bundesliga">Bundesliga (Germany)</option>
+          <option value="soccer_germany_bundesliga2">Bundesliga 2 (Germany)</option>
+          <option value="soccer_germany_liga3">3. Liga (Germany)</option>
+          <option value="soccer_spain_la_liga">La Liga (Spain)</option>
+          <option value="soccer_spain_segunda_division">La Liga 2 (Spain)</option>
+          <option value="soccer_italy_serie_a">Serie A (Italy)</option>
+          <option value="soccer_italy_serie_b">Serie B (Italy)</option>
+          <option value="soccer_france_ligue_one">Ligue 1 (France)</option>
+          <option value="soccer_france_ligue_two">Ligue 2 (France)</option>
+          <option value="soccer_netherlands_eredivisie">Eredivisie (Netherlands)</option>
+          <option value="soccer_portugal_primeira_liga">Primeira Liga (Portugal)</option>
+          <option value="soccer_turkey_super_league">Süper Lig (Turkey)</option>
+          <option value="soccer_greece_super_league">Super League (Greece)</option>
+          <option value="soccer_belgium_first_div">First Division A (Belgium)</option>
+          <option value="soccer_spl">Premiership (Scotland)</option>
+          <option value="soccer_denmark_superliga">Superliga (Denmark)</option>
+          <option value="soccer_sweden_allsvenskan">Allsvenskan (Sweden)</option>
+          <option value="soccer_sweden_superettan">Superettan (Sweden)</option>
+          <option value="soccer_norway_eliteserien">Eliteserien (Norway)</option>
+          <option value="soccer_austria_bundesliga">Bundesliga (Austria)</option>
+          <option value="soccer_switzerland_superleague">Super League (Switzerland)</option>
+          <option value="soccer_russia_premier_league">Premier League (Russia)</option>
+          <option value="soccer_poland_ekstraklasa">Ekstraklasa (Poland)</option>
+          <option value="soccer_finland_veikkausliiga">Veikkausliiga (Finland)</option>
+          <option value="soccer_league_of_ireland">League of Ireland</option>
+        </optgroup>
+        <optgroup label="Soccer — Rest of World">
+          <option value="soccer_australia_aleague">A-League (Australia)</option>
+          <option value="soccer_japan_j_league">J-League (Japan)</option>
+          <option value="soccer_korea_kleague1">K League 1 (South Korea)</option>
+          <option value="soccer_china_superleague">Super League (China)</option>
+          <option value="soccer_saudi_arabia_pro_league">Saudi Pro League</option>
+          <option value="soccer_africa_cup_of_nations">Africa Cup of Nations</option>
+        </optgroup>
+        <optgroup label="Tennis — ATP">
+          <option value="tennis_atp_aus_open_singles">Australian Open (ATP)</option>
+          <option value="tennis_atp_french_open">French Open (ATP)</option>
+          <option value="tennis_atp_wimbledon">Wimbledon (ATP)</option>
+          <option value="tennis_atp_us_open">US Open (ATP)</option>
+          <option value="tennis_atp_miami_open">Miami Open (ATP)</option>
+          <option value="tennis_atp_indian_wells">Indian Wells (ATP)</option>
+          <option value="tennis_atp_madrid_open">Madrid Open (ATP)</option>
+          <option value="tennis_atp_italian_open">Italian Open (ATP)</option>
+          <option value="tennis_atp_canadian_open">Canadian Open (ATP)</option>
+          <option value="tennis_atp_cincinnati_open">Cincinnati Open (ATP)</option>
+          <option value="tennis_atp_monte_carlo_masters">Monte-Carlo Masters (ATP)</option>
+          <option value="tennis_atp_china_open">China Open (ATP)</option>
+          <option value="tennis_atp_dubai">Dubai Championships (ATP)</option>
+          <option value="tennis_atp_paris_masters">Paris Masters (ATP)</option>
+        </optgroup>
+        <optgroup label="Tennis — WTA">
+          <option value="tennis_wta_aus_open_singles">Australian Open (WTA)</option>
+          <option value="tennis_wta_french_open">French Open (WTA)</option>
+          <option value="tennis_wta_wimbledon">Wimbledon (WTA)</option>
+          <option value="tennis_wta_us_open">US Open (WTA)</option>
+          <option value="tennis_wta_miami_open">Miami Open (WTA)</option>
+          <option value="tennis_wta_indian_wells">Indian Wells (WTA)</option>
+          <option value="tennis_wta_madrid_open">Madrid Open (WTA)</option>
+          <option value="tennis_wta_canadian_open">Canadian Open (WTA)</option>
+          <option value="tennis_wta_cincinnati_open">Cincinnati Open (WTA)</option>
+          <option value="tennis_wta_china_open">China Open (WTA)</option>
+          <option value="tennis_wta_dubai">Dubai Championships (WTA)</option>
+        </optgroup>
+        <optgroup label="MMA &amp; Boxing">
+          <option value="mma_mixed_martial_arts">MMA / UFC</option>
+          <option value="boxing_boxing">Boxing</option>
+        </optgroup>
+        <optgroup label="Golf">
+          <option value="golf_masters_tournament_winner">Masters Tournament</option>
+          <option value="golf_pga_championship_winner">PGA Championship</option>
+          <option value="golf_us_open_winner">US Open (Golf)</option>
+          <option value="golf_the_open_championship_winner">The Open Championship</option>
+        </optgroup>
+        <optgroup label="Cricket">
+          <option value="cricket_ipl">IPL</option>
+          <option value="cricket_test_match">Test Matches</option>
+          <option value="cricket_international_t20">International T20</option>
+          <option value="cricket_odi">One Day Internationals</option>
+          <option value="cricket_t20_world_cup">T20 World Cup</option>
+          <option value="cricket_icc_world_cup">ICC World Cup</option>
+          <option value="cricket_big_bash">Big Bash</option>
+          <option value="cricket_psl">Pakistan Super League</option>
+          <option value="cricket_t20_blast">T20 Blast</option>
+          <option value="cricket_the_hundred">The Hundred</option>
+          <option value="cricket_caribbean_premier_league">Caribbean Premier League</option>
+        </optgroup>
+        <optgroup label="Rugby">
+          <option value="rugbyleague_nrl">NRL (Rugby League)</option>
+          <option value="rugbyunion_six_nations">Six Nations (Rugby Union)</option>
+          <option value="rugbyleague_nrl_state_of_origin">NRL State of Origin</option>
+        </optgroup>
+        <optgroup label="Other Sports">
+          <option value="aussierules_afl">AFL (Aussie Rules)</option>
+          <option value="lacrosse_pll">Premier Lacrosse League</option>
+          <option value="lacrosse_ncaa">NCAA Lacrosse</option>
+          <option value="handball_germany_bundesliga">Handball Bundesliga</option>
+        </optgroup>
+  </select>
   <button class="fetch-btn" id="mob-btn" onclick="go()">Fetch odds</button>
   <button class="fetch-btn" id="mob-all-btn" onclick="goAll()" style="background:var(--green);">All sports</button>
 </div>
@@ -670,7 +700,7 @@ async function go() {
   btns.forEach(b=>{b.textContent='Loading…';b.disabled=true;});
   data=[];
 
-  const bookList = 'fanduel,draftkings,betmgm,williamhill_us,bovada,betonlineag,hardrockbet,pinnacle';
+  const bookList = getSelectedBookmarks();
   const allEvents = [];
   for(let si=0; si<selectedSports.length; si++){
     const sport = selectedSports[si];
@@ -1899,55 +1929,69 @@ async function fetchAndRenderT2(key) {
 // ── Book chip toggle ──────────────────────────────────────────────────────
 
 // ═══ INTERACTION LAYER ═══════════════════════════════════════════════════════
-let propsEnabled = false;
-let t2Enabled    = false;
+
+
+
+
+
+
+
+
+
+
+// ═════════════════════════════════════════════════════════════════════════════
+
+// ═══ Book selector + Toggles ═════════════════════════════════════════════
 let selectedBooks = new Set(['fanduel', 'draftkings', 'betmgm', 'williamhill_us', 'bovada', 'betonlineag', 'hardrockbet', 'pinnacle']);
-
-function toggleProps(e) {
-  if(e) e.stopPropagation();
-  propsEnabled = !propsEnabled;
-  var tr=document.getElementById('props-track');
-  var th=document.getElementById('props-thumb');
-  var nt=document.getElementById('props-cost-note');
-  if(tr) tr.style.background = propsEnabled ? 'var(--green)' : 'var(--border2)';
-  if(th) th.style.left       = propsEnabled ? '18px' : '2px';
-  if(nt) nt.style.display    = propsEnabled ? 'inline' : 'none';
-}
-
-function toggleT2(e) {
-  if(e) e.stopPropagation();
-  t2Enabled = !t2Enabled;
-  var tr=document.getElementById('t2-track');
-  var th=document.getElementById('t2-thumb');
-  var nt=document.getElementById('t2-cost-note');
-  if(tr) tr.style.background = t2Enabled ? 'var(--blue)' : 'var(--border2)';
-  if(th) th.style.left       = t2Enabled ? '18px' : '2px';
-  if(nt) nt.style.display    = t2Enabled ? 'inline' : 'none';
-}
+let propsEnabled = false;
+let t2Enabled = false;
 
 function toggleBook(key) {
-  var chip = document.getElementById('bchip-'+key);
-  if(selectedBooks.has(key)) {
-    if(selectedBooks.size <= 1) return;
+  var chip = document.getElementById('bchip-' + key);
+  if (selectedBooks.has(key)) {
+    if (selectedBooks.size <= 1) return;
     selectedBooks.delete(key);
-    if(chip) chip.classList.remove('active');
+    if (chip) chip.classList.remove('active');
   } else {
     selectedBooks.add(key);
-    if(chip) chip.classList.add('active');
+    if (chip) chip.classList.add('active');
   }
 }
 
 function selectAllBooks() {
-  document.querySelectorAll('.bk-chip').forEach(function(chip) {
-    var key = chip.dataset.key;
-    if(key) { selectedBooks.add(key); chip.classList.add('active'); }
+  document.querySelectorAll('.bk-chip').forEach(function(c) {
+    var k = c.dataset.key;
+    if (k) { selectedBooks.add(k); c.classList.add('active'); }
   });
 }
 
 function getSelectedBookmarks() {
   return Array.from(selectedBooks).join(',');
 }
-// ═════════════════════════════════════════════════════════════════════════════
+
+function toggleProps(e) {
+  if (e) e.stopPropagation();
+  propsEnabled = !propsEnabled;
+  var tr = document.getElementById('props-track');
+  var th = document.getElementById('props-thumb');
+  var nt = document.getElementById('props-cost-note');
+  if (tr) tr.style.background = propsEnabled ? 'var(--green)' : 'var(--border2)';
+  if (th) th.style.left = propsEnabled ? '18px' : '2px';
+  if (nt) nt.style.display = propsEnabled ? 'inline' : 'none';
+}
+
+function toggleT2(e) {
+  if (e) e.stopPropagation();
+  t2Enabled = !t2Enabled;
+  var tr = document.getElementById('t2-track');
+  var th = document.getElementById('t2-thumb');
+  var nt = document.getElementById('t2-cost-note');
+  if (tr) tr.style.background = t2Enabled ? 'var(--blue)' : 'var(--border2)';
+  if (th) th.style.left = t2Enabled ? '18px' : '2px';
+  if (nt) nt.style.display = t2Enabled ? 'inline' : 'none';
+}
+// ═════════════════════════════════════════════════════════════════════════
+
 </script>
 </body>
 </html>
