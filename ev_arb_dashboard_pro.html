@@ -969,7 +969,7 @@ function renderAll() {
 
 $('f-unit').addEventListener('input',function(){$('s-unit').textContent='$'+(parseFloat(this.value)||50).toLocaleString();renderAll();});
 $('f-key').addEventListener('keydown',e=>{if(e.key==='Enter')go();});
-$('f-sport').addEventListener('change',function(){$('mob-sport').value=this.value;});
+
 
 async function goAll() {
   const key = $('f-key').value.trim();
