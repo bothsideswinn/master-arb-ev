@@ -947,7 +947,8 @@ function renderAll() {
               <span></span><span></span><span></span>
             </button>
             <div class="arb-menu-dropdown" id="menu-${arbId}">
-              <div class="arb-menu-item clr-green" onclick="logArbById('${arbId}')"><span class="arb-menu-icon">↗</span>Log this arb</div>
+              <div class="arb-menu-item clr-green" onclick="logArbById('${arbId}','personal')"><span class="arb-menu-icon">↗</span>Log to personal tracker</div>
+              <div class="arb-menu-item clr-green" onclick="logArbById('${arbId}','public')"><span class="arb-menu-icon">↗</span>Log to public tracker</div>
               <div class="arb-menu-item clr-blue" onclick="downloadArbCard('${arbId}')"><span class="arb-menu-icon">⬇</span>Download card</div>
               <div class="arb-menu-item clr-x" onclick="shareToX('${arbId}')"><span class="arb-menu-icon">𝕏</span>Share to X</div>
             </div>
@@ -988,7 +989,8 @@ function renderAll() {
           +'<div class="arb-menu-wrap" onclick="event.stopPropagation()">'
             +'<button class="arb-menu-btn" onclick="toggleArbMenu(\''+evId+'\',event)" title="Options"><span></span><span></span><span></span></button>'
             +'<div class="arb-menu-dropdown" id="menu-'+evId+'">'
-              +'<div class="arb-menu-item clr-green" onclick="logEVById(\''+evId+'\')" ><span class="arb-menu-icon">↗</span>Log this EV bet</div>'
+              +'<div class="arb-menu-item clr-green" onclick="logEVById(\''+evId+'\',\'personal\')" ><span class="arb-menu-icon">↗</span>Log to personal tracker</div>'
+              +'<div class="arb-menu-item clr-green" onclick="logEVById(\''+evId+'\',\'public\')" ><span class="arb-menu-icon">↗</span>Log to public tracker</div>'
               +'<div class="arb-menu-item clr-blue" onclick="downloadEVCard(\''+evId+'\')" ><span class="arb-menu-icon">⬇</span>Download card</div>'
               +'<div class="arb-menu-item clr-x" onclick="shareEVToX(\''+evId+'\')" ><span class="arb-menu-icon">𝕏</span>Share to X</div>'
             +'</div>'
@@ -1389,10 +1391,12 @@ if (spDropdown) {
 
 
 // ── Log bet to tracker ──
-function logArbById(arbId) {
+function logArbById(arbId, tracker) {
   const a = arbStore[arbId];
   if (!a) { alert('Could not find arb data. Please re-fetch odds and try again.'); return; }
-  const trackerUrl = 'https://bothsideswinn.github.io/master-arb-ev/public_tracker.html';
+  const trackerUrl = (tracker === 'personal')
+    ? 'https://bothsideswinn.github.io/arb-ev/personal_tracker.html'
+    : 'https://bothsideswinn.github.io/master-arb-ev/public_tracker.html';
   const ctDate = a.commenceTime ? new Date(a.commenceTime) : null;
   const gamedate = ctDate ? ctDate.toISOString().split('T')[0] : '';
   const gametimeonly = ctDate ? ctDate.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true}) : '';
@@ -1417,10 +1421,12 @@ function logArbById(arbId) {
 }
 
 
-function logEVById(evId) {
+function logEVById(evId, tracker) {
   const e = evStore[evId];
   if (!e) { alert('Could not find EV data. Please re-fetch and try again.'); return; }
-  const trackerUrl = 'https://bothsideswinn.github.io/master-arb-ev/public_tracker.html';
+  const trackerUrl = (tracker === 'personal')
+    ? 'https://bothsideswinn.github.io/arb-ev/personal_tracker.html'
+    : 'https://bothsideswinn.github.io/master-arb-ev/public_tracker.html';
   const ctDate2 = e.commenceTime ? new Date(e.commenceTime) : null;
   const gamedate2 = ctDate2 ? ctDate2.toISOString().split('T')[0] : '';
   const gametimeonly2 = ctDate2 ? ctDate2.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true}) : '';
@@ -1868,7 +1874,8 @@ async function fetchAndRenderT2(key, sports) {
             <div class="arb-menu-wrap" onclick="event.stopPropagation()">
               <button class="arb-menu-btn" onclick="toggleArbMenu('${arbId}',event)" title="Options"><span></span><span></span><span></span></button>
               <div class="arb-menu-dropdown" id="menu-${arbId}">
-                <div class="arb-menu-item clr-green" onclick="logArbById('${arbId}')"><span class="arb-menu-icon">↗</span>Log this arb</div>
+                <div class="arb-menu-item clr-green" onclick="logArbById('${arbId}','personal')"><span class="arb-menu-icon">↗</span>Log to personal tracker</div>
+              <div class="arb-menu-item clr-green" onclick="logArbById('${arbId}','public')"><span class="arb-menu-icon">↗</span>Log to public tracker</div>
                 <div class="arb-menu-item clr-blue" onclick="downloadArbCard('${arbId}')"><span class="arb-menu-icon">⬇</span>Download card</div>
                 <div class="arb-menu-item clr-x" onclick="shareToX('${arbId}')"><span class="arb-menu-icon">𝕏</span>Share to X</div>
               </div>
