@@ -186,6 +186,22 @@ input[type="range"] { width: 80px; accent-color: var(--blue); }
 .log-bet-btn { display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:6px 12px;border-radius:var(--r);border:1.5px solid #00E676;color:#00E676;background:rgba(0,230,118,.08);cursor:pointer;text-decoration:none;white-space:nowrap;-webkit-tap-highlight-color:transparent;font-family:inherit; }
 .log-bet-btn:active{opacity:.7;}
 
+
+.arb-menu-wrap{position:relative;flex-shrink:0;}
+.arb-menu-btn{background:none;border:.5px solid var(--border2);border-radius:var(--r);width:32px;height:32px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:0;color:var(--text2);-webkit-tap-highlight-color:transparent;}
+.arb-menu-btn:hover{background:var(--bg2);}
+.arb-menu-btn span{display:block;width:14px;height:1.5px;background:currentColor;border-radius:2px;}
+.arb-menu-dropdown{display:none;position:absolute;top:calc(100% + 4px);right:0;background:var(--bg);border:.5px solid var(--border2);border-radius:var(--r-lg);min-width:190px;z-index:300;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.25);}
+.arb-menu-dropdown.open{display:block;}
+.arb-menu-item{display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;border-bottom:.5px solid var(--border);-webkit-tap-highlight-color:transparent;}
+.arb-menu-item:last-child{border-bottom:none;}
+.arb-menu-item:hover{background:var(--bg2);}
+.arb-menu-item:active{opacity:.7;}
+.arb-menu-icon{font-size:14px;flex-shrink:0;width:20px;text-align:center;}
+.arb-menu-item.clr-green{color:var(--green);}
+.arb-menu-item.clr-blue{color:var(--blue);}
+.arb-menu-item.clr-x{color:#1DA1F2;}
+
 </style>
 </head>
 <body>
@@ -789,8 +805,20 @@ function renderAll() {
     return `<div class="arb-card">
       <div class="arb-hd">
         <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap;">
-          <div class="arb-event">${a.event}</div>
-          ${(()=>{ const t=fmtEventTime(a.commenceTime); return t?`<span class="tag tag-${t.status}" style="flex-shrink:0;">${t.status==='live'?'LIVE · ':''}${t.label}</span>`:''; })()}
+          <div>
+            <div class="arb-event">${a.event}</div>
+            ${(()=>{ const t=fmtEventTime(a.commenceTime); return t?`<span class="tag tag-${t.status}" style="flex-shrink:0;display:inline-block;margin-top:4px;">${t.status==='live'?'LIVE · ':''}${t.label}</span>`:''; })()}
+          </div>
+          <div class="arb-menu-wrap" onclick="event.stopPropagation()">
+            <button class="arb-menu-btn" onclick="toggleArbMenu('${arbId}',event)" title="Options">
+              <span></span><span></span><span></span>
+            </button>
+            <div class="arb-menu-dropdown" id="menu-${arbId}">
+              <div class="arb-menu-item clr-green" onclick="logArbById('${arbId}')"><span class="arb-menu-icon">↗</span>Log this arb</div>
+              <div class="arb-menu-item clr-blue" onclick="downloadArbCard('${arbId}')"><span class="arb-menu-icon">⬇</span>Download card</div>
+              <div class="arb-menu-item clr-x" onclick="shareToX('${arbId}')"><span class="arb-menu-icon">𝕏</span>Share to X</div>
+            </div>
+          </div>
         </div>
         <div class="arb-meta">
           <span class="tag tag-sport">${a.sport}</span>
@@ -806,11 +834,6 @@ function renderAll() {
         <div class="foot-item"><span class="foot-lbl">Combined implied</span><span class="foot-val">${ci}%</span></div>
         <div class="foot-item"><span class="foot-lbl">Guaranteed profit</span><span class="foot-val" style="color:var(--green)">$${a.profit.toFixed(2)}</span></div>
         <div class="foot-item"><span class="foot-lbl">Return on unit</span><span class="foot-val">${((a.profit/a.unit)*100).toFixed(2)}%</span></div>
-        <div style="margin-left:auto;display:flex;align-items:center;">
-          <button class="log-bet-btn" onclick="logArbById('${arbId}')">
-            ↗ Log this arb
-          </button>
-        </div>
       </div>
     </div>`;
   }).join('')
@@ -1299,6 +1322,122 @@ function logEVById(evId) {
   window.open(trackerUrl + '?' + params.toString(), '_blank');
 }
 
+
+
+var openMenuId=null;
+function toggleArbMenu(id,ev){ev.stopPropagation();var m=document.getElementById('menu-'+id);if(!m)return;if(openMenuId&&openMenuId!==id){var p=document.getElementById('menu-'+openMenuId);if(p)p.classList.remove('open');}m.classList.toggle('open');openMenuId=m.classList.contains('open')?id:null;}
+document.addEventListener('click',function(){if(openMenuId){var m=document.getElementById('menu-'+openMenuId);if(m)m.classList.remove('open');openMenuId=null;}});
+
+function roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();}
+function roundRectTop(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h);ctx.lineTo(x,y+h);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();}
+function roundRectBottom(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+w,y);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y);ctx.closePath();}
+
+function downloadArbCard(arbId){
+  var a=arbStore[arbId];if(!a){alert('Could not find arb data.');return;}
+  var m=document.getElementById('menu-'+arbId);if(m)m.classList.remove('open');openMenuId=null;
+  var canvas=document.createElement('canvas');
+  var sc=2,W=600,H=350;
+  canvas.width=W*sc;canvas.height=H*sc;
+  var ctx=canvas.getContext('2d');ctx.scale(sc,sc);
+  var dark=window.matchMedia('(prefers-color-scheme: dark)').matches;
+  var bg=dark?'#111814':'#ffffff';
+  var bg2=dark?'#182319':'#f6f6f4';
+  var tp=dark?'#e8f5e9':'#1a1a18';
+  var tm=dark?'#5A7A60':'#888780';
+  var gr='#2d9e5f';
+  var bl='#185FA5';
+  var bord=dark?'rgba(255,255,255,0.1)':'rgba(0,0,0,0.1)';
+  // Background
+  ctx.fillStyle=bg;roundRect(ctx,0,0,W,H,14);ctx.fill();
+  // Header band
+  ctx.fillStyle=bg2;roundRectTop(ctx,0,0,W,60,14);ctx.fill();
+  // Event
+  ctx.fillStyle=tp;ctx.font='bold 17px -apple-system,sans-serif';
+  var ev=a.event||'';
+  if(ctx.measureText(ev).width>W-140)ev=ev.slice(0,Math.floor(ev.length*(W-140)/ctx.measureText(ev).width)-3)+'...';
+  ctx.fillText(ev,20,26);
+  // Time tag
+  var ct=a.commenceTime?new Date(a.commenceTime):null;
+  var ts=ct?ct.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})+' · '+ct.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true}):'';
+  if(ts){
+    ctx.font='bold 11px -apple-system,sans-serif';
+    var tw=ctx.measureText(ts).width;
+    ctx.fillStyle=dark?'#0C447C':'#E6F1FB';roundRect(ctx,20,34,tw+14,18,9);ctx.fill();
+    ctx.fillStyle=dark?'#B5D4F4':'#0C447C';ctx.fillText(ts,27,47);
+  }
+  // Tags
+  var tagX=20,tagY=ct?60:36;
+  [[a.sport,'#E6F1FB','#0C447C'],['Arb '+a.pct.toFixed(2)+'%','#E6F1FB','#185FA5'],['+$'+a.profit.toFixed(2)+' guaranteed','#EAF3DE','#2d6a0f']].forEach(function(t){
+    if(!t[0])return;
+    ctx.font='bold 10px -apple-system,sans-serif';
+    var w=ctx.measureText(t[0]).width;
+    ctx.fillStyle=t[1];roundRect(ctx,tagX,tagY,w+12,18,9);ctx.fill();
+    ctx.fillStyle=t[2];ctx.fillText(t[0],tagX+6,tagY+13);
+    tagX+=w+18;
+  });
+  // Divider
+  var dy=tagY+26;
+  ctx.strokeStyle=bord;ctx.lineWidth=0.5;
+  ctx.beginPath();ctx.moveTo(0,dy);ctx.lineTo(W,dy);ctx.stroke();
+  // Legs
+  [a.leg1,a.leg2].forEach(function(leg,i){
+    if(!leg)return;
+    var ly=dy+10+i*115;
+    ctx.fillStyle=tm;ctx.font='bold 9px -apple-system,sans-serif';
+    ctx.fillText((leg.book||leg.bk||'').toUpperCase(),20,ly+13);
+    ctx.fillStyle=tp;ctx.font='bold 14px -apple-system,sans-serif';
+    ctx.fillText(leg.name||'',20,ly+30);
+    [['ODDS',(leg.odds>=0?'+':'')+leg.odds,leg.odds>=0?gr:tp],['STAKE','$'+(leg.stake||0).toFixed(2),tp],['IMPLIED',(1/leg.dec*100).toFixed(1)+'%',tm]].forEach(function(col,ci){
+      var cx=20+ci*150;
+      ctx.fillStyle=tm;ctx.font='9px -apple-system,sans-serif';ctx.fillText(col[0],cx,ly+50);
+      ctx.fillStyle=col[2];ctx.font='bold 15px -apple-system,sans-serif';ctx.fillText(col[1],cx,ly+68);
+    });
+    if(i===0){ctx.strokeStyle=bord;ctx.lineWidth=0.5;ctx.beginPath();ctx.moveTo(20,ly+82);ctx.lineTo(W-20,ly+82);ctx.stroke();}
+  });
+  // Footer
+  var fy=H-40;
+  ctx.fillStyle=bg2;roundRectBottom(ctx,0,fy,W,40,14);ctx.fill();
+  ctx.strokeStyle=bord;ctx.lineWidth=0.5;ctx.beginPath();ctx.moveTo(0,fy);ctx.lineTo(W,fy);ctx.stroke();
+  var total=((a.leg1?a.leg1.stake:0)+(a.leg2?a.leg2.stake:0)).toFixed(2);
+  var ci=((1/(a.leg1?a.leg1.dec:1)+1/(a.leg2?a.leg2.dec:1))*100).toFixed(1);
+  var ret=((a.profit/a.unit)*100).toFixed(2);
+  [['TOTAL STAKED','$'+total,tp],['COMBINED IMPLIED',ci+'%',tp],['GUARANTEED PROFIT','+$'+a.profit.toFixed(2),gr],['RETURN ON UNIT',ret+'%',tp]].forEach(function(f,i){
+    var fx=20+i*145;
+    ctx.fillStyle=tm;ctx.font='8px -apple-system,sans-serif';ctx.fillText(f[0],fx,fy+13);
+    ctx.fillStyle=f[2];ctx.font='bold 13px -apple-system,sans-serif';ctx.fillText(f[1],fx,fy+29);
+  });
+  ctx.fillStyle=tm;ctx.font='9px -apple-system,sans-serif';ctx.fillText('@BothSidesWinn',W-115,fy+29);
+  var link=document.createElement('a');
+  link.download='arb_'+Date.now()+'.png';
+  link.href=canvas.toDataURL('image/png');
+  link.click();
+}
+
+function shareToX(arbId){
+  var a=arbStore[arbId];if(!a){alert('Could not find arb data.');return;}
+  var m=document.getElementById('menu-'+arbId);if(m)m.classList.remove('open');openMenuId=null;
+  var ct=a.commenceTime?new Date(a.commenceTime):null;
+  var ts=ct?ct.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})+' · '+ct.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true}):'';
+  var l1=a.leg1||{},l2=a.leg2||{};
+  var o1=(l1.odds>=0?'+':'')+l1.odds,o2=(l2.odds>=0?'+':'')+l2.odds;
+  var lines=[
+    '\u{1F6A8} ARB ALERT \u2014 '+a.sport,
+    '',
+    a.event,
+    ts?'\uD83D\uDD50 '+ts:'',
+    '',
+    '\u2705 '+(l1.name||'')+': '+(l1.book||l1.bk||'')+' '+o1+' \u2192 Stake $'+(l1.stake||0).toFixed(2),
+    '\u2705 '+(l2.name||'')+': '+(l2.book||l2.bk||'')+' '+o2+' \u2192 Stake $'+(l2.stake||0).toFixed(2),
+    '',
+    '\uD83D\uDCB0 Guaranteed Profit: +$'+a.profit.toFixed(2),
+    '\uD83D\uDCC8 ROI: '+((a.profit/a.unit)*100).toFixed(2)+'% on $'+a.unit,
+    '',
+    'Both sides win. No matter what.',
+    '',
+    '#SportsBetting #ArbBetting'
+  ].filter(function(l){return l!==null;}).join('\n');
+  window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(lines),'_blank');
+}
 
 </script>
 </body>
