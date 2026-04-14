@@ -937,7 +937,7 @@ function renderAll() {
   }).join('')
   : `<div class="arb-card"><div class="empty">No arb opportunities above ${at.toFixed(1)}% — lower the threshold or switch sports</div></div>`;
 
-  $('ev-out').innerHTML = fe.length ? fe.map(e=>{
+  $('ev-out').innerHTML = fe.length ? fe.map((e,evIdx)=>{ const evId='ev_'+evIdx; evStore[evId]=e;
     const dec=aDec(e.odds), win=((dec-1)*e.unit).toFixed(2);
     return `<div class="ev-card"><div class="ev-row">
       <div class="ev-row-top">
