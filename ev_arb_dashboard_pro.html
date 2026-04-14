@@ -214,28 +214,33 @@ input[type="range"] { width: 80px; accent-color: var(--blue); }
 .book-sel-divider { width:.5px; height:18px; background:var(--border2); margin:0 2px; }
 
 
-/* ── Input panel ── */
-.input-panel { display:flex; flex-direction:column; gap:.5rem; margin-bottom:.5rem; }
-.input-row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
-.input-group { display:flex; flex-direction:column; gap:4px; }
-.inp-label { font-size:11px; font-weight:600; color:var(--text3); text-transform:uppercase; letter-spacing:.05em; white-space:nowrap; }
-.input-group input, .input-group select { font-size:13px; padding:6px 10px; border-radius:var(--r); border:.5px solid var(--border2); background:var(--bg); color:var(--text); }
 
-/* Book chips */
-.bk-row { flex-wrap:wrap; gap:6px; }
-.bk-chip { display:inline-flex; align-items:center; gap:5px; padding:5px 11px; border-radius:20px; font-size:12px; font-weight:700; cursor:pointer; border:1.5px solid var(--bk); background:transparent; color:var(--bk); opacity:.35; transition:opacity .15s; font-family:inherit; -webkit-tap-highlight-color:transparent; }
-.bk-chip.active { opacity:1; background:color-mix(in srgb, var(--bk) 12%, transparent); }
-.bk-dot { width:6px; height:6px; border-radius:50%; background:var(--bk); flex-shrink:0; }
-.bk-sel-all { font-size:11px; font-weight:600; padding:5px 12px; border-radius:20px; border:.5px solid var(--border2); background:transparent; color:var(--text2); cursor:pointer; font-family:inherit; }
-.bk-sel-all:hover { border-color:var(--green); color:var(--green); }
 
+
+
+
+
+
+/* ── Input panel ──────────────────────────────────────── */
+.ipanel { display:flex; flex-direction:column; gap:6px; margin-bottom:6px; }
+.irow { display:flex; align-items:center; gap:8px; }
+.ifield { display:flex; flex-direction:column; gap:3px; }
+.ilbl { font-size:10px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:.07em; }
+.iinput { font-size:13px; padding:5px 9px; border-radius:var(--r); border:.5px solid var(--border2); background:var(--bg); color:var(--text); width:100%; box-sizing:border-box; }
+/* Book row */
+.bk-row { flex-wrap:wrap; gap:5px; }
+.bk-chip { display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:16px; font-size:11px; font-weight:700; cursor:pointer; border:1.5px solid var(--bk,#888); background:transparent; color:var(--bk,#888); opacity:.3; transition:opacity .15s,background .15s; font-family:inherit; -webkit-tap-highlight-color:transparent; }
+.bk-chip.active { opacity:1; background:color-mix(in srgb,var(--bk) 13%,transparent); }
+.bk-dot { width:5px; height:5px; border-radius:50%; background:var(--bk,#888); flex-shrink:0; }
+.bk-all { font-size:10px; font-weight:700; padding:4px 10px; border-radius:16px; border:.5px solid var(--border2); background:transparent; color:var(--text2); cursor:pointer; font-family:inherit; letter-spacing:.03em; }
+.bk-all:hover { border-color:var(--green); color:var(--green); }
 /* Toggles */
-.toggle-group { display:flex; align-items:center; gap:8px; padding:8px 12px; background:var(--bg2); border:.5px solid var(--border2); border-radius:var(--r); }
-.tgl-label { display:flex; align-items:center; gap:8px; cursor:pointer; font-size:12px; font-weight:600; color:var(--text2); white-space:nowrap; }
-.tgl-track { position:relative; width:38px; height:22px; background:var(--border2); border-radius:11px; transition:background .2s; flex-shrink:0; }
-.tgl-thumb { position:absolute; top:3px; left:3px; width:16px; height:16px; background:#fff; border-radius:50%; transition:left .2s; box-shadow:0 1px 3px rgba(0,0,0,.3); }
-.tgl-note { font-size:11px; color:var(--amber); font-weight:600; display:none; }
-.tgl-divider { width:.5px; height:30px; background:var(--border2); margin:0 4px; }
+.tgl-pill { display:flex; align-items:center; gap:7px; padding:7px 12px; background:var(--bg2); border:.5px solid var(--border2); border-radius:var(--r); }
+.tgl-sep { width:.5px; height:26px; background:var(--border2); }
+.tgl-lbl { display:flex; align-items:center; gap:7px; cursor:pointer; font-size:12px; font-weight:600; color:var(--text2); white-space:nowrap; }
+.tgl-track { position:relative; width:36px; height:20px; background:var(--border2); border-radius:10px; transition:background .2s; flex-shrink:0; }
+.tgl-thumb { position:absolute; top:2px; left:2px; width:16px; height:16px; background:#fff; border-radius:50%; transition:left .2s; box-shadow:0 1px 3px rgba(0,0,0,.25); }
+.tgl-note { font-size:10px; color:var(--amber); font-weight:700; display:none; }
 
 </style>
 </head>
@@ -263,34 +268,23 @@ input[type="range"] { width: 80px; accent-color: var(--blue); }
   </div>
 
   <!-- Input panel -->
-  <div class="input-panel">
+  <div class="ipanel">
 
-    <!-- Row 1: API Key -->
-    <div class="input-row">
-      <div class="input-group" style="flex:1;">
-        <label class="inp-label" for="f-key">API key</label>
-        <input type="password" id="f-key" placeholder="paste key from the-odds-api.com" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
+    <div class="irow">
+      <div class="ifield" style="flex:1;">
+        <span class="ilbl">API key</span>
+        <input type="password" id="f-key" class="iinput" placeholder="paste key from the-odds-api.com" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
       </div>
     </div>
 
-    <!-- Row 2: Books -->
-    <div class="input-row bk-row">
-      <button class="bk-chip active" id="bchip-fanduel" data-key="fanduel" style="--bk:#1890ff;" onclick="toggleBook('fanduel')"><span class="bk-dot"></span>FanDuel</button>
-      <button class="bk-chip active" id="bchip-draftkings" data-key="draftkings" style="--bk:#53c028;" onclick="toggleBook('draftkings')"><span class="bk-dot"></span>DraftKings</button>
-      <button class="bk-chip active" id="bchip-betmgm" data-key="betmgm" style="--bk:#b8960c;" onclick="toggleBook('betmgm')"><span class="bk-dot"></span>BetMGM</button>
-      <button class="bk-chip active" id="bchip-williamhill_us" data-key="williamhill_us" style="--bk:#0c7c3e;" onclick="toggleBook('williamhill_us')"><span class="bk-dot"></span>Caesars</button>
-      <button class="bk-chip active" id="bchip-bovada" data-key="bovada" style="--bk:#c8960a;" onclick="toggleBook('bovada')"><span class="bk-dot"></span>Bovada</button>
-      <button class="bk-chip active" id="bchip-betonlineag" data-key="betonlineag" style="--bk:#0a6b9e;" onclick="toggleBook('betonlineag')"><span class="bk-dot"></span>BetOnline</button>
-      <button class="bk-chip active" id="bchip-hardrockbet" data-key="hardrockbet" style="--bk:#b0174e;" onclick="toggleBook('hardrockbet')"><span class="bk-dot"></span>Hard Rock</button>
-      <button class="bk-chip active" id="bchip-pinnacle" data-key="pinnacle" style="--bk:#8b5cf6;" onclick="toggleBook('pinnacle')"><span class="bk-dot"></span>Pinnacle (EV ref)</button>
-      
-      <button class="bk-sel-all" onclick="selectAllBooks()">Select all</button>
+    <div class="irow bk-row">
+      <button class="bk-chip active" id="bchip-fanduel" data-key="fanduel" style="--bk:#1890ff;" onclick="toggleBook('fanduel')"><span class="bk-dot"></span>FanDuel</button> <button class="bk-chip active" id="bchip-draftkings" data-key="draftkings" style="--bk:#53c028;" onclick="toggleBook('draftkings')"><span class="bk-dot"></span>DraftKings</button> <button class="bk-chip active" id="bchip-betmgm" data-key="betmgm" style="--bk:#b8960c;" onclick="toggleBook('betmgm')"><span class="bk-dot"></span>BetMGM</button> <button class="bk-chip active" id="bchip-williamhill_us" data-key="williamhill_us" style="--bk:#0c7c3e;" onclick="toggleBook('williamhill_us')"><span class="bk-dot"></span>Caesars</button> <button class="bk-chip active" id="bchip-bovada" data-key="bovada" style="--bk:#c8960a;" onclick="toggleBook('bovada')"><span class="bk-dot"></span>Bovada</button> <button class="bk-chip active" id="bchip-betonlineag" data-key="betonlineag" style="--bk:#0a6b9e;" onclick="toggleBook('betonlineag')"><span class="bk-dot"></span>BetOnline</button> <button class="bk-chip active" id="bchip-hardrockbet" data-key="hardrockbet" style="--bk:#b0174e;" onclick="toggleBook('hardrockbet')"><span class="bk-dot"></span>Hard Rock</button> <button class="bk-chip active" id="bchip-pinnacle" data-key="pinnacle" style="--bk:#8b5cf6;" onclick="toggleBook('pinnacle')"><span class="bk-dot"></span>Pinnacle (EV ref)</button>
+      <button class="bk-all" onclick="selectAllBooks()">All</button>
     </div>
 
-    <!-- Row 3: Sport · Status · Date · Unit -->
-    <div class="input-row" style="flex-wrap:wrap;gap:8px;align-items:flex-end;">
-      <div class="input-group" style="min-width:150px;flex:1;">
-        <label class="inp-label">Sport</label>
+    <div class="irow" style="flex-wrap:wrap;">
+      <div class="ifield" style="flex:1;min-width:130px;">
+        <span class="ilbl">Sport</span>
         <div class="sport-picker-wrap" id="sport-picker-wrap">
           <div class="sport-picker-btn" id="sport-picker-btn" onclick="toggleSportPicker()">
             <span id="sport-picker-label">Select sports…</span>
@@ -405,17 +399,17 @@ input[type="range"] { width: 80px; accent-color: var(--blue); }
           <div class="sp-selected-chips" id="sport-chips"></div>
         </div>
       </div>
-      <div class="input-group">
-        <label class="inp-label">Status</label>
-        <select id="status-filter-pre" onchange="syncFilters('status')">
+      <div class="ifield">
+        <span class="ilbl">Status</span>
+        <select id="status-filter-pre" class="iinput" onchange="syncFilters('status')">
           <option value="all">All events</option>
           <option value="upcoming">Upcoming</option>
           <option value="live">Live only</option>
         </select>
       </div>
-      <div class="input-group">
-        <label class="inp-label">Date</label>
-        <select id="date-preset-pre" onchange="syncFilters('date')">
+      <div class="ifield">
+        <span class="ilbl">Date</span>
+        <select id="date-preset-pre" class="iinput" onchange="syncFilters('date')">
           <option value="all">All dates</option>
           <option value="today">Today</option>
           <option value="tomorrow">Tomorrow</option>
@@ -424,29 +418,28 @@ input[type="range"] { width: 80px; accent-color: var(--blue); }
         </select>
       </div>
       <div id="custom-date-wrap-pre" style="display:none;align-items:center;gap:6px;flex-wrap:wrap;">
-        <label class="inp-label">From</label>
-        <input type="date" id="date-from-pre" onchange="syncFilters('date')">
-        <label class="inp-label">To</label>
-        <input type="date" id="date-to-pre" onchange="syncFilters('date')">
+        <span class="ilbl">From</span>
+        <input type="date" id="date-from-pre" class="iinput" onchange="syncFilters('date')">
+        <span class="ilbl">To</span>
+        <input type="date" id="date-to-pre" class="iinput" onchange="syncFilters('date')">
       </div>
-      <div class="input-group" style="max-width:100px;">
-        <label class="inp-label" for="f-unit">Unit ($)</label>
-        <input type="number" id="f-unit" value="50" min="1" max="999999" step="1" inputmode="numeric">
+      <div class="ifield" style="max-width:90px;">
+        <span class="ilbl">Unit ($)</span>
+        <input type="number" id="f-unit" class="iinput" value="50" min="1" max="999999" step="1" inputmode="numeric">
       </div>
     </div>
 
-    <!-- Row 4: Toggles -->
-    <div class="input-row" style="gap:0;">
-      <div class="toggle-group">
-        <label class="tgl-label">
+    <div class="irow" style="gap:0;flex-wrap:wrap;">
+      <div class="tgl-pill">
+        <label class="tgl-lbl">
           <div class="tgl-track" id="props-track"><div class="tgl-thumb" id="props-thumb"></div></div>
           Player props
         </label>
         <span class="tgl-note" id="props-cost-note">1 req/game</span>
       </div>
-      <div class="tgl-divider"></div>
-      <div class="toggle-group">
-        <label class="tgl-label">
+      <div class="tgl-sep"></div>
+      <div class="tgl-pill">
+        <label class="tgl-lbl">
           <div class="tgl-track" id="t2-track"><div class="tgl-thumb" id="t2-thumb"></div></div>
           Tier 2 props
         </label>
@@ -454,8 +447,7 @@ input[type="range"] { width: 80px; accent-color: var(--blue); }
       </div>
     </div>
 
-    <!-- Row 5: Fetch buttons -->
-    <div class="input-row" style="gap:8px;">
+    <div class="irow">
       <button class="fetch-btn" id="fetch-btn" onclick="go()">Fetch odds</button>
       <button class="fetch-btn" id="fetch-all-btn" onclick="goAll()" style="background:var(--green);">Fetch all in-season</button>
     </div>
