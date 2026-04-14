@@ -983,7 +983,17 @@ function renderAll() {
     return '<div class="ev-card"><div class="ev-row">'
       +'<div class="ev-row-top">'
         +'<div><div class="ev-event">'+e.event+'</div>'+timeTag+'</div>'
-        +'<div style="display:flex;gap:5px;flex-wrap:wrap;flex-shrink:0;">'+bookBtn(e.bk)+'</div>'
+        +'<div style="display:flex;gap:5px;align-items:center;flex-shrink:0;">'
+          +bookBtn(e.bk)
+          +'<div class="arb-menu-wrap" onclick="event.stopPropagation()">'
+            +'<button class="arb-menu-btn" onclick="toggleArbMenu(\''+evId+'\',event)" title="Options"><span></span><span></span><span></span></button>'
+            +'<div class="arb-menu-dropdown" id="menu-'+evId+'">'
+              +'<div class="arb-menu-item clr-green" onclick="logEVById(\''+evId+'\')" ><span class="arb-menu-icon">↗</span>Log this EV bet</div>'
+              +'<div class="arb-menu-item clr-blue" onclick="downloadEVCard(\''+evId+'\')" ><span class="arb-menu-icon">⬇</span>Download card</div>'
+              +'<div class="arb-menu-item clr-x" onclick="shareEVToX(\''+evId+'\')" ><span class="arb-menu-icon">𝕏</span>Share to X</div>'
+            +'</div>'
+          +'</div>'
+        +'</div>'
       +'</div>'
       +'<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;">'
         +'<span class="tag tag-sport">'+(e.sport||'')+'</span>'
@@ -1953,6 +1963,114 @@ async function fetchAndRenderT2(key, sports) {
   }
   })();
 
+
+// ── EV card actions ────────────────────────────────────────────────────────
+function downloadEVCard(evId) {
+  var e = evStore[evId];
+  if (!e) { alert('Could not find EV data.'); return; }
+  var m = document.getElementById('menu-' + evId);
+  if (m) m.classList.remove('open');
+  openMenuId = null;
+
+  var canvas = document.createElement('canvas');
+  var sc=2, W=600, H=280;
+  canvas.width=W*sc; canvas.height=H*sc;
+  var ctx = canvas.getContext('2d'); ctx.scale(sc, sc);
+  var dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  var bg   = dark ? '#111814' : '#ffffff';
+  var bg2  = dark ? '#182319' : '#f6f6f4';
+  var tp   = dark ? '#e8f5e9' : '#1a1a18';
+  var tm   = dark ? '#5A7A60' : '#888780';
+  var gr   = '#2d9e5f';
+  var bl   = '#185FA5';
+  var bord = dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
+
+  function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();}
+  function rrTop(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h);ctx.lineTo(x,y+h);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();}
+  function rrBot(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+w,y);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y);ctx.closePath();}
+
+  // Background
+  ctx.fillStyle=bg; rr(0,0,W,H,14); ctx.fill();
+  // Header band
+  ctx.fillStyle=bg2; rrTop(0,0,W,56,14); ctx.fill();
+  // Event name
+  ctx.fillStyle=tp; ctx.font='bold 16px -apple-system,sans-serif';
+  var ev=e.event||'';
+  if(ctx.measureText(ev).width>W-40) ev=ev.slice(0,Math.floor(ev.length*(W-40)/ctx.measureText(ev).width)-3)+'...';
+  ctx.fillText(ev,20,24);
+  // Time
+  var ct=e.commenceTime?new Date(e.commenceTime):null;
+  var ts=ct?ct.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})+' · '+ct.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true}):'';
+  if(ts){ctx.font='bold 11px -apple-system,sans-serif';ctx.fillStyle=dark?'#B5D4F4':'#0C447C';ctx.fillText(ts,20,42);}
+  // Tags
+  var tagX=20,tagY=64;
+  [[e.sport||'','#E6F1FB','#0C447C'],[e.mkt||'','#E6F1FB','#185FA5'],['+'+((e.ev||0).toFixed(1))+'% EV','#EAF3DE','#2d6a0f']].forEach(function(t){
+    if(!t[0])return;
+    ctx.font='bold 10px -apple-system,sans-serif';
+    var w=ctx.measureText(t[0]).width;
+    ctx.fillStyle=t[1]; rr(tagX,tagY,w+12,18,9); ctx.fill();
+    ctx.fillStyle=t[2]; ctx.fillText(t[0],tagX+6,tagY+13);
+    tagX+=w+18;
+  });
+  // Divider
+  ctx.strokeStyle=bord; ctx.lineWidth=0.5;
+  ctx.beginPath(); ctx.moveTo(0,90); ctx.lineTo(W,90); ctx.stroke();
+  // Stats row
+  var unit=e.unit||50;
+  var dec2=e.odds>0?e.odds/100+1:100/Math.abs(e.odds)+1;
+  var win2=((dec2-1)*unit).toFixed(2);
+  [['BET',e.bet||'',tp],['BOOK',(BOOK_NAMES&&BOOK_NAMES[e.bk])||e.bk||'',tp],['BOOK ODDS',(e.odds>=0?'+':'')+e.odds,gr],['PINNACLE',(e.pinnOdds>=0?'+':'')+e.pinnOdds,tm],['EV EDGE','+'+((e.ev||0).toFixed(1))+'%',gr],['WIN $'+unit,'$'+win2,bl]].forEach(function(f,i){
+    var fx=20+i*95;
+    ctx.fillStyle=tm; ctx.font='8px -apple-system,sans-serif'; ctx.fillText(f[0],fx,110);
+    ctx.fillStyle=f[2]; ctx.font='bold 13px -apple-system,sans-serif'; ctx.fillText(f[1],fx,128);
+  });
+  // Footer
+  var fy=H-44;
+  ctx.fillStyle=bg2; rrBot(0,fy,W,44,14); ctx.fill();
+  ctx.strokeStyle=bord; ctx.lineWidth=0.5; ctx.beginPath(); ctx.moveTo(0,fy); ctx.lineTo(W,fy); ctx.stroke();
+  ctx.fillStyle=tm; ctx.font='10px -apple-system,sans-serif';
+  var wm='@BothSidesWinn · +EV betting. Every edge counts.';
+  var wmW=ctx.measureText(wm).width;
+  ctx.fillText(wm,(W-wmW)/2,fy+27);
+
+  var link=document.createElement('a');
+  link.download='ev_'+Date.now()+'.png';
+  link.href=canvas.toDataURL('image/png');
+  link.click();
+}
+
+function shareEVToX(evId) {
+  var e = evStore[evId];
+  if (!e) { alert('Could not find EV data.'); return; }
+  var m = document.getElementById('menu-' + evId);
+  if (m) m.classList.remove('open');
+  openMenuId = null;
+  downloadEVCard(evId);
+  var ct=e.commenceTime?new Date(e.commenceTime):null;
+  var ts=ct?ct.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})+' · '+ct.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true}):'';
+  var unit=e.unit||50;
+  var dec2=e.odds>0?e.odds/100+1:100/Math.abs(e.odds)+1;
+  var win2=((dec2-1)*unit).toFixed(2);
+  var bkName=(typeof BOOK_NAMES!=='undefined'&&BOOK_NAMES[e.bk])||e.bk||'';
+  var lines=[
+    '📊 +EV BET ALERT — '+(e.sport||''),
+    '',
+    e.event||'',
+    ts?'🕐 '+ts:'',
+    '',
+    '✅ Bet: '+(e.bet||''),
+    '📖 Book: '+bkName+' '+(e.odds>=0?'+':'')+e.odds,
+    '📌 Pinnacle (fair): '+(e.pinnOdds>=0?'+':'')+e.pinnOdds,
+    '📈 EV Edge: +'+(e.ev||0).toFixed(1)+'%',
+    '💰 Win on $'+unit+': $'+win2,
+    '',
+    'Edge is edge. Bet accordingly.',
+    '',
+    '#SportsBetting #EVBetting #BothSidesWinn'
+  ].filter(function(l){return l!==null;}).join('\n');
+  setTimeout(function(){ window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(lines),'_blank'); }, 800);
+}
+// ──────────────────────────────────────────────────────────────────────────
 // ═══ INTERACTION LAYER ═══════════════════════════════════════════════════
 const arbStore = {};
 const evStore  = {};
