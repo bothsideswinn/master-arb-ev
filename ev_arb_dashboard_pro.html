@@ -433,13 +433,13 @@ input[type="range"] { width: 80px; accent-color: var(--blue); }
 
     <div class="irow" style="gap:0;flex-wrap:wrap;">
       <div class="tgl-pill" onclick="toggleProps(event)" style="cursor:pointer;">
-        <div class="tgl-track" id="props-track"><div class="tgl-thumb" id="props-thumb"></div></div>
+        <div class="tgl-track" id="props-track" onclick="toggleProps(event)" style="cursor:pointer;"><div class="tgl-thumb" id="props-thumb"></div></div>
         <span class="tgl-lbl-text">Player props</span>
         <span class="tgl-note" id="props-cost-note">1 req/game</span>
       </div>
       <div class="tgl-sep"></div>
       <div class="tgl-pill" onclick="toggleT2(event)" style="cursor:pointer;">
-        <div class="tgl-track" id="t2-track"><div class="tgl-thumb" id="t2-thumb"></div></div>
+        <div class="tgl-track" id="t2-track" onclick="toggleT2(event)" style="cursor:pointer;"><div class="tgl-thumb" id="t2-thumb"></div></div>
         <span class="tgl-lbl-text">Tier 2 props</span>
         <span class="tgl-note" id="t2-cost-note">1 req/game</span>
       </div>
