@@ -432,13 +432,13 @@ input[type="range"] { width: 80px; accent-color: var(--blue); }
     </div>
 
     <div class="irow" style="gap:0;flex-wrap:wrap;">
-      <div class="tgl-pill" onclick="document.getElementById('props-track').click()">
+      <div class="tgl-pill" style="cursor:pointer;" onclick="toggleProps(event)">
         <div class="tgl-track" id="props-track"><div class="tgl-thumb" id="props-thumb"></div></div>
         <span class="tgl-lbl-text">Player props</span>
         <span class="tgl-note" id="props-cost-note">1 req/game</span>
       </div>
       <div class="tgl-sep"></div>
-      <div class="tgl-pill" onclick="document.getElementById('t2-track').click()">
+      <div class="tgl-pill" style="cursor:pointer;" onclick="toggleT2(event)">
         <div class="tgl-track" id="t2-track"><div class="tgl-thumb" id="t2-thumb"></div></div>
         <span class="tgl-lbl-text">Tier 2 props</span>
         <span class="tgl-note" id="t2-cost-note">1 req/game</span>
@@ -1043,29 +1043,6 @@ async function goAll() {
 }
 
 
-// ── Props toggle ──
-let propsEnabled = false;
-(function initPropsToggle() {
-  const track = document.getElementById('props-track');
-  const thumb = document.getElementById('props-thumb');
-  if (!track) return;
-  track.addEventListener('click', () => {
-    propsEnabled = !propsEnabled;
-    track.style.background = propsEnabled ? 'var(--green)' : 'var(--border2)';
-    thumb.style.left = propsEnabled ? '19px' : '3px';
-    const note = document.getElementById('props-cost-note');
-    if (note) {
-      note.style.display = propsEnabled ? 'inline' : 'none';
-      note.textContent = 'Props ON — each game uses 1 extra API request';
-    }
-    if (document.getElementById('props-hd')) {
-      document.getElementById('props-hd').style.display = propsEnabled ? 'block' : 'none';
-    }
-    if (!propsEnabled && document.getElementById('props-out')) {
-      document.getElementById('props-out').innerHTML = '';
-    }
-  });
-})();
 
 const PROP_MARKETS = [
   'player_points','player_rebounds','player_assists','player_threes',
@@ -1690,17 +1667,6 @@ const TIER2_LABEL = {
 };
 
 // Tier 2 toggle handler
-const t2Track = document.getElementById('t2-track');
-const t2Thumb = document.getElementById('t2-thumb');
-if (t2Track) {
-  t2Track.addEventListener('click', () => {
-    t2Enabled = !t2Enabled;
-    t2Track.style.background = t2Enabled ? 'var(--blue)' : 'var(--border2)';
-    t2Thumb.style.left = t2Enabled ? '19px' : '3px';
-    const note = document.getElementById('t2-cost-note');
-    if (note) note.style.display = t2Enabled ? 'inline' : 'none';
-  });
-}
 
 // Fetch Tier 2 data for a single event
 async function fetchT2ForEvent(key, eventId, sportKey, bookmakers) {
@@ -1923,8 +1889,36 @@ async function fetchAndRenderT2(key) {
 
 
 // ── Book selector ──────────────────────────────────────────────────────────
-let selectedBooks = new Set(['fanduel', 'draftkings', 'betmgm', 'williamhill_us', 'bovada', 'betonlineag', 'hardrockbet', 'pinnacle']);
 
+
+// ── Toggle functions (called directly from HTML) ──────────────────────────
+let selectedBooks = new Set(['fanduel', 'draftkings', 'betmgm', 'williamhill_us', 'bovada', 'betonlineag', 'hardrockbet', 'pinnacle']);
+let propsEnabled = false;
+let t2Enabled = false;
+
+function toggleProps(e) {
+  if (e) e.stopPropagation();
+  propsEnabled = !propsEnabled;
+  const track = document.getElementById('props-track');
+  const thumb = document.getElementById('props-thumb');
+  const note  = document.getElementById('props-cost-note');
+  if (track) track.style.background = propsEnabled ? 'var(--green)' : 'var(--border2)';
+  if (thumb) thumb.style.left = propsEnabled ? '18px' : '2px';
+  if (note)  note.style.display = propsEnabled ? 'inline' : 'none';
+}
+
+function toggleT2(e) {
+  if (e) e.stopPropagation();
+  t2Enabled = !t2Enabled;
+  const track = document.getElementById('t2-track');
+  const thumb = document.getElementById('t2-thumb');
+  const note  = document.getElementById('t2-cost-note');
+  if (track) track.style.background = t2Enabled ? 'var(--blue)' : 'var(--border2)';
+  if (thumb) thumb.style.left = t2Enabled ? '18px' : '2px';
+  if (note)  note.style.display = t2Enabled ? 'inline' : 'none';
+}
+
+// ── Book chip toggle ──────────────────────────────────────────────────────
 function toggleBook(key) {
   if (selectedBooks.has(key)) {
     if (selectedBooks.size <= 1) return;
@@ -1939,14 +1933,13 @@ function toggleBook(key) {
 }
 
 function selectAllBooks() {
-  selectedBooks.add('fanduel'); const c_0=document.getElementById('bchip-fanduel'); if(c_0) c_0.classList.add('active');
-selectedBooks.add('draftkings'); const c_1=document.getElementById('bchip-draftkings'); if(c_1) c_1.classList.add('active');
-selectedBooks.add('betmgm'); const c_2=document.getElementById('bchip-betmgm'); if(c_2) c_2.classList.add('active');
-selectedBooks.add('williamhill_us'); const c_3=document.getElementById('bchip-williamhill_us'); if(c_3) c_3.classList.add('active');
-selectedBooks.add('bovada'); const c_4=document.getElementById('bchip-bovada'); if(c_4) c_4.classList.add('active');
-selectedBooks.add('betonlineag'); const c_5=document.getElementById('bchip-betonlineag'); if(c_5) c_5.classList.add('active');
-selectedBooks.add('hardrockbet'); const c_6=document.getElementById('bchip-hardrockbet'); if(c_6) c_6.classList.add('active');
-selectedBooks.add('pinnacle'); const c_7=document.getElementById('bchip-pinnacle'); if(c_7) c_7.classList.add('active');
+  document.querySelectorAll('.bk-chip').forEach(chip => {
+    const key = chip.dataset.key;
+    if (key) {
+      selectedBooks.add(key);
+      chip.classList.add('active');
+    }
+  });
 }
 
 function getSelectedBookmarks() {
