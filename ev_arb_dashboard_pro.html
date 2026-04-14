@@ -759,7 +759,7 @@ function buildOpps() {
             bookSides.forEach(o=>{
               const ps=(pm.outcomes||[]).find(p=>p.name===o.name);if(!ps)return;
               const dec=aDec(o.price), e=evCalc(dec,aDec(ps.price));
-              if(e>0) evs.push({event:`${event.home_team} vs ${event.away_team}`,sport:event.sport_title,
+              if(e>0) evs.push({event:`${event.home_team} vs ${event.away_team}`,sport:event.sport_title,commenceTime:event.commence_time,
                 mkt:MKT_LABEL[mkt],bet:o.name,bk,odds:o.price,pinnOdds:ps.price,ev:e,unit});
             });
           });
@@ -813,7 +813,7 @@ function buildOpps() {
             [...ov[pt],...un[pt]].forEach(s=>{
               const ps=(pm.outcomes||[]).find(o=>o.name===s.name&&String(o.point)===String(pt));if(!ps)return;
               const e=evCalc(s.dec,aDec(ps.price));
-              if(e>0) evs.push({event:`${event.home_team} vs ${event.away_team}`,sport:event.sport_title,
+              if(e>0) evs.push({event:`${event.home_team} vs ${event.away_team}`,sport:event.sport_title,commenceTime:event.commence_time,
                 mkt:`Total ${pt}`,bet:s.name+' '+pt,bk:s.bk,odds:s.odds,pinnOdds:ps.price,ev:e,unit});
             });
           }
