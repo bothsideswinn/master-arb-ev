@@ -184,12 +184,13 @@ h1{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
 <div class="tab-bar">
   <div class="tab active" id="tab-week" onclick="setView('week')">This week</div>
   <div class="tab" id="tab-alltime" onclick="setView('alltime')">All time</div>
+  <div class="tab" id="tab-other" onclick="setView('other')">Other</div>
 </div>
 
 <!-- CONTROLS -->
 <div class="controls">
   <button class="btn primary" onclick="openForm()">+ Log bet</button>
-  <button class="btn" id="btn-arb" onclick="setTypeFilter('all')" style="border-color:var(--green);color:var(--green);">All types</button>
+  <button class="btn" id="btn-arb" onclick="setTypeFilter('all')" style="border-color:var(--green);color:var(--green);">Overview</button>
   <button class="btn" id="btn-only-arb" onclick="setTypeFilter('arb')">Arb only</button>
   <button class="btn" id="btn-only-ev" onclick="setTypeFilter('ev')">+EV only</button>
   <button class="btn" onclick="exportCSV()" style="margin-left:auto;">Export CSV</button>
@@ -259,6 +260,123 @@ h1{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
   </div>
   <div id="betLog"><div class="empty-state">No bets logged yet — tap "+ Log bet" to get started</div></div>
 </div>
+
+
+<!-- OTHER TAB SECTION -->
+<div id="other-section" style="display:none;padding:0 24px 16px">
+
+  <!-- Date bar -->
+  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 14px;background:var(--bg-card);border:.5px solid var(--border);border-radius:var(--r);margin-bottom:1rem">
+    <span style="font-size:12px;color:var(--text-muted)">From</span>
+    <input type="date" id="oth-from" style="font-size:12px;padding:4px 8px;border-radius:var(--r);border:.5px solid var(--border);background:var(--bg-input);color:var(--text)" onchange="renderOther()">
+    <span style="font-size:12px;color:var(--text-muted)">To</span>
+    <input type="date" id="oth-to" style="font-size:12px;padding:4px 8px;border-radius:var(--r);border:.5px solid var(--border);background:var(--bg-input);color:var(--text)" onchange="renderOther()">
+    <div style="display:flex;gap:4px;flex-wrap:wrap">
+      <button class="btn" onclick="setOthPreset('7d')" id="opr-7d" style="font-size:11px;padding:4px 10px">7d</button>
+      <button class="btn" onclick="setOthPreset('30d')" id="opr-30d" style="font-size:11px;padding:4px 10px">30d</button>
+      <button class="btn" onclick="setOthPreset('mtd')" id="opr-mtd" style="font-size:11px;padding:4px 10px">MTD</button>
+      <button class="btn" onclick="setOthPreset('ytd')" id="opr-ytd" style="font-size:11px;padding:4px 10px">YTD</button>
+      <button class="btn primary" onclick="setOthPreset('all')" id="opr-all" style="font-size:11px;padding:4px 10px">All time</button>
+      <button class="btn" onclick="clearOthDates()" style="font-size:11px;padding:4px 10px;color:var(--text-muted)">× Clear</button>
+    </div>
+    <span id="oth-count" style="font-size:11px;color:var(--text-muted);margin-left:auto"></span>
+  </div>
+
+  <!-- Metrics grid -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-bottom:1.25rem">
+    <div class="stat-card"><div class="stat-lbl">Total bets</div><div class="stat-val" id="oth-total-bets">—</div></div>
+    <div class="stat-card"><div class="stat-lbl">Net P&L</div><div class="stat-val" id="oth-pnl">—</div></div>
+    <div class="stat-card"><div class="stat-lbl">Win rate</div><div class="stat-val" id="oth-winrate">—</div></div>
+    <div class="stat-card"><div class="stat-lbl">ROI</div><div class="stat-val" id="oth-roi">—</div></div>
+    <div class="stat-card"><div class="stat-lbl">Total staked</div><div class="stat-val" id="oth-staked">—</div></div>
+    <div class="stat-card"><div class="stat-lbl">Biggest win</div><div class="stat-val green" id="oth-big-win">—</div></div>
+    <div class="stat-card"><div class="stat-lbl">Biggest loss</div><div class="stat-val red" id="oth-big-loss">—</div></div>
+    <div class="stat-card"><div class="stat-lbl">Pending</div><div class="stat-val blue" id="oth-pending">—</div></div>
+  </div>
+
+  <!-- Per-book breakdown -->
+  <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:10px">Per book breakdown</div>
+  <div id="oth-book-cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:1.5rem"></div>
+
+  <!-- Wins/Losses chart -->
+  <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:10px">Wins &amp; losses by book</div>
+  <div style="display:flex;gap:12px;margin-bottom:8px;font-size:12px;color:var(--text-muted)">
+    <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:var(--green);display:inline-block"></span>Wins</span>
+    <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:var(--red);display:inline-block"></span>Losses</span>
+    <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:var(--text-muted);display:inline-block"></span>Push / pending</span>
+  </div>
+  <div class="panel" style="margin-bottom:1.25rem;height:200px;position:relative">
+    <canvas id="oth-wl-chart"></canvas>
+  </div>
+
+  <!-- P&L over time -->
+  <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:10px">P&amp;L over time</div>
+  <div class="panel" style="margin-bottom:1.25rem;height:220px;position:relative">
+    <canvas id="oth-pnl-chart"></canvas>
+  </div>
+
+  <!-- ROI by sport -->
+  <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:10px">ROI by sport</div>
+  <div class="panel" style="margin-bottom:1.25rem;height:220px;position:relative">
+    <canvas id="oth-sport-chart"></canvas>
+  </div>
+
+  <!-- Bet table -->
+  <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:10px">All bets</div>
+  <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+    <select id="oth-filter-book" onchange="renderOthTable()" style="font-size:12px;padding:5px 10px;border-radius:var(--r);border:.5px solid var(--border);background:var(--bg-input);color:var(--text)"><option value="all">All books</option></select>
+    <select id="oth-filter-result" onchange="renderOthTable()" style="font-size:12px;padding:5px 10px;border-radius:var(--r);border:.5px solid var(--border);background:var(--bg-input);color:var(--text)">
+      <option value="all">All results</option>
+      <option value="settled">Settled</option>
+      <option value="pending">Pending</option>
+      <option value="void">Void</option>
+    </select>
+    <select id="oth-filter-type" onchange="renderOthTable()" style="font-size:12px;padding:5px 10px;border-radius:var(--r);border:.5px solid var(--border);background:var(--bg-input);color:var(--text)">
+      <option value="all">All types</option>
+      <option value="arb">Arb only</option>
+      <option value="ev">+EV only</option>
+    </select>
+  </div>
+  <div class="panel" style="overflow-x:auto;margin-bottom:1.5rem">
+    <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead>
+        <tr style="border-bottom:.5px solid var(--border);background:var(--bg)">
+          <th style="text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500;white-space:nowrap">Date</th>
+          <th style="text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500">Type</th>
+          <th style="text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500">Book</th>
+          <th style="text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500">Sport</th>
+          <th style="text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500;max-width:200px">Matchup</th>
+          <th style="text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500">Stake</th>
+          <th style="text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500">P&amp;L</th>
+          <th style="text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500">Status</th>
+        </tr>
+      </thead>
+      <tbody id="oth-table-body"></tbody>
+    </table>
+    <div id="oth-table-empty" style="display:none;text-align:center;padding:2rem;color:var(--text-muted);font-size:13px">No bets found</div>
+  </div>
+
+  <!-- CSV Import -->
+  <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:10px">Import bets (CSV)</div>
+  <div class="panel" style="margin-bottom:1.5rem">
+    <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px">
+      Expected columns: <code>date, type, sport, game, book1, book2, bookEv, stake, profit, status, odds, notes</code>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center">
+      <label style="display:inline-block;padding:7px 14px;border-radius:var(--r);border:.5px solid var(--border);cursor:pointer;font-size:13px;color:var(--text-muted);background:var(--bg-input)">
+        Choose file <input type="file" accept=".csv" id="oth-csv-file" style="display:none" onchange="handleOthFile(this)">
+      </label>
+      <span id="oth-file-name" style="font-size:12px;color:var(--text-muted)">No file chosen</span>
+    </div>
+    <textarea id="oth-paste-area" rows="4" placeholder="Or paste CSV content here..." style="width:100%;font-size:12px;padding:8px;border-radius:var(--r);border:.5px solid var(--border);background:var(--bg-input);color:var(--text);font-family:monospace;resize:vertical"></textarea>
+    <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+      <button class="btn primary" onclick="handleOthPaste()" style="font-size:13px">Import CSV</button>
+      <button class="btn" onclick="exportCSV()" style="font-size:13px">Export my bets</button>
+    </div>
+    <div id="oth-import-msg" style="margin-top:8px;font-size:12px"></div>
+  </div>
+
+</div><!-- /other-section -->
 
 <!-- FOOTER -->
 <div class="footer">
@@ -426,8 +544,27 @@ function setView(mode) {
   viewMode = mode;
   document.getElementById('tab-week').classList.toggle('active', mode==='week');
   document.getElementById('tab-alltime').classList.toggle('active', mode==='alltime');
-  const wb = document.getElementById('tab-week').closest('.tab-bar');
-  render();
+  document.getElementById('tab-other').classList.toggle('active', mode==='other');
+  // Show/hide main content vs other section
+  const mainEls = [
+    document.querySelector('.controls'),
+    document.querySelector('.stats-strip'),
+    document.querySelector('.middle'),
+    document.querySelector('.log-wrap'),
+  ];
+  const othSection = document.getElementById('other-section');
+  const weekNav = document.querySelector('.week-nav');
+  if (mode === 'other') {
+    mainEls.forEach(el => { if(el) el.style.display = 'none'; });
+    if (othSection) othSection.style.display = 'block';
+    if (weekNav) weekNav.style.display = 'none';
+    renderOther();
+  } else {
+    mainEls.forEach(el => { if(el) el.style.display = ''; });
+    if (othSection) othSection.style.display = 'none';
+    if (weekNav) weekNav.style.display = '';
+    render();
+  }
 }
 function changeWeek(dir) { weekOffset += dir; render(); }
 function setTypeFilter(f) {
@@ -893,6 +1030,351 @@ function calcEVProfit() {
 }
 // ──────────────────────────────────────────────────────────────────────────
 
+
+
+// ── OTHER TAB ─────────────────────────────────────────────────────────────────
+let othWlChart = null, othPnlChart = null, othSportChart = null;
+
+function getOthFiltered() {
+  const from = document.getElementById('oth-from').value;
+  const to   = document.getElementById('oth-to').value;
+  return bets.filter(b => {
+    if (!b.date) return true;
+    if (from && b.date < from) return false;
+    if (to   && b.date > to)   return false;
+    return true;
+  });
+}
+
+function setOthPreset(preset) {
+  const now = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  const fmt = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  const today = fmt(now);
+  let from = '', to = today;
+  if (preset === '7d')  { const d=new Date(now); d.setDate(d.getDate()-6); from=fmt(d); }
+  if (preset === '30d') { const d=new Date(now); d.setDate(d.getDate()-29); from=fmt(d); }
+  if (preset === 'mtd') { from=fmt(new Date(now.getFullYear(),now.getMonth(),1)); }
+  if (preset === 'ytd') { from=fmt(new Date(now.getFullYear(),0,1)); }
+  if (preset === 'all') { from=''; to=''; }
+  document.getElementById('oth-from').value = from;
+  document.getElementById('oth-to').value   = to;
+  // Update active preset button
+  ['7d','30d','mtd','ytd','all'].forEach(p => {
+    const el = document.getElementById('opr-'+p);
+    if (el) { el.className = p===preset ? 'btn primary' : 'btn'; el.style.fontSize='11px'; el.style.padding='4px 10px'; }
+  });
+  renderOther();
+}
+
+function clearOthDates() {
+  document.getElementById('oth-from').value = '';
+  document.getElementById('oth-to').value   = '';
+  ['7d','30d','mtd','ytd','all'].forEach(p => {
+    const el = document.getElementById('opr-'+p);
+    if (el) { el.className = 'btn'; el.style.fontSize='11px'; el.style.padding='4px 10px'; }
+  });
+  renderOther();
+}
+
+function othGetBook(b) {
+  if (b.type === 'ev') return b.bookEv || 'Unknown';
+  if (b.book1 && b.book2) return b.book1 + ' × ' + b.book2;
+  return b.book1 || b.book2 || 'Unknown';
+}
+
+function othGetPnl(b) {
+  const p = parseFloat(b.profit || 0);
+  if (b.status === 'pending') return 0;
+  if (b.status === 'void') return 0;
+  return p;
+}
+
+function renderOther() {
+  const pool = getOthFiltered();
+  const settled = pool.filter(b => b.status === 'settled');
+  const pending = pool.filter(b => b.status === 'pending');
+
+  // Count
+  document.getElementById('oth-count').textContent = pool.length + ' bet' + (pool.length!==1?'s':'') + ' in range';
+
+  // Metrics
+  const totalPnl = settled.reduce((s,b) => s + parseFloat(b.profit||0), 0);
+  const totalStaked = pool.reduce((s,b) => s + parseFloat(b.stake||0), 0);
+  const wins = settled.filter(b => parseFloat(b.profit||0) > 0).length;
+  const losses = settled.filter(b => parseFloat(b.profit||0) < 0).length;
+  const winrate = settled.length ? (wins/settled.length*100).toFixed(1) : '—';
+  const roi = totalStaked ? (totalPnl/totalStaked*100).toFixed(1) : '—';
+  const profits = settled.map(b => parseFloat(b.profit||0));
+  const bigWin  = profits.length ? Math.max(...profits) : 0;
+  const bigLoss = profits.length ? Math.min(...profits) : 0;
+
+  document.getElementById('oth-total-bets').textContent = pool.length;
+  const pnlEl = document.getElementById('oth-pnl');
+  pnlEl.textContent = (totalPnl>=0?'+':'') + '$' + totalPnl.toFixed(2);
+  pnlEl.className = 'stat-val ' + (totalPnl>=0?'green':'red');
+  document.getElementById('oth-winrate').textContent = winrate !== '—' ? winrate+'%' : '—';
+  document.getElementById('oth-roi').textContent = roi !== '—' ? roi+'%' : '—';
+  document.getElementById('oth-staked').textContent = '$' + totalStaked.toFixed(2);
+  document.getElementById('oth-big-win').textContent  = profits.length ? '+$'+bigWin.toFixed(2) : '—';
+  document.getElementById('oth-big-loss').textContent = profits.length ? '$'+bigLoss.toFixed(2) : '—';
+  document.getElementById('oth-pending').textContent  = pending.length;
+
+  // Book cards
+  renderOthBookCards(pool);
+
+  // Charts
+  renderOthWlChart(pool);
+  renderOthPnlChart(settled);
+  renderOthSportChart(settled);
+
+  // Table
+  renderOthTable();
+}
+
+function renderOthBookCards(pool) {
+  const books = {};
+  pool.forEach(b => {
+    const bk = othGetBook(b);
+    // For arb bets, credit both books separately
+    const bkList = b.type === 'arb' && b.book1 && b.book2 ? [b.book1, b.book2] : [bk];
+    bkList.forEach(book => {
+      if (!books[book]) books[book] = {bets:0, wins:0, losses:0, pnl:0, staked:0, bigWin:0};
+      books[book].bets++;
+      books[book].staked += parseFloat(b.stake||0);
+      if (b.status === 'settled') {
+        const p = parseFloat(b.profit||0);
+        books[book].pnl += p;
+        if (p > 0) { books[book].wins++; if(p>books[book].bigWin) books[book].bigWin=p; }
+        if (p < 0) books[book].losses++;
+      }
+    });
+  });
+
+  const el = document.getElementById('oth-book-cards');
+  if (!Object.keys(books).length) {
+    el.innerHTML = '<div style="color:var(--text-muted);font-size:13px">No data yet</div>';
+    return;
+  }
+  el.innerHTML = Object.entries(books).sort((a,b)=>b[1].pnl-a[1].pnl).map(([book, d]) => {
+    const wr = (d.wins+d.losses) ? Math.round(d.wins/(d.wins+d.losses)*100) : 0;
+    const roi = d.staked ? (d.pnl/d.staked*100).toFixed(1) : '0.0';
+    return `<div class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <span style="font-size:13px;font-weight:600">${book}</span>
+        <span style="font-size:13px;font-weight:600;color:${d.pnl>=0?'var(--green)':'var(--red)'}">${d.pnl>=0?'+':''}$${d.pnl.toFixed(2)}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px">
+        <div><div style="font-size:10px;color:var(--text-muted)">Bets</div><div style="font-size:14px;font-weight:500">${d.bets}</div></div>
+        <div><div style="font-size:10px;color:var(--text-muted)">Win rate</div><div style="font-size:14px;font-weight:500">${wr}%</div></div>
+        <div><div style="font-size:10px;color:var(--text-muted)">Net P&L</div><div style="font-size:14px;font-weight:500;color:${d.pnl>=0?'var(--green)':'var(--red)'}">${d.pnl>=0?'+':''}$${d.pnl.toFixed(2)}</div></div>
+        <div><div style="font-size:10px;color:var(--text-muted)">ROI</div><div style="font-size:14px;font-weight:500">${roi}%</div></div>
+        <div><div style="font-size:10px;color:var(--text-muted)">Deposited</div><div style="font-size:14px;font-weight:500">—</div></div>
+        <div><div style="font-size:10px;color:var(--text-muted)">Best win</div><div style="font-size:14px;font-weight:500;color:var(--green)">+$${d.bigWin.toFixed(2)}</div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderOthWlChart(pool) {
+  const ctx = document.getElementById('oth-wl-chart');
+  if (!ctx) return;
+  if (othWlChart) { othWlChart.destroy(); othWlChart = null; }
+
+  const books = {};
+  pool.forEach(b => {
+    const bkList = b.type==='arb'&&b.book1&&b.book2 ? [b.book1,b.book2] : [othGetBook(b)];
+    bkList.forEach(bk => {
+      if (!books[bk]) books[bk]={wins:0,losses:0,other:0};
+      if (b.status==='settled') {
+        if (parseFloat(b.profit||0)>0) books[bk].wins++;
+        else if (parseFloat(b.profit||0)<0) books[bk].losses++;
+        else books[bk].other++;
+      } else books[bk].other++;
+    });
+  });
+
+  const labels = Object.keys(books);
+  if (!labels.length) return;
+
+  othWlChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label:'Wins',          data:labels.map(l=>books[l].wins),   backgroundColor:'#16a34a' },
+        { label:'Losses',        data:labels.map(l=>books[l].losses), backgroundColor:'#dc2626' },
+        { label:'Push/Pending',  data:labels.map(l=>books[l].other),  backgroundColor:'#9ca3af' },
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false} },
+      scales:{ x:{stacked:true,grid:{display:false}}, y:{stacked:true,grid:{color:'rgba(0,0,0,0.05)'}} }
+    }
+  });
+}
+
+function renderOthPnlChart(settled) {
+  const ctx = document.getElementById('oth-pnl-chart');
+  if (!ctx) return;
+  if (othPnlChart) { othPnlChart.destroy(); othPnlChart = null; }
+  if (!settled.length) return;
+
+  const sorted = [...settled].sort((a,b)=>a.date.localeCompare(b.date));
+  const days = {}; let cum = 0;
+  sorted.forEach(b => { cum += parseFloat(b.profit||0); days[b.date] = cum; });
+  const labels = Object.keys(days);
+  const data   = Object.values(days);
+
+  othPnlChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{ label:'Cumulative P&L', data, borderColor:'#1d4ed8', backgroundColor:'rgba(29,78,216,0.08)', fill:true, tension:0.3, pointRadius:3 }]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false} },
+      scales:{ x:{grid:{display:false}}, y:{grid:{color:'rgba(0,0,0,0.05)'}} }
+    }
+  });
+}
+
+function renderOthSportChart(settled) {
+  const ctx = document.getElementById('oth-sport-chart');
+  if (!ctx) return;
+  if (othSportChart) { othSportChart.destroy(); othSportChart = null; }
+  if (!settled.length) return;
+
+  const sports = {};
+  settled.forEach(b => {
+    const s = (b.sport||'Other').replace(/^[^ ]+ /,'');
+    if (!sports[s]) sports[s] = {profit:0, staked:0};
+    sports[s].profit += parseFloat(b.profit||0);
+    sports[s].staked += parseFloat(b.stake||0);
+  });
+  const labels = Object.keys(sports).sort((a,b)=>sports[b].profit-sports[a].profit);
+  const rois   = labels.map(l => sports[l].staked ? +(sports[l].profit/sports[l].staked*100).toFixed(1) : 0);
+
+  othSportChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{ label:'ROI %', data:rois, backgroundColor:rois.map(v=>v>=0?'#16a34a':'#dc2626') }]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false} },
+      scales:{ x:{grid:{display:false}}, y:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{callback:v=>v+'%'}} }
+    }
+  });
+}
+
+function renderOthTable() {
+  const pool     = getOthFiltered();
+  const bookF    = document.getElementById('oth-filter-book').value;
+  const resultF  = document.getElementById('oth-filter-result').value;
+  const typeF    = document.getElementById('oth-filter-type').value;
+
+  // Populate book filter
+  const books = [...new Set(pool.map(b => othGetBook(b)))].sort();
+  const bookSel = document.getElementById('oth-filter-book');
+  const cur = bookSel.value;
+  bookSel.innerHTML = '<option value="all">All books</option>';
+  books.forEach(bk => { const o=document.createElement('option'); o.value=bk; o.textContent=bk; bookSel.appendChild(o); });
+  bookSel.value = books.includes(cur) ? cur : 'all';
+
+  let filtered = pool;
+  if (bookF !== 'all')   filtered = filtered.filter(b => othGetBook(b) === bookF);
+  if (resultF !== 'all') filtered = filtered.filter(b => b.status === resultF);
+  if (typeF !== 'all')   filtered = filtered.filter(b => b.type === typeF);
+  filtered = [...filtered].sort((a,b) => b.date.localeCompare(a.date));
+
+  const tbody = document.getElementById('oth-table-body');
+  const empty = document.getElementById('oth-table-empty');
+  if (!filtered.length) { tbody.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = filtered.map(b => {
+    const pnl = parseFloat(b.profit||0);
+    const pnlColor = b.status==='pending' ? 'var(--blue)' : pnl>=0 ? 'var(--green)' : 'var(--red)';
+    const pnlStr  = b.status==='pending' ? '~$'+pnl.toFixed(2) : (pnl>=0?'+':'')+'$'+pnl.toFixed(2);
+    const statusBadge = b.status==='pending'
+      ? '<span style="background:#eff6ff;color:#1d4ed8;padding:2px 7px;border-radius:5px;font-size:11px;font-weight:600">Pending</span>'
+      : b.status==='settled'
+        ? (pnl>=0
+          ? '<span style="background:#f0fdf4;color:#16a34a;padding:2px 7px;border-radius:5px;font-size:11px;font-weight:600">Won</span>'
+          : '<span style="background:#fef2f2;color:#dc2626;padding:2px 7px;border-radius:5px;font-size:11px;font-weight:600">Lost</span>')
+        : '<span style="background:#f3f4f6;color:#6b7280;padding:2px 7px;border-radius:5px;font-size:11px;font-weight:600">Void</span>';
+    const typeTag = b.type==='ev'
+      ? '<span style="background:#f0fdf4;color:#16a34a;padding:2px 7px;border-radius:5px;font-size:10px;font-weight:700">+EV</span>'
+      : '<span style="background:#eff6ff;color:#1d4ed8;padding:2px 7px;border-radius:5px;font-size:10px;font-weight:700">ARB</span>';
+    const sport = (b.sport||'').replace(/^[^ ]+ /,'');
+    return `<tr style="border-bottom:.5px solid var(--border)">
+      <td style="padding:8px 10px;white-space:nowrap;color:var(--text-muted)">${b.date}</td>
+      <td style="padding:8px 10px">${typeTag}</td>
+      <td style="padding:8px 10px;white-space:nowrap">${othGetBook(b)}</td>
+      <td style="padding:8px 10px">${sport}</td>
+      <td style="padding:8px 10px;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${b.game||''}">${b.game||'—'}</td>
+      <td style="padding:8px 10px">$${parseFloat(b.stake||0).toFixed(2)}</td>
+      <td style="padding:8px 10px;font-weight:600;color:${pnlColor}">${pnlStr}</td>
+      <td style="padding:8px 10px">${statusBadge}</td>
+    </tr>`;
+  }).join('');
+}
+
+function handleOthFile(inp) {
+  const file = inp.files[0]; if (!file) return;
+  document.getElementById('oth-file-name').textContent = file.name;
+  const reader = new FileReader();
+  reader.onload = e => { importOthCSV(e.target.result); };
+  reader.readAsText(file);
+}
+
+function handleOthPaste() {
+  importOthCSV(document.getElementById('oth-paste-area').value);
+}
+
+function importOthCSV(text) {
+  const msgEl = document.getElementById('oth-import-msg');
+  const lines = text.trim().split('\n').filter(l=>l.trim());
+  if (lines.length < 2) { msgEl.innerHTML='<div style="color:var(--red);font-size:12px">No valid rows found.</div>'; return; }
+  const headers = lines[0].split(',').map(h=>h.trim().toLowerCase().replace(/['"]/g,''));
+  const rows = lines.slice(1).map(line => {
+    const vals=[]; let cur='',inQ=false;
+    for (let ch of line) { if(ch==='"'){inQ=!inQ}else if(ch===','&&!inQ){vals.push(cur.trim());cur=''}else cur+=ch; }
+    vals.push(cur.trim());
+    const obj={}; headers.forEach((h,i)=>obj[h]=(vals[i]||'').replace(/^["']|["']$/g,'').trim());
+    return obj;
+  }).filter(r=>r.date||r.game||r.matchup);
+
+  if (!rows.length) { msgEl.innerHTML='<div style="color:var(--red);font-size:12px">No valid rows found. Check headers.</div>'; return; }
+
+  const newBets = rows.map(r => ({
+    id: String(Date.now() + Math.random()),
+    date: r.date || '',
+    type: (r.type||'arb').toLowerCase().includes('ev') ? 'ev' : 'arb',
+    sport: r.sport || '⚽ Soccer',
+    status: (r.status||'pending').toLowerCase().includes('settl') ? 'settled'
+           : (r.status||'').toLowerCase().includes('void') ? 'void' : 'pending',
+    game: r.game || r.matchup || r.description || '',
+    stake: parseFloat(r.stake||0)||0,
+    profit: parseFloat(r.profit||r.pnl||0)||0,
+    book1: r.book1||r.book||'',
+    book2: r.book2||'',
+    bookEv: r.bookev||r.book||'',
+    odds: r.odds||'',
+    evPct: r.evpct||'',
+    notes: r.notes||'',
+    gametime: r.gametime||'',
+  }));
+
+  bets = [...bets, ...newBets];
+  save(); render(); renderOther();
+  msgEl.innerHTML = `<div style="color:var(--green);font-size:12px">Imported ${newBets.length} bet${newBets.length!==1?'s':''}. Total: ${bets.length}.</div>`;
+}
+// ── END OTHER TAB ─────────────────────────────────────────────────────────────
 
 </script>
 </body>
