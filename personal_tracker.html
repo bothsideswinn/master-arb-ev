@@ -803,13 +803,19 @@ function setView(mode) {
     if (ab) { ab.style.borderColor=''; ab.style.color=''; }
     renderOther();
   } else {
+    // Restore everything
     mainEls.forEach(el => { if(el) el.style.display = ''; });
     if (othSection) othSection.style.display = 'none';
     if (weekNav)    weekNav.style.display    = '';
     if (subTabs)    subTabs.style.display    = 'flex';
-    // Reset Other button highlight
+    // Ensure controls bar is visible
+    const ctrl = document.querySelector('.controls');
+    if (ctrl) ctrl.style.display = '';
+    // Reset all button highlights
     const ob = document.getElementById('btn-other');
     if (ob) { ob.style.borderColor = ''; ob.style.color = ''; }
+    const bb = document.getElementById('btn-balances');
+    if (bb) { bb.style.borderColor = ''; bb.style.color = ''; }
     // Restore Overview button highlight
     const ab = document.getElementById('btn-arb');
     if (ab) { ab.style.borderColor = 'var(--green)'; ab.style.color = 'var(--green)'; }
@@ -818,7 +824,7 @@ function setView(mode) {
 }
 function changeWeek(dir) { weekOffset += dir; render(); }
 function setTypeFilter(f) {
-  if (viewMode === 'other') setView('week');
+  if (viewMode === 'other' || viewMode === 'balances') setView('week');
   typeFilter = f;
   // Update Overview main button highlight
   const arbBtn = document.getElementById('btn-arb');
