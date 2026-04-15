@@ -1000,10 +1000,14 @@ function renderLog(pool) {
   const el=document.getElementById('betLog');
   if (!pool.length) { el.innerHTML='<div class="empty-state">No bets in this period</div>'; return; }
   const sorted=[...pool].sort((a,b)=>{
-    // Sort by contest date/time first, fall back to log date
-    const aTime = a.gametime ? new Date(a.gametime.split(' · ')[0] + ' ' + (a.gametime.split(' · ')[1]||'')) : new Date(a.date);
-    const bTime = b.gametime ? new Date(b.gametime.split(' · ')[0] + ' ' + (b.gametime.split(' · ')[1]||'')) : new Date(b.date);
-    return bTime - aTime;
+    // Sort by game date first (YYYY-MM-DD), fall back to log date
+    const aDate = a.gamedate || a.date || '';
+    const bDate = b.gamedate || b.date || '';
+    if (bDate !== aDate) return bDate.localeCompare(aDate);
+    // Same date — sort by game time
+    const aTime = a.gametimeonly || '';
+    const bTime = b.gametimeonly || '';
+    return bTime.localeCompare(aTime);
   });
   el.innerHTML=sorted.map(b=>{
     const isPending=b.status==='pending', isVoid=b.status==='void';
@@ -1019,7 +1023,7 @@ function renderLog(pool) {
     const bookSub=b.type==='ev'?`${b.bookEv||''}`:b.book1&&b.book2?`${b.book1} × ${b.book2}`:'';
     return `<div class="log-row" style="${isVoid?'opacity:.4':''}">
       <div class="log-date">
-        ${b.gametime ? `<div style="font-size:10px;color:var(--yellow);line-height:1.5;">${b.gametime.replace(' · ','<br>')}</div>` : '<div style="color:var(--text-muted);">—</div>'}
+        ${(b.gamedate || b.gametime) ? `<div style="font-size:10px;color:var(--yellow);line-height:1.5;">${b.gamedate || ''}<br>${b.gametimeonly || (b.gametime ? b.gametime.split(' · ').slice(1).join(' · ') : '')}</div>` : `<div style="color:var(--text-muted);">${b.date||'—'}</div>`}
       </div>
       <div>
         <div class="log-game-title">${b.game||'—'}</div>
@@ -1139,19 +1143,24 @@ function editBet(id) {
   const b = bets.find(b => b.id === id);
   if (!b) return;
   let gamedate = '', gametime_only = '';
-  // Use stored gamedate directly if available
-  if (b.gamedate) {
+  // Use stored gamedate directly if available (YYYY-MM-DD format)
+  if (b.gamedate && b.gamedate.match(/^\d{4}-\d{2}-\d{2}$/)) {
     gamedate = b.gamedate;
     gametime_only = b.gametimeonly || '';
   } else if (b.gametime) {
-    // Fall back to parsing gametime string
+    // Parse from gametime display string e.g. "Mon, Apr 14 · 7:30 PM"
     const parts = b.gametime.split(' · ');
-    if (parts.length >= 2) {
-      const dp = new Date(parts[0] + ' ' + new Date().getFullYear());
-      gamedate = !isNaN(dp) ? dp.toISOString().split('T')[0] : '';
-      gametime_only = parts.slice(1).join(' · ');
-    } else { gametime_only = b.gametime; }
+    const datePart = parts[0] || '';
+    gametime_only = parts.slice(1).join(' · ');
+    // Try parsing with current year first, then next year
+    for (const yr of [new Date().getFullYear(), new Date().getFullYear()+1]) {
+      const dp = new Date(datePart + ' ' + yr);
+      if (!isNaN(dp)) { gamedate = dp.toISOString().split('T')[0]; break; }
+    }
   }
+  // Final fallback: use stored gamedate even if not ISO format
+  if (!gamedate && b.gamedate) gamedate = b.gamedate;
+  if (!gametime_only && b.gametimeonly) gametime_only = b.gametimeonly;
   editingId = id;
   document.getElementById('formTitle').textContent = 'Edit bet';
   document.getElementById('f-date').value = b.date || '';
