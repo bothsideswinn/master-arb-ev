@@ -2046,7 +2046,16 @@ function getBookStats(book) {
   const settledCount  = arbSettled.length + evSettled.length + othSettled.length;
   const winRate       = (wins + losses) ? Math.round(wins / (wins + losses) * 100) : 0;
   const bestWin       = Math.max(arbBestWin, evBestWin, othBestWin);
-  const totalStaked   = [...arbBets, ...evBets, ...othBets].reduce((s,b) => s + parseFloat(b.stake||0), 0);
+  // Per-book staked: use individual leg stake for arb bets
+  const totalStaked = arbBets.reduce((s,b) => {
+    const isBook1 = bookMatch(b.book1);
+    if (b.leg1Stake != null && b.leg2Stake != null) {
+      return s + (isBook1 ? parseFloat(b.leg1Stake) : parseFloat(b.leg2Stake));
+    }
+    return s + parseFloat(b.stake||0) / 2;
+  }, 0)
+  + evBets.reduce((s,b) => s + parseFloat(b.stake||0), 0)
+  + othBets.reduce((s,b) => s + parseFloat(b.stake||0), 0);
   const totalBets     = arbBets.length + evBets.length + othBets.length;
 
   // ── Balance ──
