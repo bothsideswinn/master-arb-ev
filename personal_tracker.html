@@ -678,7 +678,7 @@ h1{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
           </div>
           <div style="display:flex;flex-direction:column;gap:3px;flex:1;min-width:80px;">
             <span style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">Unit ($)</span>
-            <input type="number" id="calc-unit" placeholder="50" oninput="calcArb()" style="font-size:13px;padding:6px 8px;border-radius:6px;border:.5px solid var(--border);background:var(--bg-input);color:var(--text);">
+            <input type="number" id="calc-unit" placeholder="50" value="50" oninput="calcArb()" style="font-size:13px;padding:6px 8px;border-radius:6px;border:.5px solid var(--border);background:var(--bg-input);color:var(--text);">
           </div>
         </div>
         <div id="calc-result" style="display:none;margin-top:8px;padding:8px 10px;background:var(--bg-card);border:.5px solid var(--border);border-radius:6px;font-size:12px;color:var(--text-muted);"></div>
@@ -1384,8 +1384,12 @@ function syncCalcOdds() {
   var o2 = document.getElementById('f-leg2-odds');
   var c1 = document.getElementById('calc-odds1');
   var c2 = document.getElementById('calc-odds2');
+  var cu = document.getElementById('calc-unit');
+  var su = document.getElementById('f-stake');
   if (o1 && c1) c1.value = o1.value;
   if (o2 && c2) c2.value = o2.value;
+  // If unit field empty, use f-stake value or default 50
+  if (cu && !cu.value) cu.value = (su && su.value) ? su.value : '50';
   calcArb();
 }
 
