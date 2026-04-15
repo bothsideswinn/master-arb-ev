@@ -778,6 +778,7 @@ function setView(mode) {
     mainEls2.forEach(el => { if(el) el.style.display = 'none'; });
     if (document.querySelector('.controls')) document.querySelector('.controls').style.display = '';
     if (balSection) balSection.style.display = 'block';
+    if (othSection) othSection.style.display = 'none';
     if (document.querySelector('.week-nav')) document.querySelector('.week-nav').style.display = 'none';
     if (subTabs) subTabs.style.display = 'none';
     // Button highlights
@@ -1652,7 +1653,11 @@ function clearAllOthBets() {
   if (!confirm('Delete ALL bets in the Other tab? This cannot be undone.')) return;
   otherBets = [];
   saveOther();
+  const othSec = document.getElementById('other-section');
+  const wasHidden = othSec && othSec.style.display === 'none';
+  if (wasHidden) othSec.style.display = 'block';
   renderOther();
+  if (wasHidden) othSec.style.display = 'none';
 }
 
 function exportOthCSV() {
