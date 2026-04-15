@@ -159,7 +159,166 @@ h1{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
   .log-row{grid-template-columns:1fr 1fr;gap:6px}
 }
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js">
+// ── BOOK BALANCE TAB ──────────────────────────────────────────────────────────
+const BOOKS = ['Hard Rock Bet', 'Bovada', 'BetOnline'];
+let deposits = JSON.parse(localStorage.getItem('book_balances_v1') || '[]');
+
+function saveDeposits() {
+  localStorage.setItem('book_balances_v1', JSON.stringify(deposits));
+}
+
+function addDeposit() {
+  const book   = document.getElementById('dep-book').value;
+  const amount = parseFloat(document.getElementById('dep-amount').value);
+  const date   = document.getElementById('dep-date').value;
+  const note   = document.getElementById('dep-note').value.trim();
+  const msgEl  = document.getElementById('dep-msg');
+
+  if (!amount || amount <= 0) { msgEl.innerHTML = '<span style="color:var(--red)">Please enter a valid amount.</span>'; return; }
+  if (!date) { msgEl.innerHTML = '<span style="color:var(--red)">Please select a date.</span>'; return; }
+
+  deposits.push({ id: String(Date.now()), book, amount, date, note });
+  saveDeposits();
+
+  // Reset form
+  document.getElementById('dep-amount').value = '';
+  document.getElementById('dep-note').value   = '';
+  msgEl.innerHTML = '<span style="color:var(--green)">Deposit added!</span>';
+  setTimeout(() => { msgEl.innerHTML = ''; }, 2000);
+  renderBalances();
+}
+
+function deleteDeposit(id) {
+  if (!confirm('Delete this deposit?')) return;
+  deposits = deposits.filter(d => d.id !== id);
+  saveDeposits();
+  renderBalances();
+}
+
+function getBookStats(book) {
+  const bookBets = bets.filter(b => {
+    const b1 = (b.book1 || '').toLowerCase();
+    const b2 = (b.book2 || '').toLowerCase();
+    const bEv = (b.bookEv || '').toLowerCase();
+    const bk  = book.toLowerCase();
+    return b1 === bk || b2 === bk || bEv === bk;
+  });
+
+  const settled  = bookBets.filter(b => b.status === 'settled');
+  const pending  = bookBets.filter(b => b.status === 'pending');
+
+  const pnl      = settled.reduce((s, b) => s + parseFloat(b.profit || 0), 0);
+  const atRisk   = pending.reduce((s, b) => s + parseFloat(b.stake || 0), 0);
+  const totalDep = deposits.filter(d => d.book === book).reduce((s, d) => s + d.amount, 0);
+  const balance  = totalDep + pnl;
+  const wins     = settled.filter(b => parseFloat(b.profit || 0) > 0).length;
+  const losses   = settled.filter(b => parseFloat(b.profit || 0) < 0).length;
+  const winRate  = settled.length ? Math.round(wins / settled.length * 100) : 0;
+  const bestWin  = settled.length ? Math.max(0, ...settled.map(b => parseFloat(b.profit || 0))) : 0;
+  const totalStaked = bookBets.reduce((s, b) => s + parseFloat(b.stake || 0), 0);
+
+  return { pnl, atRisk, totalDep, balance, wins, losses, winRate, bestWin, totalStaked, totalBets: bookBets.length, settled: settled.length };
+}
+
+function renderBalances() {
+  // Summary totals
+  let totalBal = 0, totalDep = 0, totalPnl = 0, totalRisk = 0;
+  BOOKS.forEach(book => {
+    const s = getBookStats(book);
+    totalBal  += s.balance;
+    totalDep  += s.totalDep;
+    totalPnl  += s.pnl;
+    totalRisk += s.atRisk;
+  });
+
+  const fmt = n => Math.abs(n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+
+  const setBal = (id, val, signed=false) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = signed ? (val >= 0 ? '+$' : '-$') + fmt(val) : (val < 0 ? '-$' : '$') + fmt(val);
+    if (id === 'bal-total') el.className = 'stat-val ' + (val >= 0 ? 'green' : 'red');
+    if (id === 'bal-pnl')   el.className = 'stat-val ' + (val >= 0 ? 'green' : 'red');
+  };
+
+  setBal('bal-total',     totalBal);
+  setBal('bal-deposited', totalDep);
+  setBal('bal-pnl',       totalPnl, true);
+  setBal('bal-risk',      totalRisk);
+
+  // Per book cards
+  const wrap = document.getElementById('book-cards-wrap');
+  if (wrap) {
+    wrap.innerHTML = BOOKS.map(book => {
+      const s = getBookStats(book);
+      const balColor = s.balance >= 0 ? 'var(--green)' : 'var(--red)';
+      const pnlColor = s.pnl >= 0 ? 'var(--green)' : 'var(--red)';
+      return `<div class="panel">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:12px;border-bottom:.5px solid var(--border)">
+          <span style="font-size:15px;font-weight:700">${book}</span>
+          <span style="font-size:20px;font-weight:800;color:${balColor}">${s.balance < 0 ? '-' : ''}$${fmt(s.balance)}</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+          <div>
+            <div style="font-size:10px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">Deposited</div>
+            <div style="font-size:15px;font-weight:700">$${fmt(s.totalDep)}</div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">Net P&L</div>
+            <div style="font-size:15px;font-weight:700;color:${pnlColor}">${s.pnl >= 0 ? '+' : '-'}$${fmt(s.pnl)}</div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">At risk</div>
+            <div style="font-size:15px;font-weight:700;color:var(--blue)">$${fmt(s.atRisk)}</div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">Win rate</div>
+            <div style="font-size:15px;font-weight:700">${s.winRate}%</div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">Total bets</div>
+            <div style="font-size:15px;font-weight:700">${s.totalBets}</div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">Best win</div>
+            <div style="font-size:15px;font-weight:700;color:var(--green)">+$${fmt(s.bestWin)}</div>
+          </div>
+        </div>
+        <div style="background:var(--bg);border-radius:var(--r);padding:8px 12px;font-size:11px;color:var(--text-muted)">
+          ${s.settled} settled · ${s.totalBets - s.settled} pending · $${fmt(s.totalStaked)} total staked
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // Deposit table
+  const tbody = document.getElementById('dep-table-body');
+  const empty = document.getElementById('dep-table-empty');
+  if (!tbody) return;
+
+  const sorted = [...deposits].sort((a, b) => b.date.localeCompare(a.date));
+  if (!sorted.length) {
+    tbody.innerHTML = '';
+    if (empty) empty.style.display = 'block';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+
+  tbody.innerHTML = sorted.map(d => `
+    <tr style="border-bottom:.5px solid var(--border)">
+      <td style="padding:8px 10px;color:var(--text-muted);white-space:nowrap">${d.date}</td>
+      <td style="padding:8px 10px;font-weight:600">${d.book}</td>
+      <td style="padding:8px 10px;font-weight:700;color:var(--green)">+$${fmt(d.amount)}</td>
+      <td style="padding:8px 10px;color:var(--text-muted)">${d.note || '—'}</td>
+      <td style="padding:8px 10px">
+        <button onclick="deleteDeposit('${d.id}')" style="font-size:10px;padding:3px 7px;border-radius:5px;border:.5px solid var(--border);background:var(--bg-input);cursor:pointer;color:var(--red)">✕</button>
+      </td>
+    </tr>`).join('');
+}
+// ── END BOOK BALANCE TAB ──────────────────────────────────────────────────────
+
+</script>
 <body>
 
 
@@ -191,6 +350,7 @@ h1{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
 <div class="controls">
   <button class="btn" id="btn-arb" onclick="setTypeFilter('all')" style="border-color:var(--green);color:var(--green);">Overview</button>
   <button class="btn" id="btn-other" onclick="setView('other')">Other</button>
+  <button class="btn" id="btn-balances" onclick="setView('balances')">Book Balance</button>
   <button class="btn" onclick="exportCSV()" style="margin-left:auto;">Export CSV</button>
   <button class="btn danger" onclick="clearAll()">Clear all</button>
 </div>
@@ -449,6 +609,77 @@ h1{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
 
 </div><!-- /other-section -->
 
+
+<!-- BOOK BALANCE SECTION -->
+<div id="balances-section" style="display:none;padding:0 24px 24px">
+
+  <!-- Total summary -->
+  <div style="margin-bottom:1.25rem;margin-top:1rem">
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:10px">Combined — all books</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px">
+      <div class="stat-card highlight"><div class="stat-lbl">Total balance</div><div class="stat-val green" id="bal-total">$0.00</div><div class="stat-sub">deposits + P&L</div></div>
+      <div class="stat-card"><div class="stat-lbl">Total deposited</div><div class="stat-val" id="bal-deposited">$0.00</div><div class="stat-sub">all books</div></div>
+      <div class="stat-card"><div class="stat-lbl">Net P&L</div><div class="stat-val" id="bal-pnl">$0.00</div><div class="stat-sub">settled bets</div></div>
+      <div class="stat-card"><div class="stat-lbl">Total at risk</div><div class="stat-val blue" id="bal-risk">$0.00</div><div class="stat-sub">pending stakes</div></div>
+    </div>
+  </div>
+
+  <!-- Per book cards -->
+  <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:10px">Per book breakdown</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-bottom:1.5rem" id="book-cards-wrap">
+  </div>
+
+  <!-- Deposit history -->
+  <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:10px">Deposit history</div>
+
+  <!-- Add deposit form -->
+  <div class="panel" style="margin-bottom:1rem">
+    <div style="font-size:13px;font-weight:700;margin-bottom:12px">Add deposit</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Book</span>
+        <select id="dep-book" class="sel" style="min-width:150px">
+          <option value="Hard Rock Bet">Hard Rock Bet</option>
+          <option value="Bovada">Bovada</option>
+          <option value="BetOnline">BetOnline</option>
+        </select>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Amount ($)</span>
+        <input type="number" id="dep-amount" class="inp" placeholder="e.g. 500" style="width:120px" min="0">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Date</span>
+        <input type="date" id="dep-date" class="inp" style="width:140px">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Note (optional)</span>
+        <input type="text" id="dep-note" class="inp" placeholder="e.g. Initial deposit" style="width:180px">
+      </div>
+      <button class="btn primary" onclick="addDeposit()" style="padding:8px 20px;font-size:13px">Add</button>
+    </div>
+    <div id="dep-msg" style="font-size:12px;margin-top:8px"></div>
+  </div>
+
+  <!-- Deposit table -->
+  <div class="panel" style="overflow-x:auto;overflow-y:auto;max-height:400px">
+    <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead>
+        <tr style="background:var(--bg);border-bottom:.5px solid var(--border)">
+          <th style="text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500;position:sticky;top:0;background:var(--bg)">Date</th>
+          <th style="text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500;position:sticky;top:0;background:var(--bg)">Book</th>
+          <th style="text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500;position:sticky;top:0;background:var(--bg)">Amount</th>
+          <th style="text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500;position:sticky;top:0;background:var(--bg)">Note</th>
+          <th style="padding:8px 10px;position:sticky;top:0;background:var(--bg)"></th>
+        </tr>
+      </thead>
+      <tbody id="dep-table-body"></tbody>
+    </table>
+    <div id="dep-table-empty" style="text-align:center;padding:2rem;color:var(--text-muted);font-size:13px">No deposits logged yet</div>
+  </div>
+
+</div><!-- /balances-section -->
+
 <!-- LOG BET BUTTON -->
 <div style="padding:16px 24px;background:var(--bg-card);border-top:.5px solid var(--border);">
   <button class="btn primary" onclick="openForm()" style="width:100%;padding:12px;font-size:14px;border-radius:var(--r-lg);">+ Log bet</button>
@@ -632,6 +863,8 @@ function setView(mode) {
   viewMode = mode;
   document.getElementById('tab-week').classList.toggle('active', mode==='week');
   document.getElementById('tab-alltime').classList.toggle('active', mode==='alltime');
+  // Handle balances section visibility
+  const balSection = document.getElementById('balances-section');
   // Highlight Other button
   const othBtn = document.getElementById('btn-other');
   if (othBtn) {
@@ -646,6 +879,27 @@ function setView(mode) {
   const othSection = document.getElementById('other-section');
   const weekNav    = document.querySelector('.week-nav');
   const subTabs = document.getElementById('overview-subtabs');
+  if (balSection) balSection.style.display = 'none';
+  if (mode === 'balances') {
+    const mainEls2 = [document.querySelector('.stats-strip'), document.querySelector('.middle'), document.querySelector('.log-wrap')];
+    mainEls2.forEach(el => { if(el) el.style.display = 'none'; });
+    if (document.querySelector('.controls')) document.querySelector('.controls').style.display = '';
+    if (balSection) balSection.style.display = 'block';
+    if (document.querySelector('.week-nav')) document.querySelector('.week-nav').style.display = 'none';
+    if (subTabs) subTabs.style.display = 'none';
+    // Button highlights
+    const bb = document.getElementById('btn-balances');
+    if (bb) { bb.style.borderColor = 'var(--green)'; bb.style.color = 'var(--green)'; }
+    const ab = document.getElementById('btn-arb');
+    if (ab) { ab.style.borderColor = ''; ab.style.color = ''; }
+    const ob = document.getElementById('btn-other');
+    if (ob) { ob.style.borderColor = ''; ob.style.color = ''; }
+    renderBalances();
+    return;
+  } else {
+    const bb = document.getElementById('btn-balances');
+    if (bb) { bb.style.borderColor = ''; bb.style.color = ''; }
+  }
   if (mode === 'other') {
     mainEls.forEach(el => { if(el) el.style.display = 'none'; });
     if (othSection) othSection.style.display = 'block';
@@ -944,7 +1198,7 @@ function saveBet() {
     bets.push(bet);
   }
   editingId = null;
-  save(); closeForm(); render();
+  save(); closeForm(); render(); if (viewMode === 'balances') renderBalances();
 }
 
 function editBet(id) {
@@ -987,7 +1241,7 @@ function editBet(id) {
 function deleteBet(id) {
   if (!confirm('Delete this bet?')) return;
   bets = bets.filter(b => b.id !== id);
-  save(); render();
+  save(); render(); if (typeof renderBalances === 'function') renderBalances();
 }
 
 function cycleStatus(id) {
@@ -1658,6 +1912,8 @@ function importOthCSV(text) {
 (function() {
   const dateEl = document.getElementById('oth-f-date');
   if (dateEl) dateEl.value = new Date().toISOString().split('T')[0];
+  const depDateEl = document.getElementById('dep-date');
+  if (depDateEl) depDateEl.value = new Date().toISOString().split('T')[0];
 })();
 // ── END OTHER TAB ─────────────────────────────────────────────────────────────
 
