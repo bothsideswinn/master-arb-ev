@@ -1812,13 +1812,28 @@ function importOthCSV(text) {
 // ── BOOK BALANCE TAB ──────────────────────────────────────────────────────────
 const BOOKS = ['Hard Rock Bet', 'Bovada', 'BetOnline'];
 let deposits    = JSON.parse(localStorage.getItem('book_balances_v1') || '[]');
-let withdrawals = JSON.parse(localStorage.getItem('book_withdrawals_v1') || '[]');
+let withdrawals    = JSON.parse(localStorage.getItem('book_withdrawals_v1') || '[]');
+let manualBalances = JSON.parse(localStorage.getItem('book_manual_v1') || '{}');
 
 function saveDeposits() {
   localStorage.setItem('book_balances_v1', JSON.stringify(deposits));
 }
 function saveWithdrawals() {
   localStorage.setItem('book_withdrawals_v1', JSON.stringify(withdrawals));
+}
+function saveManualBalances() {
+  localStorage.setItem('book_manual_v1', JSON.stringify(manualBalances));
+}
+function setManualBalance(book) {
+  const key    = book.replace(/\s+/g,'_');
+  const amount = parseFloat(document.getElementById('mb-amount-'+key).value);
+  const date   = document.getElementById('mb-date-'+key).value || new Date().toISOString().split('T')[0];
+  const msgEl  = document.getElementById('mb-msg-'+key);
+  if (isNaN(amount)) { if(msgEl) msgEl.innerHTML='<span style="color:var(--red)">Enter a valid amount.</span>'; return; }
+  manualBalances[book] = { amount, date };
+  saveManualBalances();
+  if(msgEl) { msgEl.innerHTML='<span style="color:var(--green)">Balance set!</span>'; setTimeout(()=>{msgEl.innerHTML='';},2000); }
+  renderBalances();
 }
 
 function addDeposit() {
@@ -1910,7 +1925,22 @@ function getBookStats(book) {
   const atRisk        = arbRisk + othRisk;
   const totalDep      = deposits.filter(d => d.book === book).reduce((s, d) => s + d.amount, 0);
   const totalWithdraw = (typeof withdrawals !== 'undefined' ? withdrawals : []).filter(w => w.book === book).reduce((s, w) => s + w.amount, 0);
-  const balance       = totalDep - totalWithdraw + totalPnl;
+
+  // Manual balance baseline — only count P&L from bets after the baseline date
+  const mb = (typeof manualBalances !== 'undefined' && manualBalances[book]) ? manualBalances[book] : null;
+  let balance;
+  if (mb) {
+    // P&L from arb/EV bets settled AFTER baseline date
+    const arbPnlNew = arbSettled.filter(b => b.date > mb.date).reduce((s,b) => s + parseFloat(b.profit||0), 0);
+    // P&L from Other bets settled AFTER baseline date
+    const othPnlNew = othSettled.filter(b => b.date > mb.date).reduce((s,b) => s + (b.pnl||0), 0);
+    // Deposits/withdrawals AFTER baseline date
+    const depNew  = deposits.filter(d => d.book === book && d.date > mb.date).reduce((s,d) => s + d.amount, 0);
+    const withNew = (typeof withdrawals !== 'undefined' ? withdrawals : []).filter(w => w.book === book && w.date > mb.date).reduce((s,w) => s + w.amount, 0);
+    balance = mb.amount + arbPnlNew + othPnlNew + depNew - withNew;
+  } else {
+    balance = totalDep - totalWithdraw + totalPnl;
+  }
   const wins          = arbWins + othWins;
   const losses        = arbSettled.filter(b => parseFloat(b.profit||0) < 0).length +
                         othSettled.filter(b => (b.pnl||0) < 0).length;
@@ -1960,8 +1990,11 @@ function renderBalances() {
   // Per book cards
   const wrap = document.getElementById('book-cards-wrap');
   if (wrap) {
+    const today = new Date().toISOString().split('T')[0];
     wrap.innerHTML = BOOKS.map(book => {
-      const s = getBookStats(book);
+      const s      = getBookStats(book);
+      const key    = book.replace(/\s+/g,'_');
+      const mb     = (typeof manualBalances !== 'undefined' && manualBalances[book]) ? manualBalances[book] : null;
       const balColor = s.balance >= 0 ? 'var(--green)' : 'var(--red)';
       const pnlColor = s.pnl >= 0 ? 'var(--green)' : 'var(--red)';
       return `<div class="panel">
@@ -1995,8 +2028,23 @@ function renderBalances() {
             <div style="font-size:15px;font-weight:700;color:var(--green)">+$${fmt(s.bestWin)}</div>
           </div>
         </div>
-        <div style="background:var(--bg);border-radius:var(--r);padding:8px 12px;font-size:11px;color:var(--text-muted)">
+        <div style="background:var(--bg);border-radius:var(--r);padding:8px 12px;font-size:11px;color:var(--text-muted);margin-bottom:12px">
           ${s.settled} settled · ${s.totalBets - s.settled} pending · $${fmt(s.totalStaked)} total staked
+        </div>
+        <div style="border-top:.5px solid var(--border);padding-top:12px">
+          <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">
+            Manual balance baseline
+            ${mb ? `<span style="font-weight:400;color:var(--green);margin-left:6px">Set: $${fmt(mb.amount)} on ${mb.date}</span>` : '<span style="font-weight:400;margin-left:6px">Not set — using deposit/bet history</span>'}
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:flex-end">
+            <input type="number" id="mb-amount-${key}" placeholder="Current balance e.g. 500" value="${mb ? mb.amount : ''}"
+              style="font-size:12px;padding:6px 8px;border-radius:var(--r);border:.5px solid var(--border);background:var(--bg-input);color:var(--text);width:180px">
+            <input type="date" id="mb-date-${key}" value="${mb ? mb.date : today}"
+              style="font-size:12px;padding:6px 8px;border-radius:var(--r);border:.5px solid var(--border);background:var(--bg-input);color:var(--text)">
+            <button onclick="setManualBalance('${book}')"
+              style="font-size:12px;font-weight:700;padding:6px 14px;border-radius:var(--r);border:none;background:var(--text);color:#fff;cursor:pointer">Set balance</button>
+          </div>
+          <div id="mb-msg-${key}" style="font-size:11px;margin-top:4px"></div>
         </div>
       </div>`;
     }).join('');
