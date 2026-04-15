@@ -189,7 +189,6 @@ h1{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
 
 <!-- CONTROLS -->
 <div class="controls">
-  <button class="btn primary" onclick="openForm()">+ Log bet</button>
   <button class="btn" id="btn-arb" onclick="setTypeFilter('all')" style="border-color:var(--green);color:var(--green);">Overview</button>
   <button class="btn" id="btn-other" onclick="setView('other')">Other</button>
   <button class="btn" onclick="exportCSV()" style="margin-left:auto;">Export CSV</button>
@@ -448,6 +447,11 @@ h1{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
   </div>
 
 </div><!-- /other-section -->
+
+<!-- LOG BET BUTTON -->
+<div style="padding:16px 24px;background:var(--bg-card);border-top:.5px solid var(--border);">
+  <button class="btn primary" onclick="openForm()" style="width:100%;padding:12px;font-size:14px;border-radius:var(--r-lg);">+ Log bet</button>
+</div>
 
 <!-- FOOTER -->
 <div class="footer">
