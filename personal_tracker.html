@@ -176,9 +176,9 @@ function addDeposit() {
   const msgEl  = document.getElementById('dep-msg');
 
   if (!amount || amount <= 0) { msgEl.innerHTML = '<span style="color:var(--red)">Please enter a valid amount.</span>'; return; }
-  if (!date) { msgEl.innerHTML = '<span style="color:var(--red)">Please select a date.</span>'; return; }
+  const finalDate = date || new Date().toISOString().split('T')[0];
 
-  deposits.push({ id: String(Date.now()), book, amount, date, note });
+  deposits.push({ id: String(Date.now()), book, amount, date: finalDate, note });
   saveDeposits();
 
   // Reset form
@@ -222,6 +222,9 @@ function getBookStats(book) {
 }
 
 function renderBalances() {
+  // Set today's date in deposit form if empty
+  const depDateEl = document.getElementById('dep-date');
+  if (depDateEl && !depDateEl.value) depDateEl.value = new Date().toISOString().split('T')[0];
   // Summary totals
   let totalBal = 0, totalDep = 0, totalPnl = 0, totalRisk = 0;
   BOOKS.forEach(book => {
@@ -1912,8 +1915,6 @@ function importOthCSV(text) {
 (function() {
   const dateEl = document.getElementById('oth-f-date');
   if (dateEl) dateEl.value = new Date().toISOString().split('T')[0];
-  const depDateEl = document.getElementById('dep-date');
-  if (depDateEl) depDateEl.value = new Date().toISOString().split('T')[0];
 })();
 // ── END OTHER TAB ─────────────────────────────────────────────────────────────
 
