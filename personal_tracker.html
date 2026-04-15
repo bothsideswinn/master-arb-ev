@@ -130,8 +130,8 @@ h1{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
 
 
 /* ── Bet log rows ── */
-.log-header{display:grid;grid-template-columns:100px 1fr 60px 80px 70px 80px 65px 100px 70px;gap:8px;padding:9px 16px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);border-bottom:.5px solid var(--border);background:var(--bg)}
-.log-row{display:grid;grid-template-columns:100px 1fr 60px 80px 70px 80px 65px 100px 70px;gap:8px;padding:11px 16px;border-bottom:.5px solid var(--border);align-items:center;transition:background .1s}
+.log-header{display:grid;grid-template-columns:100px 1fr 60px 80px 90px 70px 80px 65px 100px 70px;gap:8px;padding:9px 16px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);border-bottom:.5px solid var(--border);background:var(--bg)}
+.log-row{display:grid;grid-template-columns:100px 1fr 60px 80px 90px 70px 80px 65px 100px 70px;gap:8px;padding:11px 16px;border-bottom:.5px solid var(--border);align-items:center;transition:background .1s}
 .log-row:last-child{border-bottom:none}
 .log-row:hover{background:#fafafa}
 .log-date{font-family:'Space Mono',monospace;font-size:10px;color:var(--text-muted);line-height:1.4}
@@ -261,6 +261,7 @@ h1{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
     <span>Matchup</span>
     <span>Type</span>
     <span>Bet type</span>
+    <span>Odds</span>
     <span>Staked</span>
     <span>Profit</span>
     <span>ROI</span>
@@ -647,6 +648,14 @@ h1{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
         <label>Book 2</label>
         <input type="text" id="f-book2" placeholder="e.g. BetOnline">
       </div>
+      <div class="form-group" id="fg-leg1-odds">
+        <label>Leg 1 odds</label>
+        <input type="text" id="f-leg1-odds" placeholder="e.g. +355" oninput="syncCalcOdds()">
+      </div>
+      <div class="form-group" id="fg-leg2-odds">
+        <label>Leg 2 odds</label>
+        <input type="text" id="f-leg2-odds" placeholder="e.g. +100" oninput="syncCalcOdds()">
+      </div>
       <div class="form-group" id="fg-winning-leg" style="display:none;">
         <label>Which leg won?</label>
         <select id="f-winning-leg">
@@ -1031,6 +1040,7 @@ function renderLog(pool) {
       </div>
       <div class="log-cell">${typeTag}</div>
       <div class="log-cell" style="font-size:11px;color:var(--text-secondary)">${b.betType||'—'}</div>
+      <div class="log-cell" style="font-size:11px;color:var(--text-secondary)">${b.type==='arb'?(b.leg1Odds&&b.leg2Odds?b.leg1Odds+' / '+b.leg2Odds:'—'):(b.odds||'—')}</div>
       <div class="log-cell">$${parseFloat(b.stake||0).toFixed(0)}</div>
       <div class="log-cell">${profitStr}</div>
       <div class="log-cell ${b.type==='ev'?'ev-col':''}">${isPending?'~':''}${roi}%</div>
@@ -1050,7 +1060,7 @@ function renderLog(pool) {
 function toggleBetType() {
   const t = document.getElementById('f-type').value;
   const s = document.getElementById('f-status').value;
-  ['fg-book1','fg-book2','fg-leg1-stake','fg-leg2-stake','fg-stake','fg-profit'].forEach(id=>document.getElementById(id).style.display=t==='arb'?'':'none');
+  ['fg-book1','fg-book2','fg-leg1-odds','fg-leg2-odds','fg-leg1-stake','fg-leg2-stake','fg-stake','fg-profit'].forEach(id=>document.getElementById(id).style.display=t==='arb'?'':'none');
   ['fg-book-ev','fg-odds','fg-ev-pct','fg-ev-stake','fg-ev-profit'].forEach(id=>document.getElementById(id).style.display=t==='ev'?'':'none');
   const wl = document.getElementById('fg-winning-leg');
   if (wl) wl.style.display = (t==='arb' && s==='settled') ? '' : 'none';
@@ -1087,6 +1097,8 @@ function openForm(prefill={}) {
   }
   if (document.getElementById('f-leg1-stake')) document.getElementById('f-leg1-stake').value = prefill.leg1Stake || '';
   if (document.getElementById('f-leg2-stake')) document.getElementById('f-leg2-stake').value = prefill.leg2Stake || '';
+  if (document.getElementById('f-leg1-odds')) document.getElementById('f-leg1-odds').value = prefill.leg1Odds || '';
+  if (document.getElementById('f-leg2-odds')) document.getElementById('f-leg2-odds').value = prefill.leg2Odds || '';
   if (document.getElementById('calc-odds1')) document.getElementById('calc-odds1').value = prefill.leg1Odds || '';
   if (document.getElementById('calc-odds2')) document.getElementById('calc-odds2').value = prefill.leg2Odds || '';
   toggleBetType();
@@ -1123,8 +1135,8 @@ function saveBet() {
     winningLeg: document.getElementById('f-winning-leg') ? (document.getElementById('f-winning-leg').value || null) : null,
     leg1Stake: parseFloat(document.getElementById('f-leg1-stake') ? document.getElementById('f-leg1-stake').value : 0) || null,
     leg2Stake: parseFloat(document.getElementById('f-leg2-stake') ? document.getElementById('f-leg2-stake').value : 0) || null,
-    leg1Odds: document.getElementById('calc-odds1') ? document.getElementById('calc-odds1').value.trim() : '',
-    leg2Odds: document.getElementById('calc-odds2') ? document.getElementById('calc-odds2').value.trim() : '',
+    leg1Odds: document.getElementById('f-leg1-odds') ? document.getElementById('f-leg1-odds').value.trim() : '',
+    leg2Odds: document.getElementById('f-leg2-odds') ? document.getElementById('f-leg2-odds').value.trim() : '',
     book1: document.getElementById('f-book1').value.trim(),
     book2: document.getElementById('f-book2').value.trim(),
     bookEv: document.getElementById('f-book-ev').value.trim(),
@@ -1191,6 +1203,8 @@ function editBet(id) {
   }
   if (document.getElementById('f-leg1-stake')) document.getElementById('f-leg1-stake').value = b.leg1Stake || '';
   if (document.getElementById('f-leg2-stake')) document.getElementById('f-leg2-stake').value = b.leg2Stake || '';
+  if (document.getElementById('f-leg1-odds')) document.getElementById('f-leg1-odds').value = b.leg1Odds || '';
+  if (document.getElementById('f-leg2-odds')) document.getElementById('f-leg2-odds').value = b.leg2Odds || '';
   if (document.getElementById('calc-odds1')) document.getElementById('calc-odds1').value = b.leg1Odds || '';
   if (document.getElementById('calc-odds2')) document.getElementById('calc-odds2').value = b.leg2Odds || '';
   toggleBetType();
@@ -1354,6 +1368,16 @@ function calcArb() {
       'Leg 2 stake: <strong>$' + s2.toFixed(2) + '</strong> &nbsp;|&nbsp; ' +
       'Profit: <strong>$' + profit.toFixed(2) + '</strong>';
   }
+}
+
+function syncCalcOdds() {
+  var o1 = document.getElementById('f-leg1-odds');
+  var o2 = document.getElementById('f-leg2-odds');
+  var c1 = document.getElementById('calc-odds1');
+  var c2 = document.getElementById('calc-odds2');
+  if (o1 && c1) c1.value = o1.value;
+  if (o2 && c2) c2.value = o2.value;
+  calcArb();
 }
 
 function updateTotalFromLegs() {
