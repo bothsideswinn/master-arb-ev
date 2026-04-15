@@ -2013,10 +2013,10 @@ function getBookStats(book) {
     }
     if (b.winningLeg === '1') {
       if (isBook1) { arbWins++; arbPnl += profit; if (profit > arbBestWin) arbBestWin = profit; }
-      if (isBook2) { arbLosses++; arbPnl -= parseFloat(b.stake||0) * (1 - 1/(1 + profit/parseFloat(b.stake||1))); }
+      if (isBook2) { arbLosses++; arbPnl -= (b.leg2Stake != null ? parseFloat(b.leg2Stake) : parseFloat(b.stake||0) / 2); }
     } else if (b.winningLeg === '2') {
       if (isBook2) { arbWins++; arbPnl += profit; if (profit > arbBestWin) arbBestWin = profit; }
-      if (isBook1) { arbLosses++; arbPnl -= parseFloat(b.stake||0) * (1 - 1/(1 + profit/parseFloat(b.stake||1))); }
+      if (isBook1) { arbLosses++; arbPnl -= (b.leg1Stake != null ? parseFloat(b.leg1Stake) : parseFloat(b.stake||0) / 2); }
     }
   });
 
