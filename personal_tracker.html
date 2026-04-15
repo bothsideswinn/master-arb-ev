@@ -130,8 +130,8 @@ h1{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
 
 
 /* ── Bet log rows ── */
-.log-header{display:grid;grid-template-columns:100px 1fr 60px 70px 80px 65px 100px 70px;gap:8px;padding:9px 16px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);border-bottom:.5px solid var(--border);background:var(--bg)}
-.log-row{display:grid;grid-template-columns:100px 1fr 60px 70px 80px 65px 100px 70px;gap:8px;padding:11px 16px;border-bottom:.5px solid var(--border);align-items:center;transition:background .1s}
+.log-header{display:grid;grid-template-columns:100px 1fr 60px 80px 70px 80px 65px 100px 70px;gap:8px;padding:9px 16px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);border-bottom:.5px solid var(--border);background:var(--bg)}
+.log-row{display:grid;grid-template-columns:100px 1fr 60px 80px 70px 80px 65px 100px 70px;gap:8px;padding:11px 16px;border-bottom:.5px solid var(--border);align-items:center;transition:background .1s}
 .log-row:last-child{border-bottom:none}
 .log-row:hover{background:#fafafa}
 .log-date{font-family:'Space Mono',monospace;font-size:10px;color:var(--text-muted);line-height:1.4}
@@ -152,7 +152,7 @@ h1{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
 .edit-row-btn:hover{border-color:var(--blue);color:var(--blue)}
 .delete-btn:hover{border-color:var(--red);color:var(--red)}
 @media(max-width:900px){
-  .log-header,.log-row{grid-template-columns:80px 1fr 55px 65px 70px 55px 90px 60px;font-size:11px}
+  .log-header,.log-row{grid-template-columns:80px 1fr 55px 70px 65px 70px 55px 90px 60px;font-size:11px}
 }
 @media(max-width:700px){
   .log-header{display:none}
@@ -257,6 +257,7 @@ h1{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
     <span>Date</span>
     <span>Matchup</span>
     <span>Type</span>
+    <span>Bet type</span>
     <span>Staked</span>
     <span>Profit</span>
     <span>ROI</span>
@@ -479,6 +480,18 @@ h1{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
         <select id="f-type" onchange="toggleBetType()">
           <option value="arb">Arbitrage</option>
           <option value="ev">+EV bet</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Bet type</label>
+        <select id="f-bet-type">
+          <option value="Moneyline">Moneyline</option>
+          <option value="Spread">Spread</option>
+          <option value="Over/Under">Over/Under</option>
+          <option value="Parlay">Parlay</option>
+          <option value="Prop">Prop</option>
+          <option value="Futures">Futures</option>
+          <option value="Other">Other</option>
         </select>
       </div>
       <div class="form-group">
@@ -838,6 +851,7 @@ function renderLog(pool) {
         <div class="log-game-sub">${bookSub}${b.notes?` · ${b.notes}`:''}</div>
       </div>
       <div class="log-cell">${typeTag}</div>
+      <div class="log-cell" style="font-size:11px;color:var(--text-secondary)">${b.betType||'—'}</div>
       <div class="log-cell">$${parseFloat(b.stake||0).toFixed(0)}</div>
       <div class="log-cell">${profitStr}</div>
       <div class="log-cell ${b.type==='ev'?'ev-col':''}">${isPending?'~':''}${roi}%</div>
@@ -883,6 +897,9 @@ function openForm(prefill={}) {
     document.getElementById('f-gametime-only').value = gt;
   }
   document.getElementById('f-notes').value = prefill.notes || '';
+  if (document.getElementById('f-bet-type')) {
+    document.getElementById('f-bet-type').value = prefill.betType || 'Moneyline';
+  }
   toggleBetType();
   document.getElementById('formOverlay').classList.add('open');
 }
@@ -911,6 +928,7 @@ function saveBet() {
     sport: document.getElementById('f-sport').value,
     status: document.getElementById('f-status').value,
     game, stake, profit, gametime,
+    betType: document.getElementById('f-bet-type') ? document.getElementById('f-bet-type').value : 'Moneyline',
     book1: document.getElementById('f-book1').value.trim(),
     book2: document.getElementById('f-book2').value.trim(),
     bookEv: document.getElementById('f-book-ev').value.trim(),
@@ -959,6 +977,9 @@ function editBet(id) {
   if (document.getElementById('f-gamedate')) document.getElementById('f-gamedate').value = gamedate;
   if (document.getElementById('f-gametime-only')) document.getElementById('f-gametime-only').value = gametime_only;
   document.getElementById('f-notes').value = b.notes || '';
+  if (document.getElementById('f-bet-type')) {
+    document.getElementById('f-bet-type').value = b.betType || 'Moneyline';
+  }
   toggleBetType();
   document.getElementById('formOverlay').classList.add('open');
 }
@@ -983,9 +1004,9 @@ function clearAll() {
 
 // ── EXPORT CSV ────────────────────────────────────────────────────────────────
 function exportCSV() {
-  const headers=['Date','Type','Sport','Matchup','Book1','Book2','Stake','Profit','ROI%','Status','GameTime','Notes'];
+  const headers=['Date','Type','BetType','Sport','Matchup','Book1','Book2','Stake','Profit','ROI%','Status','GameTime','Notes'];
   const rows=bets.map(b=>[
-    b.date,b.type,b.sport,`"${b.game||''}"`,b.book1||b.bookEv||'',b.book2||'',
+    b.date,b.type,b.betType||'',b.sport,`"${b.game||''}"`,b.book1||b.bookEv||'',b.book2||'',
     b.stake,b.profit,((parseFloat(b.profit||0)/parseFloat(b.stake||1))*100).toFixed(2),
     b.status,b.gametime||'',`"${b.notes||''}"`
   ]);
