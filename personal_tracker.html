@@ -335,7 +335,8 @@ h1{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
       <option value="pending">Pending</option>
     </select>
     <select id="oth-filter-sport" onchange="renderOthTable()" style="font-size:12px;padding:5px 10px;border-radius:var(--r);border:.5px solid var(--border);background:var(--bg-input);color:var(--text)"><option value="all">All sports</option></select>
-    <button onclick="exportOthCSV()" class="btn" style="margin-left:auto;font-size:12px">Export CSV</button>
+    <button onclick="exportOthCSV()" class="btn" style="font-size:12px">Export CSV</button>
+    <button onclick="clearAllOthBets()" class="btn danger" style="margin-left:auto;font-size:12px">Clear all</button>
   </div>
   <div class="panel" style="overflow-x:auto;margin-bottom:1.5rem">
     <table style="width:100%;border-collapse:collapse;font-size:12px">
@@ -344,6 +345,7 @@ h1{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
           <th style="text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500;white-space:nowrap">Date</th>
           <th style="text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500">Book</th>
           <th style="text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500">Sport</th>
+          <th style="text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500">League</th>
           <th style="text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500">Matchup</th>
           <th style="text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500">Odds</th>
           <th style="text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500">Stake</th>
@@ -401,6 +403,10 @@ h1{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
       <div style="display:flex;flex-direction:column;gap:4px">
         <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Book</span>
         <input type="text" id="oth-f-book" class="inp" placeholder="e.g. DraftKings">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">League</span>
+        <input type="text" id="oth-f-league" class="inp" placeholder="e.g. MLB, NBA, Champions League">
       </div>
       <div style="display:flex;flex-direction:column;gap:4px;grid-column:span 3">
         <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Matchup / Bet description</span>
@@ -1143,10 +1149,11 @@ function saveOthBet() {
   const profitIfWin = dec && stake ? +((dec-1)*stake).toFixed(2) : 0;
   const pnl = result==='win' ? profitIfWin : result==='loss' ? -stake : result==='push' ? 0 : profitIfWin;
 
+  const league = document.getElementById('oth-f-league') ? document.getElementById('oth-f-league').value.trim() : '';
   const bet = {
     id: othEditingId || String(Date.now()),
     date: date || new Date().toISOString().split('T')[0],
-    sport, book, game, odds, stake, pnl, result, notes,
+    sport, league, book, game, odds, stake, pnl, result, notes,
   };
 
   if (othEditingId) {
@@ -1178,6 +1185,7 @@ function editOthBet(id) {
   document.getElementById('oth-f-date').value   = b.date   || '';
   document.getElementById('oth-f-sport').value  = b.sport  || '🏀 NBA';
   document.getElementById('oth-f-book').value   = b.book   || '';
+  if (document.getElementById('oth-f-league')) document.getElementById('oth-f-league').value = b.league || '';
   document.getElementById('oth-f-game').value   = b.game   || '';
   document.getElementById('oth-f-odds').value   = b.odds   || '';
   document.getElementById('oth-f-stake').value  = b.stake  || '';
@@ -1424,6 +1432,7 @@ function renderOthTable() {
       <td style="padding:8px 10px;white-space:nowrap;color:var(--text-muted)">${b.date}</td>
       <td style="padding:8px 10px;white-space:nowrap">${b.book||'—'}</td>
       <td style="padding:8px 10px">${sport}</td>
+      <td style="padding:8px 10px;white-space:nowrap;color:var(--text-muted);font-size:11px">${b.league||'—'}</td>
       <td style="padding:8px 10px;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${b.game||''}">${b.game||'—'}</td>
       <td style="padding:8px 10px">${b.odds||'—'}</td>
       <td style="padding:8px 10px">$${parseFloat(b.stake||0).toFixed(2)}</td>
@@ -1438,9 +1447,16 @@ function renderOthTable() {
   }).join('');
 }
 
+function clearAllOthBets() {
+  if (!confirm('Delete ALL bets in the Other tab? This cannot be undone.')) return;
+  otherBets = [];
+  saveOther();
+  renderOther();
+}
+
 function exportOthCSV() {
   if(!otherBets.length){alert('No bets to export.');return;}
-  const headers=['date','sport','book','game','odds','stake','result','pnl','notes'];
+  const headers=['date','sport','league','book','game','odds','stake','result','pnl','notes'];
   const rows=otherBets.map(b=>headers.map(h=>h==='game'||h==='notes'?`"${(b[h]||'').replace(/"/g,'""')}"`:b[h]||'').join(','));
   const csv=[headers.join(','),...rows].join('\n');
   const a=document.createElement('a');
@@ -1556,6 +1572,7 @@ function importOthCSV(text) {
         stake: wager,
         result,
         pnl,
+        league: league,
         notes: isParlay ? 'Parlay' : betType,
       });
     });
@@ -1567,6 +1584,7 @@ function importOthCSV(text) {
         sport: r['sport'] || '⚽ Soccer',
         book: r['book'] || '',
         game: r['game'] || r['matchup'] || r['description'] || '',
+        league: r['league'] || '',
         odds: r['odds'] || '',
         stake: parseFloat(r['stake'] || 0) || 0,
         result: mapResult(r['result']),
