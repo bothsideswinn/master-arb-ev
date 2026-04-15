@@ -130,8 +130,8 @@ h1{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
 
 
 /* ── Bet log rows ── */
-.log-header{display:grid;grid-template-columns:100px 1fr 60px 80px 90px 70px 80px 65px 100px 70px;gap:8px;padding:9px 16px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);border-bottom:.5px solid var(--border);background:var(--bg)}
-.log-row{display:grid;grid-template-columns:100px 1fr 60px 80px 90px 70px 80px 65px 100px 70px;gap:8px;padding:11px 16px;border-bottom:.5px solid var(--border);align-items:center;transition:background .1s}
+.log-header{display:grid;grid-template-columns:90px 70px 1fr 60px 80px 90px 70px 80px 65px 100px 70px;gap:8px;padding:9px 16px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);border-bottom:.5px solid var(--border);background:var(--bg)}
+.log-row{display:grid;grid-template-columns:90px 70px 1fr 60px 80px 90px 70px 80px 65px 100px 70px;gap:8px;padding:11px 16px;border-bottom:.5px solid var(--border);align-items:center;transition:background .1s}
 .log-row:last-child{border-bottom:none}
 .log-row:hover{background:#fafafa}
 .log-date{font-family:'Space Mono',monospace;font-size:10px;color:var(--text-muted);line-height:1.4}
@@ -258,6 +258,7 @@ h1{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
 <div class="log-wrap">
   <div class="log-header">
     <span>Date</span>
+    <span>Time</span>
     <span>Matchup</span>
     <span>Type</span>
     <span>Bet type</span>
@@ -621,11 +622,27 @@ h1{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
       </div>
       <div class="form-group">
         <label>Sport</label>
-        <select id="f-sport">
-          <option>🏀 NBA</option><option>🏈 NFL</option><option>⚾ MLB</option>
-          <option>🏒 NHL</option><option>⚽ Soccer</option><option>🎾 Tennis</option>
-          <option>🥊 MMA</option><option>🏌️ Golf</option><option>🏉 Rugby</option><option>🏏 Cricket</option>
+        <select id="f-sport" onchange="updateLeagueDropdown()">
+          <option value="">Select sport...</option>
+          <option value="Baseball">Baseball</option>
+          <option value="Basketball">Basketball</option>
+          <option value="Football">Football</option>
+          <option value="Hockey">Hockey</option>
+          <option value="Soccer">Soccer</option>
+          <option value="Golf">Golf</option>
+          <option value="Tennis">Tennis</option>
+          <option value="MMA / Boxing">MMA / Boxing</option>
+          <option value="Rugby">Rugby</option>
+          <option value="Cricket">Cricket</option>
+          <option value="Other">Other</option>
         </select>
+      </div>
+      <div class="form-group">
+        <label>League</label>
+        <select id="f-league-select" onchange="if(this.value==='__other__'){document.getElementById('f-league-custom').style.display='';document.getElementById('f-league-custom').focus();}else{document.getElementById('f-league-custom').style.display='none';}">
+          <option value="">Select league...</option>
+        </select>
+        <input type="text" id="f-league-custom" placeholder="Type league name..." style="display:none;margin-top:4px" class="inp">
       </div>
       <div class="form-group">
         <label>Status</label>
@@ -636,17 +653,35 @@ h1{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
         </select>
       </div>
       <div class="form-group" style="grid-column:span 2;">
-        <label>Matchup</label>
+        <label>Matchup <span style="font-weight:400;color:var(--text-muted);font-size:10px">Team A vs Team B</span></label>
         <input type="text" id="f-game" placeholder="e.g. Lakers vs Celtics">
+      </div>
+      <div class="form-group" style="grid-column:span 2;">
+        <label>Bet description <span style="font-weight:400;color:var(--text-muted);font-size:10px">What you bet on</span></label>
+        <input type="text" id="f-bet-desc" placeholder="e.g. Lakers ML, Over 224.5, LeBron 25+ pts">
       </div>
       <!-- ARB FIELDS -->
       <div class="form-group" id="fg-book1">
         <label>Book 1</label>
-        <input type="text" id="f-book1" placeholder="e.g. Bovada">
+        <select id="f-book1-select" onchange="document.getElementById('f-book1').value=this.value==='__other__'?'':this.value; if(this.value==='__other__'){document.getElementById('f-book1').style.display='';document.getElementById('f-book1').focus();}else{document.getElementById('f-book1').style.display='none';}">
+          <option value="">Select book...</option>
+          <option value="Bovada">Bovada</option>
+          <option value="BetOnline">BetOnline</option>
+          <option value="Hard Rock Bet">Hard Rock Bet</option>
+          <option value="__other__">Other (type below)</option>
+        </select>
+        <input type="text" id="f-book1" placeholder="Type book name..." style="display:none;margin-top:4px" class="inp">
       </div>
       <div class="form-group" id="fg-book2">
         <label>Book 2</label>
-        <input type="text" id="f-book2" placeholder="e.g. BetOnline">
+        <select id="f-book2-select" onchange="document.getElementById('f-book2').value=this.value==='__other__'?'':this.value; if(this.value==='__other__'){document.getElementById('f-book2').style.display='';document.getElementById('f-book2').focus();}else{document.getElementById('f-book2').style.display='none';}">
+          <option value="">Select book...</option>
+          <option value="Bovada">Bovada</option>
+          <option value="BetOnline">BetOnline</option>
+          <option value="Hard Rock Bet">Hard Rock Bet</option>
+          <option value="__other__">Other (type below)</option>
+        </select>
+        <input type="text" id="f-book2" placeholder="Type book name..." style="display:none;margin-top:4px" class="inp">
       </div>
       <div class="form-group" id="fg-leg1-odds">
         <label>Leg 1 odds</label>
@@ -1032,10 +1067,14 @@ function renderLog(pool) {
     const bookSub=b.type==='ev'?`${b.bookEv||''}`:b.book1&&b.book2?`${b.book1} × ${b.book2}`:'';
     return `<div class="log-row" style="${isVoid?'opacity:.4':''}">
       <div class="log-date">
-        ${(b.gamedate || b.gametime) ? `<div style="font-size:10px;color:var(--yellow);line-height:1.5;">${b.gamedate || ''}<br>${b.gametimeonly || (b.gametime ? b.gametime.split(' · ').slice(1).join(' · ') : '')}</div>` : `<div style="color:var(--text-muted);">${b.date||'—'}</div>`}
+        <div style="font-size:11px;color:var(--text)">${b.gamedate || b.date || '—'}</div>
+      </div>
+      <div class="log-cell" style="font-size:11px;color:var(--yellow)">
+        ${b.gametimeonly || (b.gametime ? b.gametime.split(' · ').slice(1).join('') : '—')}
       </div>
       <div>
         <div class="log-game-title">${b.game||'—'}</div>
+        ${b.betDesc ? `<div style="font-size:10px;color:var(--blue);margin-top:1px">${b.betDesc}</div>` : ''}
         <div class="log-game-sub">${bookSub}${b.notes?` · ${b.notes}`:''}</div>
       </div>
       <div class="log-cell">${typeTag}</div>
@@ -1089,6 +1128,13 @@ function openForm(prefill={}) {
     document.getElementById('f-gametime-only').value = gt;
   }
   document.getElementById('f-notes').value = prefill.notes || '';
+  if (document.getElementById('f-bet-desc')) document.getElementById('f-bet-desc').value = prefill.betDesc || '';
+  if (document.getElementById('f-sport')) { document.getElementById('f-sport').value = prefill.sport || ''; updateLeagueDropdown(); }
+  if (document.getElementById('f-league-select') && prefill.league) {
+    const sel = document.getElementById('f-league-select');
+    const opt = [...sel.options].find(o => o.value === prefill.league);
+    if (opt) { sel.value = prefill.league; } else { sel.value = '__other__'; document.getElementById('f-league-custom').style.display=''; document.getElementById('f-league-custom').value = prefill.league; }
+  }
   if (document.getElementById('f-bet-type')) {
     document.getElementById('f-bet-type').value = prefill.betType || 'Moneyline';
   }
@@ -1135,9 +1181,11 @@ function saveBet() {
     id: currentEditId || String(Date.now()),
     date: document.getElementById('f-date').value,
     type,
-    sport: document.getElementById('f-sport').value,
+    sport: document.getElementById('f-sport').value || '🏀 NBA',
     status: document.getElementById('f-status').value,
     game, stake, profit, gametime,
+    betDesc: document.getElementById('f-bet-desc') ? document.getElementById('f-bet-desc').value.trim() : '',
+    league: getLeagueValue(),
     gamedate: document.getElementById('f-gamedate') ? document.getElementById('f-gamedate').value.trim() : '',
     gametimeonly: document.getElementById('f-gametime-only') ? document.getElementById('f-gametime-only').value.trim() : '',
     betType: document.getElementById('f-bet-type') ? document.getElementById('f-bet-type').value : 'Moneyline',
@@ -1204,6 +1252,24 @@ function editBet(id) {
   if (document.getElementById('f-gamedate')) document.getElementById('f-gamedate').value = gamedate;
   if (document.getElementById('f-gametime-only')) document.getElementById('f-gametime-only').value = gametime_only;
   document.getElementById('f-notes').value = b.notes || '';
+  if (document.getElementById('f-bet-desc')) document.getElementById('f-bet-desc').value = b.betDesc || '';
+  if (document.getElementById('f-sport')) { document.getElementById('f-sport').value = b.sport || ''; updateLeagueDropdown(); }
+  if (document.getElementById('f-league-select') && b.league) {
+    const sel2 = document.getElementById('f-league-select');
+    const opt2 = [...sel2.options].find(o => o.value === b.league);
+    if (opt2) { sel2.value = b.league; } else { sel2.value = '__other__'; document.getElementById('f-league-custom').style.display=''; document.getElementById('f-league-custom').value = b.league; }
+  }
+  // Pre-fill book selects
+  ['1','2'].forEach(n => {
+    const sel3 = document.getElementById('f-book'+n+'-select');
+    const inp3 = document.getElementById('f-book'+n);
+    const val  = n==='1' ? b.book1 : b.book2;
+    if (sel3 && val) {
+      const opt3 = [...sel3.options].find(o => o.value === val);
+      if (opt3) { sel3.value = val; if(inp3) inp3.style.display='none'; }
+      else { sel3.value = '__other__'; if(inp3) { inp3.style.display=''; inp3.value = val; } }
+    }
+  });
   if (document.getElementById('f-bet-type')) {
     document.getElementById('f-bet-type').value = b.betType || 'Moneyline';
   }
@@ -1328,6 +1394,52 @@ window.logBetFromDashboard = function(prefill) {
 })();
 
 render();
+
+
+// ── Sport/League data ─────────────────────────────────────────────────────────
+const SPORT_LEAGUES = {
+  'Baseball':      ['MLB','NCAA Baseball','World Baseball Classic','International','Other'],
+  'Basketball':    ['NBA','NCAA Basketball','WNBA','G League','EuroLeague','International','Other'],
+  'Football':      ['NFL','NCAA Football','CFL','XFL','Other'],
+  'Hockey':        ['NHL','AHL','KHL','NCAA Hockey','International','Other'],
+  'Soccer':        ['MLS','EPL','La Liga','Bundesliga','Serie A','Ligue 1','Champions League','Europa League','Conference League','World Cup','Copa America','Euros','NWSL','Other'],
+  'Golf':          ['PGA Tour','Masters Tournament','US Open','The Open Championship','PGA Championship','Ryder Cup','LIV Golf','LPGA','Other'],
+  'Tennis':        ['ATP','WTA','US Open','Wimbledon','French Open','Australian Open','Davis Cup','Other'],
+  'MMA / Boxing':  ['UFC','Bellator','ONE Championship','PFL','Boxing','Other'],
+  'Rugby':         ['NFL Rugby','Super Rugby','Six Nations','Rugby World Cup','NRL','Other'],
+  'Cricket':       ['IPL','Test Cricket','ODI','T20 World Cup','The Ashes','Other'],
+  'Other':         ['Other'],
+};
+
+function updateLeagueDropdown() {
+  const sport = document.getElementById('f-sport').value;
+  const sel   = document.getElementById('f-league-select');
+  if (!sel) return;
+  const leagues = SPORT_LEAGUES[sport] || ['Other'];
+  sel.innerHTML = '<option value="">Select league...</option>';
+  leagues.forEach(l => {
+    const o = document.createElement('option');
+    o.value = l; o.textContent = l;
+    sel.appendChild(o);
+  });
+  const otherOpt = document.createElement('option');
+  otherOpt.value = '__other__'; otherOpt.textContent = 'Other (type below)';
+  sel.appendChild(otherOpt);
+  // Hide custom input
+  const custom = document.getElementById('f-league-custom');
+  if (custom) custom.style.display = 'none';
+}
+
+function getLeagueValue() {
+  const sel    = document.getElementById('f-league-select');
+  const custom = document.getElementById('f-league-custom');
+  if (!sel) return '';
+  if (sel.value === '__other__' || sel.value === '') {
+    return custom ? custom.value.trim() : '';
+  }
+  return sel.value;
+}
+// ──────────────────────────────────────────────────────────────────────────────
 
 // ── Auto-calculators ──────────────────────────────────────────────────────
 function toDecimal(american) {
