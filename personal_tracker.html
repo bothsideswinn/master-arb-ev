@@ -355,9 +355,13 @@ h1{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
         <tr style="border-bottom:.5px solid var(--border);background:var(--bg)">
           <th style="text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500;white-space:nowrap;position:sticky;top:0;background:var(--bg);z-index:1">Date</th>
           <th style="position:sticky;top:0;background:var(--bg);z-index:1;text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500">Book</th>
+          <th style="position:sticky;top:0;background:var(--bg);z-index:1;text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500">Date</th>
+          <th style="position:sticky;top:0;background:var(--bg);z-index:1;text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500">Time</th>
+          <th style="position:sticky;top:0;background:var(--bg);z-index:1;text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500">Book</th>
           <th style="position:sticky;top:0;background:var(--bg);z-index:1;text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500">Sport</th>
           <th style="position:sticky;top:0;background:var(--bg);z-index:1;text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500">League</th>
           <th style="position:sticky;top:0;background:var(--bg);z-index:1;text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500">Matchup</th>
+          <th style="position:sticky;top:0;background:var(--bg);z-index:1;text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500">Bet desc</th>
           <th style="position:sticky;top:0;background:var(--bg);z-index:1;text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500">Odds</th>
           <th style="position:sticky;top:0;background:var(--bg);z-index:1;text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500">Stake</th>
           <th style="position:sticky;top:0;background:var(--bg);z-index:1;text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500">P&amp;L</th>
@@ -395,45 +399,116 @@ h1{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
   <!-- Inline log form -->
   <div class="panel" style="margin-bottom:1.25rem">
     <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:14px;display:flex;align-items:center;justify-content:space-between">
-      Log a bet
+      <span id="oth-form-title">Log a bet</span>
       <button class="btn primary" onclick="saveOthBet()" style="font-size:12px;padding:6px 16px">Save bet</button>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;flex-wrap:wrap">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+
+      <!-- Row 1: Date, Sport, Book -->
       <div style="display:flex;flex-direction:column;gap:4px">
         <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Date</span>
         <input type="date" id="oth-f-date" class="inp">
       </div>
       <div style="display:flex;flex-direction:column;gap:4px">
         <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Sport</span>
-        <select id="oth-f-sport" class="sel">
-          <option>🏀 NBA</option><option>🏈 NFL</option><option>⚾ MLB</option>
-          <option>🏒 NHL</option><option>⚽ Soccer</option><option>🎾 Tennis</option>
-          <option>🥊 MMA</option><option>🏌️ Golf</option><option>🏉 Rugby</option><option>🏏 Cricket</option>
+        <select id="oth-f-sport" class="sel" onchange="updateOthLeagueDropdown()">
+          <option value="">Select sport...</option>
+          <option value="Baseball">Baseball</option>
+          <option value="Basketball">Basketball</option>
+          <option value="Football">Football</option>
+          <option value="Hockey">Hockey</option>
+          <option value="Soccer">Soccer</option>
+          <option value="Golf">Golf</option>
+          <option value="Tennis">Tennis</option>
+          <option value="MMA / Boxing">MMA / Boxing</option>
+          <option value="Rugby">Rugby</option>
+          <option value="Cricket">Cricket</option>
+          <option value="Other">Other</option>
         </select>
+        <input type="text" id="oth-f-sport-custom" class="inp" placeholder="Type sport..." style="display:none;margin-top:4px">
       </div>
       <div style="display:flex;flex-direction:column;gap:4px">
         <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Book</span>
-        <input type="text" id="oth-f-book" class="inp" placeholder="e.g. DraftKings">
+        <select id="oth-f-book-select" class="sel" onchange="if(this.value==='__other__'){document.getElementById('oth-f-book').style.display='';document.getElementById('oth-f-book').focus();}else{document.getElementById('oth-f-book').value=this.value;document.getElementById('oth-f-book').style.display='none';}">
+          <option value="">Select book...</option>
+          <option value="Bovada">Bovada</option>
+          <option value="BetOnline">BetOnline</option>
+          <option value="Hard Rock Bet">Hard Rock Bet</option>
+          <option value="__other__">Other (type below)</option>
+        </select>
+        <input type="text" id="oth-f-book" class="inp" placeholder="Type book name..." style="display:none;margin-top:4px">
       </div>
+
+      <!-- Row 2: League, Game time, Contest date -->
       <div style="display:flex;flex-direction:column;gap:4px">
         <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">League</span>
-        <input type="text" id="oth-f-league" class="inp" placeholder="e.g. MLB, NBA, Champions League">
+        <select id="oth-f-league-select" class="sel" onchange="if(this.value==='__other__'){document.getElementById('oth-f-league').style.display='';document.getElementById('oth-f-league').focus();}else{document.getElementById('oth-f-league').style.display='none';}">
+          <option value="">Select league...</option>
+        </select>
+        <input type="text" id="oth-f-league" class="inp" placeholder="Type league name..." style="display:none;margin-top:4px">
       </div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Contest date</span>
+        <input type="date" id="oth-f-gamedate" class="inp">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Contest time</span>
+        <input type="text" id="oth-f-gametime" class="inp" placeholder="e.g. 7:05 PM">
+      </div>
+
+      <!-- Row 3: Matchup (full width) -->
       <div style="display:flex;flex-direction:column;gap:4px;grid-column:span 3">
-        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Matchup / Bet description</span>
-        <input type="text" id="oth-f-game" class="inp" placeholder="e.g. Lakers vs Celtics — Lakers ML">
+        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Matchup <span style="font-weight:400">Team A vs Team B</span></span>
+        <input type="text" id="oth-f-game" class="inp" placeholder="e.g. Lakers vs Celtics">
+      </div>
+
+      <!-- Row 4: Bet description (full width) -->
+      <div style="display:flex;flex-direction:column;gap:4px;grid-column:span 3">
+        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Bet description <span style="font-weight:400">What you bet on</span></span>
+        <input type="text" id="oth-f-betdesc" class="inp" placeholder="e.g. Lakers ML, LeBron 25+ pts, Over 224.5">
+      </div>
+
+      <!-- Row 5: Bet type, Odds, Stake -->
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Bet type</span>
+        <select id="oth-f-bettype" class="sel" onchange="if(this.value==='Other'){document.getElementById('oth-f-bettype-custom').style.display='';document.getElementById('oth-f-bettype-custom').focus();}else{document.getElementById('oth-f-bettype-custom').style.display='none';}">
+          <option value="Moneyline">Moneyline</option>
+          <option value="Spread">Spread</option>
+          <option value="Over/Under">Over/Under</option>
+          <option value="Parlay">Parlay</option>
+          <option value="Prop">Prop</option>
+          <option value="Futures">Futures</option>
+          <option value="Other">Other</option>
+        </select>
+        <input type="text" id="oth-f-bettype-custom" class="inp" placeholder="Type bet type..." style="display:none;margin-top:4px">
       </div>
       <div style="display:flex;flex-direction:column;gap:4px">
         <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Odds (American)</span>
-        <input type="text" id="oth-f-odds" class="inp" placeholder="e.g. -110" oninput="calcOthProfit()">
+        <input type="text" id="oth-f-odds" class="inp" placeholder="e.g. -110" oninput="calcOthFields()">
       </div>
       <div style="display:flex;flex-direction:column;gap:4px">
         <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Stake ($)</span>
-        <input type="number" id="oth-f-stake" class="inp" placeholder="50" oninput="calcOthProfit()">
+        <input type="number" id="oth-f-stake" class="inp" placeholder="e.g. 50" oninput="calcOthFields()">
+      </div>
+
+      <!-- Row 6: Profit, Total payout, Unit size -->
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Profit ($) <span style="font-weight:400">if wins</span></span>
+        <input type="number" id="oth-f-profit" class="inp" placeholder="auto-calculated" oninput="calcOthPayout()">
       </div>
       <div style="display:flex;flex-direction:column;gap:4px">
-        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Profit if wins ($)</span>
-        <input type="number" id="oth-f-profit" class="inp" placeholder="auto-calculated" readonly style="opacity:.7">
+        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Total payout ($) <span style="font-weight:400">if wins</span></span>
+        <input type="number" id="oth-f-payout" class="inp" placeholder="auto-calculated" readonly style="opacity:.7">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Unit size ($)</span>
+        <input type="number" id="oth-f-unitsize" class="inp" placeholder="e.g. 10" oninput="calcOthFields()">
+      </div>
+
+      <!-- Row 7: Units staked, Result, Notes -->
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Units staked <span style="font-weight:400">auto-calc</span></span>
+        <input type="number" id="oth-f-units" class="inp" placeholder="auto-calculated" readonly style="opacity:.7">
       </div>
       <div style="display:flex;flex-direction:column;gap:4px">
         <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Result</span>
@@ -444,12 +519,13 @@ h1{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
           <option value="push">Push</option>
         </select>
       </div>
-      <div style="display:flex;flex-direction:column;gap:4px;grid-column:span 2">
+      <div style="display:flex;flex-direction:column;gap:4px">
         <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Notes (optional)</span>
-        <input type="text" id="oth-f-notes" class="inp" placeholder="e.g. line value, sharp action, etc.">
+        <input type="text" id="oth-f-notes" class="inp" placeholder="e.g. sharp action, line value...">
       </div>
+
     </div>
-    <div id="oth-form-msg" style="font-size:12px;margin-top:8px"></div>
+    <div id="oth-form-msg" style="font-size:12px;margin-top:10px"></div>
   </div>
 
 </div><!-- /other-section -->
@@ -1558,25 +1634,90 @@ function toDecimalOth(american) {
   return n >= 0 ? (n/100)+1 : (100/Math.abs(n))+1;
 }
 
-function calcOthProfit() {
-  var odds  = document.getElementById('oth-f-odds').value;
-  var stake = parseFloat(document.getElementById('oth-f-stake').value);
-  var profEl = document.getElementById('oth-f-profit');
-  var dec = toDecimalOth(odds);
-  if (!dec || !stake || stake <= 0) { profEl.value = ''; return; }
-  profEl.value = ((dec - 1) * stake).toFixed(2);
+function calcOthFields() {
+  var odds     = document.getElementById('oth-f-odds').value;
+  var stake    = parseFloat(document.getElementById('oth-f-stake').value) || 0;
+  var unitSize = parseFloat(document.getElementById('oth-f-unitsize').value) || 0;
+  var profEl   = document.getElementById('oth-f-profit');
+  var payEl    = document.getElementById('oth-f-payout');
+  var unitsEl  = document.getElementById('oth-f-units');
+  var dec      = toDecimalOth(odds);
+  // Auto-calc profit from odds + stake
+  if (dec && stake > 0) {
+    var profit = (dec - 1) * stake;
+    if (profEl && !profEl._manualEdit) profEl.value = profit.toFixed(2);
+    if (payEl) payEl.value = (stake + profit).toFixed(2);
+  } else {
+    if (payEl) payEl.value = '';
+  }
+  // Auto-calc units staked
+  if (unitSize > 0 && stake > 0) {
+    if (unitsEl) unitsEl.value = (stake / unitSize).toFixed(2);
+  } else {
+    if (unitsEl) unitsEl.value = '';
+  }
 }
+function calcOthPayout() {
+  // Called when profit is manually edited
+  var stake  = parseFloat(document.getElementById('oth-f-stake').value) || 0;
+  var profit = parseFloat(document.getElementById('oth-f-profit').value) || 0;
+  var payEl  = document.getElementById('oth-f-payout');
+  if (payEl) payEl.value = (stake + profit).toFixed(2);
+}
+// Keep backward compat
+function calcOthProfit() { calcOthFields(); }
 
-function saveOthBet() {
-  const date  = document.getElementById('oth-f-date').value;
+function getOthBookValue() {
+  const sel = document.getElementById('oth-f-book-select');
+  const inp = document.getElementById('oth-f-book');
+  if (!sel) return inp ? inp.value.trim() : '';
+  return sel.value === '__other__' || sel.value === '' ? (inp ? inp.value.trim() : '') : sel.value;
+}
+function getOthLeagueValue() {
+  const sel = document.getElementById('oth-f-league-select');
+  const inp = document.getElementById('oth-f-league');
+  if (!sel) return inp ? inp.value.trim() : '';
+  return sel.value === '__other__' || sel.value === '' ? (inp ? inp.value.trim() : '') : sel.value;
+}
+function getOthSportValue() {
+  const sel = document.getElementById('oth-f-sport');
+  if (!sel) return '';
+  return sel.value === 'Other' ? (document.getElementById('oth-f-sport-custom') ? document.getElementById('oth-f-sport-custom').value.trim() : '') : sel.value;
+}
+function getOthBetTypeValue() {
+  const sel = document.getElementById('oth-f-bettype');
+  if (!sel) return 'Moneyline';
+  return sel.value === 'Other' ? (document.getElementById('oth-f-bettype-custom') ? document.getElementById('oth-f-bettype-custom').value.trim() : 'Other') : sel.value;
+}
+function updateOthLeagueDropdown() {
   const sport = document.getElementById('oth-f-sport').value;
-  const book  = document.getElementById('oth-f-book').value.trim();
-  const game  = document.getElementById('oth-f-game').value.trim();
-  const odds  = document.getElementById('oth-f-odds').value.trim();
-  const stake = parseFloat(document.getElementById('oth-f-stake').value) || 0;
-  const result = document.getElementById('oth-f-result').value;
-  const notes = document.getElementById('oth-f-notes').value.trim();
-  const msgEl = document.getElementById('oth-form-msg');
+  const sel   = document.getElementById('oth-f-league-select');
+  if (!sel) return;
+  const leagues = (typeof SPORT_LEAGUES !== 'undefined' && SPORT_LEAGUES[sport]) ? SPORT_LEAGUES[sport] : ['Other'];
+  sel.innerHTML = '<option value="">Select league...</option>';
+  leagues.forEach(l => { const o=document.createElement('option'); o.value=l; o.textContent=l; sel.appendChild(o); });
+  const oo=document.createElement('option'); oo.value='__other__'; oo.textContent='Other (type below)'; sel.appendChild(oo);
+  const li = document.getElementById('oth-f-league'); if(li) li.style.display='none';
+  // Show/hide sport custom
+  const sc = document.getElementById('oth-f-sport-custom');
+  if (sc) sc.style.display = sport==='Other' ? '' : 'none';
+}
+function saveOthBet() {
+  const date    = document.getElementById('oth-f-date').value;
+  const sport   = getOthSportValue();
+  const book    = getOthBookValue();
+  const league  = getOthLeagueValue();
+  const game    = document.getElementById('oth-f-game').value.trim();
+  const betdesc = document.getElementById('oth-f-betdesc') ? document.getElementById('oth-f-betdesc').value.trim() : '';
+  const bettype = getOthBetTypeValue();
+  const odds    = document.getElementById('oth-f-odds').value.trim();
+  const stake   = parseFloat(document.getElementById('oth-f-stake').value) || 0;
+  const result  = document.getElementById('oth-f-result').value;
+  const notes   = document.getElementById('oth-f-notes').value.trim();
+  const gamedate  = document.getElementById('oth-f-gamedate') ? document.getElementById('oth-f-gamedate').value : '';
+  const gametime  = document.getElementById('oth-f-gametime') ? document.getElementById('oth-f-gametime').value.trim() : '';
+  const unitsize  = parseFloat(document.getElementById('oth-f-unitsize') ? document.getElementById('oth-f-unitsize').value : 0) || 0;
+  const msgEl   = document.getElementById('oth-form-msg');
 
   if (!game || !stake) {
     msgEl.innerHTML = '<span style="color:var(--red)">Please fill in matchup and stake.</span>';
@@ -1584,14 +1725,16 @@ function saveOthBet() {
   }
 
   const dec = toDecimalOth(odds);
-  const profitIfWin = dec && stake ? +((dec-1)*stake).toFixed(2) : 0;
+  const profitIfWin = dec && stake ? +((dec-1)*stake).toFixed(2) : parseFloat(document.getElementById('oth-f-profit').value) || 0;
   const pnl = result==='win' ? profitIfWin : result==='loss' ? -stake : result==='push' ? 0 : profitIfWin;
 
-  const league = document.getElementById('oth-f-league') ? document.getElementById('oth-f-league').value.trim() : '';
   const bet = {
     id: othEditingId || String(Date.now()),
     date: date || new Date().toISOString().split('T')[0],
-    sport, league, book, game, odds, stake, pnl, result, notes,
+    sport, league, book, game, betdesc, bettype, odds, stake, pnl, result, notes,
+    gamedate, gametime,
+    unitsize: unitsize || null,
+    units: unitsize > 0 ? +(stake/unitsize).toFixed(2) : null,
   };
 
   if (othEditingId) {
@@ -1604,13 +1747,16 @@ function saveOthBet() {
 
   saveOther();
   // Reset form
-  document.getElementById('oth-f-game').value  = '';
-  document.getElementById('oth-f-book').value  = '';
-  document.getElementById('oth-f-odds').value  = '';
-  document.getElementById('oth-f-stake').value = '';
-  document.getElementById('oth-f-profit').value= '';
-  document.getElementById('oth-f-result').value= 'pending';
-  document.getElementById('oth-f-notes').value = '';
+  ['oth-f-game','oth-f-betdesc','oth-f-odds','oth-f-stake','oth-f-profit','oth-f-payout','oth-f-notes','oth-f-unitsize','oth-f-units','oth-f-gamedate','oth-f-gametime'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  document.getElementById('oth-f-result').value = 'pending';
+  const bs = document.getElementById('oth-f-book-select'); if(bs) bs.value='';
+  const bi = document.getElementById('oth-f-book'); if(bi) { bi.value=''; bi.style.display='none'; }
+  const ls = document.getElementById('oth-f-league-select'); if(ls) ls.innerHTML='<option value="">Select league...</option>';
+  const li = document.getElementById('oth-f-league'); if(li) { li.value=''; li.style.display='none'; }
+  document.getElementById('oth-f-sport').value = '';
+  const ft = document.getElementById('oth-form-title'); if(ft) ft.textContent='Log a bet';
   msgEl.innerHTML = '<span style="color:var(--green)">Bet saved!</span>';
   setTimeout(() => { msgEl.innerHTML = ''; }, 2000);
   renderOther();
@@ -1621,16 +1767,43 @@ function editOthBet(id) {
   if (!b) return;
   othEditingId = id;
   document.getElementById('oth-f-date').value   = b.date   || '';
-  document.getElementById('oth-f-sport').value  = b.sport  || '🏀 NBA';
-  document.getElementById('oth-f-book').value   = b.book   || '';
-  if (document.getElementById('oth-f-league')) document.getElementById('oth-f-league').value = b.league || '';
   document.getElementById('oth-f-game').value   = b.game   || '';
   document.getElementById('oth-f-odds').value   = b.odds   || '';
   document.getElementById('oth-f-stake').value  = b.stake  || '';
   document.getElementById('oth-f-profit').value = b.pnl > 0 ? b.pnl : '';
   document.getElementById('oth-f-result').value = b.result || 'pending';
   document.getElementById('oth-f-notes').value  = b.notes  || '';
-  document.getElementById('oth-form-msg').innerHTML = '<span style="color:var(--blue)">Editing bet — click Save bet to update.</span>';
+  if (document.getElementById('oth-f-betdesc'))  document.getElementById('oth-f-betdesc').value  = b.betdesc || '';
+  if (document.getElementById('oth-f-gamedate')) document.getElementById('oth-f-gamedate').value = b.gamedate || '';
+  if (document.getElementById('oth-f-gametime')) document.getElementById('oth-f-gametime').value = b.gametime || '';
+  if (document.getElementById('oth-f-unitsize')) document.getElementById('oth-f-unitsize').value = b.unitsize || '';
+  // Sport
+  const sportSel = document.getElementById('oth-f-sport');
+  if (sportSel) { sportSel.value = b.sport || ''; updateOthLeagueDropdown(); }
+  // League
+  const lSel = document.getElementById('oth-f-league-select');
+  if (lSel && b.league) {
+    const lOpt = [...lSel.options].find(o => o.value === b.league);
+    if (lOpt) { lSel.value = b.league; }
+    else { lSel.value = '__other__'; const li=document.getElementById('oth-f-league'); if(li){li.style.display='';li.value=b.league;} }
+  }
+  // Book
+  const bSel = document.getElementById('oth-f-book-select');
+  if (bSel && b.book) {
+    const bOpt = [...bSel.options].find(o => o.value === b.book);
+    if (bOpt) { bSel.value = b.book; const bi=document.getElementById('oth-f-book'); if(bi){bi.style.display='none';bi.value=b.book;} }
+    else { bSel.value = '__other__'; const bi=document.getElementById('oth-f-book'); if(bi){bi.style.display='';bi.value=b.book;} }
+  }
+  // Bet type
+  const btSel = document.getElementById('oth-f-bettype');
+  if (btSel && b.bettype) {
+    const btOpt = [...btSel.options].find(o => o.value === b.bettype);
+    if (btOpt) { btSel.value = b.bettype; }
+    else { btSel.value = 'Other'; const btc=document.getElementById('oth-f-bettype-custom'); if(btc){btc.style.display='';btc.value=b.bettype;} }
+  }
+  calcOthFields();
+  const ft = document.getElementById('oth-form-title'); if(ft) ft.textContent='Edit bet';
+  document.getElementById('oth-form-msg').innerHTML = '<span style="color:var(--blue)">Editing — click Save bet to update.</span>';
   document.getElementById('oth-f-game').scrollIntoView({behavior:'smooth', block:'center'});
 }
 
@@ -1867,11 +2040,13 @@ function renderOthTable() {
     const badge=badges[b.result]||badges.pending;
     const sport=(b.sport||'').replace(/^[^ ]+ /,'');
     return `<tr style="border-bottom:.5px solid var(--border)">
-      <td style="padding:8px 10px;white-space:nowrap;color:var(--text-muted)">${b.date}</td>
+      <td style="padding:8px 10px;white-space:nowrap;color:var(--text-muted)">${b.gamedate||b.date}</td>
+      <td style="padding:8px 10px;white-space:nowrap;color:var(--text-muted);font-size:11px">${b.gametime||'—'}</td>
       <td style="padding:8px 10px;white-space:nowrap">${b.book||'—'}</td>
       <td style="padding:8px 10px">${sport}</td>
       <td style="padding:8px 10px;white-space:nowrap;color:var(--text-muted);font-size:11px">${b.league||'—'}</td>
-      <td style="padding:8px 10px;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${b.game||''}">${b.game||'—'}</td>
+      <td style="padding:8px 10px;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${b.game||''}">${b.game||'—'}</td>
+      <td style="padding:8px 10px;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11px;color:var(--blue)" title="${b.betdesc||''}">${b.betdesc||'—'}</td>
       <td style="padding:8px 10px">${b.odds||'—'}</td>
       <td style="padding:8px 10px">${fmtMoney(parseFloat(b.stake||0))}</td>
       <td style="padding:8px 10px;font-weight:600;color:${pnlColor}">${pnlStr}</td>
