@@ -1344,8 +1344,15 @@ function calcArb() {
 function updateTotalFromLegs() {
   var s1 = parseFloat(document.getElementById('f-leg1-stake').value) || 0;
   var s2 = parseFloat(document.getElementById('f-leg2-stake').value) || 0;
-  var stakeEl = document.getElementById('f-stake');
+  var stakeEl  = document.getElementById('f-stake');
+  var profitEl = document.getElementById('f-profit');
   if (stakeEl) stakeEl.value = (s1 + s2).toFixed(2);
+  // Recalculate guaranteed profit from leg 1 odds × leg 1 stake - total staked
+  var d1 = toDecimal(document.getElementById('calc-odds1').value);
+  if (d1 && s1 > 0 && s2 > 0) {
+    var profit = (s1 * d1) - (s1 + s2);
+    if (profitEl) profitEl.value = profit.toFixed(2);
+  }
 }
 
 function calcEVProfit() {
