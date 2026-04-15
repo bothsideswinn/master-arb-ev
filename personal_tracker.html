@@ -628,7 +628,7 @@ h1{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
       </div>
       <div class="form-group">
         <label>Status</label>
-        <select id="f-status">
+        <select id="f-status" onchange="toggleBetType()">
           <option value="pending">🟡 Pending</option>
           <option value="settled">🟢 Settled</option>
           <option value="void">🔴 Void</option>
@@ -646,6 +646,14 @@ h1{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
       <div class="form-group" id="fg-book2">
         <label>Book 2</label>
         <input type="text" id="f-book2" placeholder="e.g. BetOnline">
+      </div>
+      <div class="form-group" id="fg-winning-leg" style="display:none;">
+        <label>Which leg won?</label>
+        <select id="f-winning-leg">
+          <option value="">Pending / not settled yet</option>
+          <option value="1">Leg 1 won (Book 1)</option>
+          <option value="2">Leg 2 won (Book 2)</option>
+        </select>
       </div>
       <!-- ARB CALCULATOR -->
       <div class="form-group" id="fg-arb-calc">
@@ -1023,9 +1031,12 @@ function renderLog(pool) {
 
 // ── FORM ──────────────────────────────────────────────────────────────────────
 function toggleBetType() {
-  const t=document.getElementById('f-type').value;
+  const t = document.getElementById('f-type').value;
+  const s = document.getElementById('f-status').value;
   ['fg-book1','fg-book2','fg-stake','fg-profit'].forEach(id=>document.getElementById(id).style.display=t==='arb'?'':'none');
   ['fg-book-ev','fg-odds','fg-ev-pct','fg-ev-stake','fg-ev-profit'].forEach(id=>document.getElementById(id).style.display=t==='ev'?'':'none');
+  const wl = document.getElementById('fg-winning-leg');
+  if (wl) wl.style.display = (t==='arb' && s==='settled') ? '' : 'none';
 }
 function openForm(prefill={}) {
   editingId = prefill.id || null;
@@ -1053,6 +1064,9 @@ function openForm(prefill={}) {
   document.getElementById('f-notes').value = prefill.notes || '';
   if (document.getElementById('f-bet-type')) {
     document.getElementById('f-bet-type').value = prefill.betType || 'Moneyline';
+  }
+  if (document.getElementById('f-winning-leg')) {
+    document.getElementById('f-winning-leg').value = prefill.winningLeg || '';
   }
   toggleBetType();
   document.getElementById('formOverlay').classList.add('open');
@@ -1083,6 +1097,7 @@ function saveBet() {
     status: document.getElementById('f-status').value,
     game, stake, profit, gametime,
     betType: document.getElementById('f-bet-type') ? document.getElementById('f-bet-type').value : 'Moneyline',
+    winningLeg: document.getElementById('f-winning-leg') ? (document.getElementById('f-winning-leg').value || null) : null,
     book1: document.getElementById('f-book1').value.trim(),
     book2: document.getElementById('f-book2').value.trim(),
     bookEv: document.getElementById('f-book-ev').value.trim(),
@@ -1134,6 +1149,9 @@ function editBet(id) {
   if (document.getElementById('f-bet-type')) {
     document.getElementById('f-bet-type').value = b.betType || 'Moneyline';
   }
+  if (document.getElementById('f-winning-leg')) {
+    document.getElementById('f-winning-leg').value = b.winningLeg || '';
+  }
   toggleBetType();
   document.getElementById('formOverlay').classList.add('open');
 }
@@ -1145,11 +1163,21 @@ function deleteBet(id) {
 }
 
 function cycleStatus(id) {
-  const b=bets.find(b=>b.id===id);
+  const b = bets.find(b => b.id === id);
   if (!b) return;
-  const cycle={pending:'settled',settled:'void',void:'pending'};
-  b.status=cycle[b.status]||'pending';
-  save(); render();
+  const cycle = {pending:'settled', settled:'void', void:'pending'};
+  const newStatus = cycle[b.status] || 'pending';
+  if (newStatus === 'settled' && b.type === 'arb') {
+    const book1 = b.book1 || 'Book 1';
+    const book2 = b.book2 || 'Book 2';
+    const choice = window.prompt(
+      'Which leg won?\n\n  1 = Leg 1 — ' + book1 + '\n  2 = Leg 2 — ' + book2 + '\n\nEnter 1 or 2:'
+    );
+    if (choice === null) return;
+    b.winningLeg = (choice.trim() === '1') ? '1' : (choice.trim() === '2') ? '2' : null;
+  }
+  b.status = newStatus;
+  save(); render(); if (typeof renderBalances === 'function') renderBalances();
 }
 
 function clearAll() {
@@ -1926,10 +1954,26 @@ function getBookStats(book) {
   // Arb/EV calculations (use status + profit fields)
   const arbSettled  = arbEvBets.filter(b => b.status === 'settled');
   const arbPending  = arbEvBets.filter(b => b.status === 'pending');
-  const arbPnl      = arbSettled.reduce((s, b) => s + parseFloat(b.profit || 0), 0);
   const arbRisk     = arbPending.reduce((s, b) => s + parseFloat(b.stake || 0), 0);
   const arbWins     = arbSettled.filter(b => parseFloat(b.profit || 0) > 0).length;
   const arbBestWin  = arbSettled.length ? Math.max(0, ...arbSettled.map(b => parseFloat(b.profit || 0))) : 0;
+
+  // Per-book P&L for arb bets using winningLeg
+  const arbPnl = arbSettled.reduce((s, b) => {
+    const profit = parseFloat(b.profit || 0);
+    if (b.type !== 'arb' || !b.winningLeg) {
+      // EV bets or arbs without winning leg — attribute full P&L to matched book
+      return s + profit;
+    }
+    // Arb with winning leg known
+    const isBook1 = (b.book1 || '').toLowerCase() === bk;
+    const isBook2 = (b.book2 || '').toLowerCase() === bk;
+    if (b.winningLeg === '1' && isBook1) return s + profit;   // book1 won
+    if (b.winningLeg === '1' && isBook2) return s - parseFloat(b.stake || 0) * 0.5; // book2 lost (approx leg2 stake)
+    if (b.winningLeg === '2' && isBook2) return s + profit;   // book2 won
+    if (b.winningLeg === '2' && isBook1) return s - parseFloat(b.stake || 0) * 0.5; // book1 lost (approx leg1 stake)
+    return s;
+  }, 0);
 
   // Combined
   const totalPnl      = arbPnl + othPnl;
