@@ -1273,9 +1273,9 @@ function renderOther() {
   if (document.getElementById('oth-pending'))  document.getElementById('oth-pending').textContent  = pending.length;
 
   renderOthBookCards(pool);
-  renderOthWlChart(pool);
-  renderOthPnlChart(settled);
-  renderOthSportChart(settled);
+  try { renderOthWlChart(pool); } catch(e) { console.warn('WL chart:', e); }
+  try { renderOthPnlChart(settled); } catch(e) { console.warn('PnL chart:', e); }
+  try { renderOthSportChart(settled); } catch(e) { console.warn('Sport chart:', e); }
   renderOthTable();
 }
 
