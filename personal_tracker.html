@@ -360,7 +360,11 @@ h1{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
   <!-- CSV Import -->
   <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:10px">Import bets (CSV)</div>
   <div class="panel" style="margin-bottom:2rem">
-    <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px">Expected columns: <code>date, sport, book, game, odds, stake, result, pnl, notes</code></div>
+    <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px">
+      Accepts two formats:<br>
+      <strong style="color:var(--text)">Sportsbook export</strong> — upload your XLS/CSV export directly from your sportsbook (columns: Date Placed, Status, League, Match, Bet Type, Market, Price, Wager, Winnings)<br>
+      <strong style="color:var(--text)">Standard template</strong> — columns: <code>date, sport, book, game, odds, stake, result, pnl, notes</code>
+    </div>
     <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center">
       <label style="display:inline-block;padding:7px 14px;border-radius:var(--r);border:.5px solid var(--border);cursor:pointer;font-size:13px;color:var(--text-muted);background:var(--bg-input)">
         Choose file <input type="file" accept=".csv" id="oth-csv-file" style="display:none" onchange="handleOthFile(this)">
@@ -1456,33 +1460,126 @@ function handleOthFile(inp) {
 function handleOthPaste() { importOthCSV(document.getElementById('oth-paste-area').value); }
 
 function importOthCSV(text) {
-  const msgEl=document.getElementById('oth-import-msg');
-  const lines=text.trim().split('\n').filter(l=>l.trim());
-  if(lines.length<2){msgEl.innerHTML='<span style="color:var(--red)">No valid rows found.</span>';return;}
-  const headers=lines[0].split(',').map(h=>h.trim().toLowerCase().replace(/[\'"]/g,''));
-  const rows=lines.slice(1).map(line=>{
-    const vals=[];let cur='',inQ=false;
-    for(let ch of line){if(ch==='"'){inQ=!inQ}else if(ch===','&&!inQ){vals.push(cur.trim());cur=''}else cur+=ch;}
+  const msgEl = document.getElementById('oth-import-msg');
+  const lines = text.trim().split('\n').filter(l => l.trim());
+  if (lines.length < 2) { msgEl.innerHTML = '<span style="color:var(--red)">No valid rows found.</span>'; return; }
+
+  function parseCSVLine(line) {
+    const vals = []; let cur = '', inQ = false;
+    for (let ch of line) {
+      if (ch === '"') { inQ = !inQ; }
+      else if (ch === ',' && !inQ) { vals.push(cur.trim()); cur = ''; }
+      else cur += ch;
+    }
     vals.push(cur.trim());
-    const obj={};headers.forEach((h,i)=>obj[h]=(vals[i]||'').replace(/^["']|["']$/g,'').trim());
+    return vals.map(v => v.replace(/^['"']|['"']$/g, '').trim());
+  }
+
+  const headers = parseCSVLine(lines[0]).map(h => h.toLowerCase());
+  const rows = lines.slice(1).map(line => {
+    const vals = parseCSVLine(line);
+    const obj = {}; headers.forEach((h, i) => obj[h] = vals[i] || '');
     return obj;
-  }).filter(r=>r.date||r.game||r.matchup);
-  if(!rows.length){msgEl.innerHTML='<span style="color:var(--red)">No valid rows. Check headers.</span>';return;}
-  const newBets=rows.map(r=>({
-    id:String(Date.now()+Math.random()),
-    date:r.date||'',
-    sport:r.sport||'⚽ Soccer',
-    book:r.book||'',
-    game:r.game||r.matchup||r.description||'',
-    odds:r.odds||'',
-    stake:parseFloat(r.stake||0)||0,
-    result:(r.result||'pending').toLowerCase(),
-    pnl:parseFloat(r.pnl||r['p&l']||0)||0,
-    notes:r.notes||'',
-  }));
-  otherBets=[...otherBets,...newBets];
+  });
+
+  const isSportsbook = headers.includes('date placed') || headers.includes('bet slip id') || headers.includes('wager');
+
+  function decToAmerican(dec) {
+    const d = parseFloat(dec);
+    if (isNaN(d) || d <= 1) return '';
+    if (d >= 2) return '+' + Math.round((d - 1) * 100);
+    return String(Math.round(-100 / (d - 1)));
+  }
+
+  function mapSport(league) {
+    const l = (league || '').toLowerCase();
+    if (l.includes('nba') || l.includes('basketball')) return '🏀 NBA';
+    if (l.includes('nfl') || l.includes('football'))   return '🏈 NFL';
+    if (l.includes('mlb') || l.includes('baseball'))   return '⚾ MLB';
+    if (l.includes('nhl') || l.includes('hockey'))     return '🏒 NHL';
+    if (l.includes('soccer')||l.includes('epl')||l.includes('mls')||l.includes('champions')||l.includes('bundesliga')||l.includes('serie')||l.includes('ligue')) return '⚽ Soccer';
+    if (l.includes('tennis'))  return '🎾 Tennis';
+    if (l.includes('mma')||l.includes('ufc')||l.includes('boxing')) return '🥊 MMA';
+    if (l.includes('golf'))    return '🏌️ Golf';
+    if (l.includes('cricket')) return '🏏 Cricket';
+    if (l.includes('rugby'))   return '🏉 Rugby';
+    return '⚽ Soccer';
+  }
+
+  function parseSBDate(str) {
+    if (!str) return '';
+    const months = {jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};
+    const parts = str.match(/(\d{1,2})\s+(\w{3})\s+(\d{4})/);
+    if (!parts) return '';
+    const mon = months[parts[2].toLowerCase()] || '01';
+    return parts[3] + '-' + mon + '-' + parts[1].padStart(2,'0');
+  }
+
+  function mapResult(status) {
+    const s = (status || '').toLowerCase();
+    if (s === 'won' || s === 'win')   return 'win';
+    if (s === 'lost' || s === 'lose' || s === 'loss') return 'loss';
+    if (s === 'push') return 'push';
+    return 'pending';
+  }
+
+  let newBets = [];
+
+  if (isSportsbook) {
+    rows.forEach(r => {
+      const datePlaced = r['date placed'] || '';
+      if (!datePlaced) return; // skip child/leg rows
+      const status   = r['status'] || '';
+      const isParlay = (r['bet type'] || '').toUpperCase() === 'MULTIPLE';
+      const match    = (r['match'] || '').split(',')[0].trim();
+      const market   = r['market'] || '';
+      const betType  = r['bet type'] || '';
+      const decOdds  = r['price'] || '';
+      const wager    = parseFloat(r['wager'] || 0) || 0;
+      const winnings = parseFloat(r['winnings'] || 0) || 0;
+      const payout   = parseFloat(r['payout'] || 0) || 0;
+      const league   = r['league'] || '';
+      const result   = mapResult(status);
+      let pnl = 0;
+      if (result === 'win')  pnl = +((winnings || (payout - wager) || 0).toFixed(2));
+      if (result === 'loss') pnl = -wager;
+      const desc = isParlay
+        ? 'Parlay: ' + (r['match']||'').replace(/,\s*$/,'').split(',').map(s=>s.trim()).filter(Boolean).join(' + ')
+        : match + (market && betType && !isParlay ? ' — ' + betType + ' ' + market : '');
+      newBets.push({
+        id: String(Date.now() + Math.random()),
+        date: parseSBDate(datePlaced),
+        sport: mapSport(league),
+        book: '',
+        game: desc,
+        odds: decOdds ? decToAmerican(decOdds) : '',
+        stake: wager,
+        result,
+        pnl,
+        notes: isParlay ? 'Parlay' : betType,
+      });
+    });
+  } else {
+    rows.filter(r => r['date'] || r['game'] || r['matchup']).forEach(r => {
+      newBets.push({
+        id: String(Date.now() + Math.random()),
+        date: r['date'] || '',
+        sport: r['sport'] || '⚽ Soccer',
+        book: r['book'] || '',
+        game: r['game'] || r['matchup'] || r['description'] || '',
+        odds: r['odds'] || '',
+        stake: parseFloat(r['stake'] || 0) || 0,
+        result: mapResult(r['result']),
+        pnl: parseFloat(r['pnl'] || r['p&l'] || 0) || 0,
+        notes: r['notes'] || '',
+      });
+    });
+  }
+
+  if (!newBets.length) { msgEl.innerHTML = '<span style="color:var(--red)">No valid bets found.</span>'; return; }
+  otherBets = [...otherBets, ...newBets];
   saveOther(); renderOther();
-  msgEl.innerHTML=`<span style="color:var(--green)">Imported ${newBets.length} bet${newBets.length!==1?'s':''}.</span>`;
+  msgEl.innerHTML = '<span style="color:var(--green)">Imported ' + newBets.length + ' bet' + (newBets.length!==1?'s':'') + (isSportsbook?' from sportsbook export':'') + '. Total: ' + otherBets.length + '.</span>';
 }
 
 // Set today's date in the log form on load
