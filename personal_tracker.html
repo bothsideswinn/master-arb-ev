@@ -160,166 +160,6 @@ h1{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
 }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js">
-// ── BOOK BALANCE TAB ──────────────────────────────────────────────────────────
-const BOOKS = ['Hard Rock Bet', 'Bovada', 'BetOnline'];
-let deposits = JSON.parse(localStorage.getItem('book_balances_v1') || '[]');
-
-function saveDeposits() {
-  localStorage.setItem('book_balances_v1', JSON.stringify(deposits));
-}
-
-function addDeposit() {
-  const book   = document.getElementById('dep-book').value;
-  const amount = parseFloat(document.getElementById('dep-amount').value);
-  const date   = document.getElementById('dep-date').value;
-  const note   = document.getElementById('dep-note').value.trim();
-  const msgEl  = document.getElementById('dep-msg');
-
-  if (!amount || amount <= 0) { msgEl.innerHTML = '<span style="color:var(--red)">Please enter a valid amount.</span>'; return; }
-  const finalDate = date || new Date().toISOString().split('T')[0];
-
-  deposits.push({ id: String(Date.now()), book, amount, date: finalDate, note });
-  saveDeposits();
-
-  // Reset form
-  document.getElementById('dep-amount').value = '';
-  document.getElementById('dep-note').value   = '';
-  msgEl.innerHTML = '<span style="color:var(--green)">Deposit added!</span>';
-  setTimeout(() => { msgEl.innerHTML = ''; }, 2000);
-  renderBalances();
-}
-
-function deleteDeposit(id) {
-  if (!confirm('Delete this deposit?')) return;
-  deposits = deposits.filter(d => d.id !== id);
-  saveDeposits();
-  renderBalances();
-}
-
-function getBookStats(book) {
-  const bookBets = bets.filter(b => {
-    const b1 = (b.book1 || '').toLowerCase();
-    const b2 = (b.book2 || '').toLowerCase();
-    const bEv = (b.bookEv || '').toLowerCase();
-    const bk  = book.toLowerCase();
-    return b1 === bk || b2 === bk || bEv === bk;
-  });
-
-  const settled  = bookBets.filter(b => b.status === 'settled');
-  const pending  = bookBets.filter(b => b.status === 'pending');
-
-  const pnl      = settled.reduce((s, b) => s + parseFloat(b.profit || 0), 0);
-  const atRisk   = pending.reduce((s, b) => s + parseFloat(b.stake || 0), 0);
-  const totalDep = deposits.filter(d => d.book === book).reduce((s, d) => s + d.amount, 0);
-  const balance  = totalDep + pnl;
-  const wins     = settled.filter(b => parseFloat(b.profit || 0) > 0).length;
-  const losses   = settled.filter(b => parseFloat(b.profit || 0) < 0).length;
-  const winRate  = settled.length ? Math.round(wins / settled.length * 100) : 0;
-  const bestWin  = settled.length ? Math.max(0, ...settled.map(b => parseFloat(b.profit || 0))) : 0;
-  const totalStaked = bookBets.reduce((s, b) => s + parseFloat(b.stake || 0), 0);
-
-  return { pnl, atRisk, totalDep, balance, wins, losses, winRate, bestWin, totalStaked, totalBets: bookBets.length, settled: settled.length };
-}
-
-function renderBalances() {
-  // Set today's date in deposit form if empty
-  const depDateEl = document.getElementById('dep-date');
-  if (depDateEl && !depDateEl.value) depDateEl.value = new Date().toISOString().split('T')[0];
-  // Summary totals
-  let totalBal = 0, totalDep = 0, totalPnl = 0, totalRisk = 0;
-  BOOKS.forEach(book => {
-    const s = getBookStats(book);
-    totalBal  += s.balance;
-    totalDep  += s.totalDep;
-    totalPnl  += s.pnl;
-    totalRisk += s.atRisk;
-  });
-
-  const fmt = n => Math.abs(n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
-
-  const setBal = (id, val, signed=false) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.textContent = signed ? (val >= 0 ? '+$' : '-$') + fmt(val) : (val < 0 ? '-$' : '$') + fmt(val);
-    if (id === 'bal-total') el.className = 'stat-val ' + (val >= 0 ? 'green' : 'red');
-    if (id === 'bal-pnl')   el.className = 'stat-val ' + (val >= 0 ? 'green' : 'red');
-  };
-
-  setBal('bal-total',     totalBal);
-  setBal('bal-deposited', totalDep);
-  setBal('bal-pnl',       totalPnl, true);
-  setBal('bal-risk',      totalRisk);
-
-  // Per book cards
-  const wrap = document.getElementById('book-cards-wrap');
-  if (wrap) {
-    wrap.innerHTML = BOOKS.map(book => {
-      const s = getBookStats(book);
-      const balColor = s.balance >= 0 ? 'var(--green)' : 'var(--red)';
-      const pnlColor = s.pnl >= 0 ? 'var(--green)' : 'var(--red)';
-      return `<div class="panel">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:12px;border-bottom:.5px solid var(--border)">
-          <span style="font-size:15px;font-weight:700">${book}</span>
-          <span style="font-size:20px;font-weight:800;color:${balColor}">${s.balance < 0 ? '-' : ''}$${fmt(s.balance)}</span>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
-          <div>
-            <div style="font-size:10px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">Deposited</div>
-            <div style="font-size:15px;font-weight:700">$${fmt(s.totalDep)}</div>
-          </div>
-          <div>
-            <div style="font-size:10px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">Net P&L</div>
-            <div style="font-size:15px;font-weight:700;color:${pnlColor}">${s.pnl >= 0 ? '+' : '-'}$${fmt(s.pnl)}</div>
-          </div>
-          <div>
-            <div style="font-size:10px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">At risk</div>
-            <div style="font-size:15px;font-weight:700;color:var(--blue)">$${fmt(s.atRisk)}</div>
-          </div>
-          <div>
-            <div style="font-size:10px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">Win rate</div>
-            <div style="font-size:15px;font-weight:700">${s.winRate}%</div>
-          </div>
-          <div>
-            <div style="font-size:10px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">Total bets</div>
-            <div style="font-size:15px;font-weight:700">${s.totalBets}</div>
-          </div>
-          <div>
-            <div style="font-size:10px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">Best win</div>
-            <div style="font-size:15px;font-weight:700;color:var(--green)">+$${fmt(s.bestWin)}</div>
-          </div>
-        </div>
-        <div style="background:var(--bg);border-radius:var(--r);padding:8px 12px;font-size:11px;color:var(--text-muted)">
-          ${s.settled} settled · ${s.totalBets - s.settled} pending · $${fmt(s.totalStaked)} total staked
-        </div>
-      </div>`;
-    }).join('');
-  }
-
-  // Deposit table
-  const tbody = document.getElementById('dep-table-body');
-  const empty = document.getElementById('dep-table-empty');
-  if (!tbody) return;
-
-  const sorted = [...deposits].sort((a, b) => b.date.localeCompare(a.date));
-  if (!sorted.length) {
-    tbody.innerHTML = '';
-    if (empty) empty.style.display = 'block';
-    return;
-  }
-  if (empty) empty.style.display = 'none';
-
-  tbody.innerHTML = sorted.map(d => `
-    <tr style="border-bottom:.5px solid var(--border)">
-      <td style="padding:8px 10px;color:var(--text-muted);white-space:nowrap">${d.date}</td>
-      <td style="padding:8px 10px;font-weight:600">${d.book}</td>
-      <td style="padding:8px 10px;font-weight:700;color:var(--green)">+$${fmt(d.amount)}</td>
-      <td style="padding:8px 10px;color:var(--text-muted)">${d.note || '—'}</td>
-      <td style="padding:8px 10px">
-        <button onclick="deleteDeposit('${d.id}')" style="font-size:10px;padding:3px 7px;border-radius:5px;border:.5px solid var(--border);background:var(--bg-input);cursor:pointer;color:var(--red)">✕</button>
-      </td>
-    </tr>`).join('');
-}
-// ── END BOOK BALANCE TAB ──────────────────────────────────────────────────────
 
 </script>
 <body>
@@ -1918,6 +1758,166 @@ function importOthCSV(text) {
 })();
 // ── END OTHER TAB ─────────────────────────────────────────────────────────────
 
+
+// ── BOOK BALANCE TAB ──────────────────────────────────────────────────────────
+const BOOKS = ['Hard Rock Bet', 'Bovada', 'BetOnline'];
+let deposits = JSON.parse(localStorage.getItem('book_balances_v1') || '[]');
+
+function saveDeposits() {
+  localStorage.setItem('book_balances_v1', JSON.stringify(deposits));
+}
+
+function addDeposit() {
+  const book   = document.getElementById('dep-book').value;
+  const amount = parseFloat(document.getElementById('dep-amount').value);
+  const date   = document.getElementById('dep-date').value;
+  const note   = document.getElementById('dep-note').value.trim();
+  const msgEl  = document.getElementById('dep-msg');
+
+  if (!amount || amount <= 0) { msgEl.innerHTML = '<span style="color:var(--red)">Please enter a valid amount.</span>'; return; }
+  const finalDate = date || new Date().toISOString().split('T')[0];
+
+  deposits.push({ id: String(Date.now()), book, amount, date: finalDate, note });
+  saveDeposits();
+
+  // Reset form
+  document.getElementById('dep-amount').value = '';
+  document.getElementById('dep-note').value   = '';
+  msgEl.innerHTML = '<span style="color:var(--green)">Deposit added!</span>';
+  setTimeout(() => { msgEl.innerHTML = ''; }, 2000);
+  renderBalances();
+}
+
+function deleteDeposit(id) {
+  if (!confirm('Delete this deposit?')) return;
+  deposits = deposits.filter(d => d.id !== id);
+  saveDeposits();
+  renderBalances();
+}
+
+function getBookStats(book) {
+  const bookBets = bets.filter(b => {
+    const b1 = (b.book1 || '').toLowerCase();
+    const b2 = (b.book2 || '').toLowerCase();
+    const bEv = (b.bookEv || '').toLowerCase();
+    const bk  = book.toLowerCase();
+    return b1 === bk || b2 === bk || bEv === bk;
+  });
+
+  const settled  = bookBets.filter(b => b.status === 'settled');
+  const pending  = bookBets.filter(b => b.status === 'pending');
+
+  const pnl      = settled.reduce((s, b) => s + parseFloat(b.profit || 0), 0);
+  const atRisk   = pending.reduce((s, b) => s + parseFloat(b.stake || 0), 0);
+  const totalDep = deposits.filter(d => d.book === book).reduce((s, d) => s + d.amount, 0);
+  const balance  = totalDep + pnl;
+  const wins     = settled.filter(b => parseFloat(b.profit || 0) > 0).length;
+  const losses   = settled.filter(b => parseFloat(b.profit || 0) < 0).length;
+  const winRate  = settled.length ? Math.round(wins / settled.length * 100) : 0;
+  const bestWin  = settled.length ? Math.max(0, ...settled.map(b => parseFloat(b.profit || 0))) : 0;
+  const totalStaked = bookBets.reduce((s, b) => s + parseFloat(b.stake || 0), 0);
+
+  return { pnl, atRisk, totalDep, balance, wins, losses, winRate, bestWin, totalStaked, totalBets: bookBets.length, settled: settled.length };
+}
+
+function renderBalances() {
+  // Set today's date in deposit form if empty
+  const depDateEl = document.getElementById('dep-date');
+  if (depDateEl && !depDateEl.value) depDateEl.value = new Date().toISOString().split('T')[0];
+  // Summary totals
+  let totalBal = 0, totalDep = 0, totalPnl = 0, totalRisk = 0;
+  BOOKS.forEach(book => {
+    const s = getBookStats(book);
+    totalBal  += s.balance;
+    totalDep  += s.totalDep;
+    totalPnl  += s.pnl;
+    totalRisk += s.atRisk;
+  });
+
+  const fmt = n => Math.abs(n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+
+  const setBal = (id, val, signed=false) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = signed ? (val >= 0 ? '+$' : '-$') + fmt(val) : (val < 0 ? '-$' : '$') + fmt(val);
+    if (id === 'bal-total') el.className = 'stat-val ' + (val >= 0 ? 'green' : 'red');
+    if (id === 'bal-pnl')   el.className = 'stat-val ' + (val >= 0 ? 'green' : 'red');
+  };
+
+  setBal('bal-total',     totalBal);
+  setBal('bal-deposited', totalDep);
+  setBal('bal-pnl',       totalPnl, true);
+  setBal('bal-risk',      totalRisk);
+
+  // Per book cards
+  const wrap = document.getElementById('book-cards-wrap');
+  if (wrap) {
+    wrap.innerHTML = BOOKS.map(book => {
+      const s = getBookStats(book);
+      const balColor = s.balance >= 0 ? 'var(--green)' : 'var(--red)';
+      const pnlColor = s.pnl >= 0 ? 'var(--green)' : 'var(--red)';
+      return `<div class="panel">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:12px;border-bottom:.5px solid var(--border)">
+          <span style="font-size:15px;font-weight:700">${book}</span>
+          <span style="font-size:20px;font-weight:800;color:${balColor}">${s.balance < 0 ? '-' : ''}$${fmt(s.balance)}</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+          <div>
+            <div style="font-size:10px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">Deposited</div>
+            <div style="font-size:15px;font-weight:700">$${fmt(s.totalDep)}</div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">Net P&L</div>
+            <div style="font-size:15px;font-weight:700;color:${pnlColor}">${s.pnl >= 0 ? '+' : '-'}$${fmt(s.pnl)}</div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">At risk</div>
+            <div style="font-size:15px;font-weight:700;color:var(--blue)">$${fmt(s.atRisk)}</div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">Win rate</div>
+            <div style="font-size:15px;font-weight:700">${s.winRate}%</div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">Total bets</div>
+            <div style="font-size:15px;font-weight:700">${s.totalBets}</div>
+          </div>
+          <div>
+            <div style="font-size:10px;color:var(--text-muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:3px">Best win</div>
+            <div style="font-size:15px;font-weight:700;color:var(--green)">+$${fmt(s.bestWin)}</div>
+          </div>
+        </div>
+        <div style="background:var(--bg);border-radius:var(--r);padding:8px 12px;font-size:11px;color:var(--text-muted)">
+          ${s.settled} settled · ${s.totalBets - s.settled} pending · $${fmt(s.totalStaked)} total staked
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // Deposit table
+  const tbody = document.getElementById('dep-table-body');
+  const empty = document.getElementById('dep-table-empty');
+  if (!tbody) return;
+
+  const sorted = [...deposits].sort((a, b) => b.date.localeCompare(a.date));
+  if (!sorted.length) {
+    tbody.innerHTML = '';
+    if (empty) empty.style.display = 'block';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+
+  tbody.innerHTML = sorted.map(d => `
+    <tr style="border-bottom:.5px solid var(--border)">
+      <td style="padding:8px 10px;color:var(--text-muted);white-space:nowrap">${d.date}</td>
+      <td style="padding:8px 10px;font-weight:600">${d.book}</td>
+      <td style="padding:8px 10px;font-weight:700;color:var(--green)">+$${fmt(d.amount)}</td>
+      <td style="padding:8px 10px;color:var(--text-muted)">${d.note || '—'}</td>
+      <td style="padding:8px 10px">
+        <button onclick="deleteDeposit('${d.id}')" style="font-size:10px;padding:3px 7px;border-radius:5px;border:.5px solid var(--border);background:var(--bg-input);cursor:pointer;color:var(--red)">✕</button>
+      </td>
+    </tr>`).join('');
+}
+// ── END BOOK BALANCE TAB ──────────────────────────────────────────────────────
+
 </script>
-</body>
-</html>
