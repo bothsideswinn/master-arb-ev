@@ -296,62 +296,6 @@ h1{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
     <div class="stat-card"><div class="stat-lbl">Pending</div><div class="stat-val blue" id="oth-pending">—</div></div>
   </div>
 
-  <!-- Inline log form -->
-  <div class="panel" style="margin-bottom:1.25rem">
-    <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:14px;display:flex;align-items:center;justify-content:space-between">
-      Log a bet
-      <button class="btn primary" onclick="saveOthBet()" style="font-size:12px;padding:6px 16px">Save bet</button>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;flex-wrap:wrap">
-      <div style="display:flex;flex-direction:column;gap:4px">
-        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Date</span>
-        <input type="date" id="oth-f-date" class="inp">
-      </div>
-      <div style="display:flex;flex-direction:column;gap:4px">
-        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Sport</span>
-        <select id="oth-f-sport" class="sel">
-          <option>🏀 NBA</option><option>🏈 NFL</option><option>⚾ MLB</option>
-          <option>🏒 NHL</option><option>⚽ Soccer</option><option>🎾 Tennis</option>
-          <option>🥊 MMA</option><option>🏌️ Golf</option><option>🏉 Rugby</option><option>🏏 Cricket</option>
-        </select>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:4px">
-        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Book</span>
-        <input type="text" id="oth-f-book" class="inp" placeholder="e.g. DraftKings">
-      </div>
-      <div style="display:flex;flex-direction:column;gap:4px;grid-column:span 3">
-        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Matchup / Bet description</span>
-        <input type="text" id="oth-f-game" class="inp" placeholder="e.g. Lakers vs Celtics — Lakers ML">
-      </div>
-      <div style="display:flex;flex-direction:column;gap:4px">
-        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Odds (American)</span>
-        <input type="text" id="oth-f-odds" class="inp" placeholder="e.g. -110" oninput="calcOthProfit()">
-      </div>
-      <div style="display:flex;flex-direction:column;gap:4px">
-        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Stake ($)</span>
-        <input type="number" id="oth-f-stake" class="inp" placeholder="50" oninput="calcOthProfit()">
-      </div>
-      <div style="display:flex;flex-direction:column;gap:4px">
-        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Profit if wins ($)</span>
-        <input type="number" id="oth-f-profit" class="inp" placeholder="auto-calculated" readonly style="opacity:.7">
-      </div>
-      <div style="display:flex;flex-direction:column;gap:4px">
-        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Result</span>
-        <select id="oth-f-result" class="sel">
-          <option value="pending">Pending</option>
-          <option value="win">Win</option>
-          <option value="loss">Loss</option>
-          <option value="push">Push</option>
-        </select>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:4px;grid-column:span 2">
-        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Notes (optional)</span>
-        <input type="text" id="oth-f-notes" class="inp" placeholder="e.g. line value, sharp action, etc.">
-      </div>
-    </div>
-    <div id="oth-form-msg" style="font-size:12px;margin-top:8px"></div>
-  </div>
-
   <!-- Per-book breakdown -->
   <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:10px">Per book breakdown</div>
   <div id="oth-book-cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:1.5rem"></div>
@@ -428,6 +372,63 @@ h1{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
       <button class="btn primary" onclick="handleOthPaste()" style="font-size:13px">Import CSV</button>
     </div>
     <div id="oth-import-msg" style="margin-top:8px;font-size:12px"></div>
+  </div>
+
+
+  <!-- Inline log form -->
+  <div class="panel" style="margin-bottom:1.25rem">
+    <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:14px;display:flex;align-items:center;justify-content:space-between">
+      Log a bet
+      <button class="btn primary" onclick="saveOthBet()" style="font-size:12px;padding:6px 16px">Save bet</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;flex-wrap:wrap">
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Date</span>
+        <input type="date" id="oth-f-date" class="inp">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Sport</span>
+        <select id="oth-f-sport" class="sel">
+          <option>🏀 NBA</option><option>🏈 NFL</option><option>⚾ MLB</option>
+          <option>🏒 NHL</option><option>⚽ Soccer</option><option>🎾 Tennis</option>
+          <option>🥊 MMA</option><option>🏌️ Golf</option><option>🏉 Rugby</option><option>🏏 Cricket</option>
+        </select>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Book</span>
+        <input type="text" id="oth-f-book" class="inp" placeholder="e.g. DraftKings">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px;grid-column:span 3">
+        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Matchup / Bet description</span>
+        <input type="text" id="oth-f-game" class="inp" placeholder="e.g. Lakers vs Celtics — Lakers ML">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Odds (American)</span>
+        <input type="text" id="oth-f-odds" class="inp" placeholder="e.g. -110" oninput="calcOthProfit()">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Stake ($)</span>
+        <input type="number" id="oth-f-stake" class="inp" placeholder="50" oninput="calcOthProfit()">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Profit if wins ($)</span>
+        <input type="number" id="oth-f-profit" class="inp" placeholder="auto-calculated" readonly style="opacity:.7">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Result</span>
+        <select id="oth-f-result" class="sel">
+          <option value="pending">Pending</option>
+          <option value="win">Win</option>
+          <option value="loss">Loss</option>
+          <option value="push">Push</option>
+        </select>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px;grid-column:span 2">
+        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Notes (optional)</span>
+        <input type="text" id="oth-f-notes" class="inp" placeholder="e.g. line value, sharp action, etc.">
+      </div>
+    </div>
+    <div id="oth-form-msg" style="font-size:12px;margin-top:8px"></div>
   </div>
 
 </div><!-- /other-section -->
