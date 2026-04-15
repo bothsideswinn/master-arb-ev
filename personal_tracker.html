@@ -1578,8 +1578,14 @@ function importOthCSV(text) {
 
   if (!newBets.length) { msgEl.innerHTML = '<span style="color:var(--red)">No valid bets found.</span>'; return; }
   otherBets = [...otherBets, ...newBets];
-  saveOther(); renderOther();
-  msgEl.innerHTML = '<span style="color:var(--green)">Imported ' + newBets.length + ' bet' + (newBets.length!==1?'s':'') + (isSportsbook?' from sportsbook export':'') + '. Total: ' + otherBets.length + '.</span>';
+  saveOther();
+  // Temporarily show section so DOM elements are accessible for render
+  const othSec = document.getElementById('other-section');
+  const wasHidden = othSec && othSec.style.display === 'none';
+  if (wasHidden) othSec.style.display = 'block';
+  renderOther();
+  if (wasHidden) othSec.style.display = 'none';
+  msgEl.innerHTML = '<span style="color:var(--green)">Imported ' + newBets.length + ' bet' + (newBets.length!==1?'s':'') + (isSportsbook?' from sportsbook export':'') + '. Total: ' + otherBets.length + '. Click the Other tab to view.</span>';
 }
 
 // Set today's date in the log form on load
