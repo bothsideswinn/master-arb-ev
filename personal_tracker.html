@@ -991,7 +991,12 @@ function renderSports(pool) {
 function renderLog(pool) {
   const el=document.getElementById('betLog');
   if (!pool.length) { el.innerHTML='<div class="empty-state">No bets in this period</div>'; return; }
-  const sorted=[...pool].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const sorted=[...pool].sort((a,b)=>{
+    // Sort by contest date/time first, fall back to log date
+    const aTime = a.gametime ? new Date(a.gametime.split(' · ')[0] + ' ' + (a.gametime.split(' · ')[1]||'')) : new Date(a.date);
+    const bTime = b.gametime ? new Date(b.gametime.split(' · ')[0] + ' ' + (b.gametime.split(' · ')[1]||'')) : new Date(b.date);
+    return bTime - aTime;
+  });
   el.innerHTML=sorted.map(b=>{
     const isPending=b.status==='pending', isVoid=b.status==='void';
     const roi=(parseFloat(b.profit||0)/parseFloat(b.stake||1)*100).toFixed(2);
@@ -1096,6 +1101,8 @@ function saveBet() {
     sport: document.getElementById('f-sport').value,
     status: document.getElementById('f-status').value,
     game, stake, profit, gametime,
+    gamedate: document.getElementById('f-gamedate') ? document.getElementById('f-gamedate').value.trim() : '',
+    gametimeonly: document.getElementById('f-gametime-only') ? document.getElementById('f-gametime-only').value.trim() : '',
     betType: document.getElementById('f-bet-type') ? document.getElementById('f-bet-type').value : 'Moneyline',
     winningLeg: document.getElementById('f-winning-leg') ? (document.getElementById('f-winning-leg').value || null) : null,
     book1: document.getElementById('f-book1').value.trim(),
@@ -1120,7 +1127,12 @@ function editBet(id) {
   const b = bets.find(b => b.id === id);
   if (!b) return;
   let gamedate = '', gametime_only = '';
-  if (b.gametime) {
+  // Use stored gamedate directly if available
+  if (b.gamedate) {
+    gamedate = b.gamedate;
+    gametime_only = b.gametimeonly || '';
+  } else if (b.gametime) {
+    // Fall back to parsing gametime string
     const parts = b.gametime.split(' · ');
     if (parts.length >= 2) {
       const dp = new Date(parts[0] + ' ' + new Date().getFullYear());
