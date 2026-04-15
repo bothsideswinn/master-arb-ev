@@ -637,20 +637,26 @@ function setView(mode) {
     mainEls.forEach(el => { if(el) el.style.display = ''; });
     if (othSection) othSection.style.display = 'none';
     if (weekNav)    weekNav.style.display    = '';
+    // Reset Other button highlight
+    const ob = document.getElementById('btn-other');
+    if (ob) { ob.style.borderColor = ''; ob.style.color = ''; }
     render();
   }
 }
 function changeWeek(dir) { weekOffset += dir; render(); }
 function setTypeFilter(f) {
+  // If on Other tab, switch back to week view first
+  if (viewMode === 'other') {
+    setView('week');
+  }
   typeFilter = f;
   ['btn-arb','btn-only-arb','btn-only-ev'].forEach(id => {
-    document.getElementById(id).classList.remove('active');
-    document.getElementById(id).style.borderColor = '';
-    document.getElementById(id).style.color = '';
+    const el = document.getElementById(id);
+    if (el) { el.classList.remove('active'); el.style.borderColor = ''; el.style.color = ''; }
   });
   const map = {all:'btn-arb', arb:'btn-only-arb', ev:'btn-only-ev'};
-  document.getElementById(map[f]).style.borderColor = 'var(--green)';
-  document.getElementById(map[f]).style.color = 'var(--green)';
+  const target = document.getElementById(map[f]);
+  if (target) { target.style.borderColor = 'var(--green)'; target.style.color = 'var(--green)'; }
   render();
 }
 
@@ -1109,6 +1115,11 @@ function calcEVProfit() {
 
 
 // ── OTHER TAB ─────────────────────────────────────────────────────────────────
+function fmtMoney(n, forceSign=false) {
+  const abs = Math.abs(n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+  if (forceSign) return (n >= 0 ? '+$' : '-$') + abs;
+  return (n < 0 ? '-$' : '$') + abs;
+}
 let otherBets = JSON.parse(localStorage.getItem('other_bets_v1') || '[]');
 let othWlChart = null, othPnlChart = null, othSportChart = null;
 let othEditingId = null;
@@ -1273,12 +1284,12 @@ function renderOther() {
   if (document.getElementById('oth-count'))      document.getElementById('oth-count').textContent = pool.length + ' bet' + (pool.length!==1?'s':'') + ' in range';
   if (document.getElementById('oth-total-bets')) document.getElementById('oth-total-bets').textContent = pool.length;
   const pnlEl = document.getElementById('oth-pnl');
-  if (pnlEl) { pnlEl.textContent = (totalPnl>=0?'+':'')+'$'+totalPnl.toFixed(2); pnlEl.className='stat-val '+(totalPnl>=0?'green':'red'); }
+  if (pnlEl) { pnlEl.textContent = fmtMoney(totalPnl, true); pnlEl.className='stat-val '+(totalPnl>=0?'green':'red'); }
   if (document.getElementById('oth-winrate'))  document.getElementById('oth-winrate').textContent  = winrate!=='—' ? winrate+'%' : '—';
   if (document.getElementById('oth-roi'))      document.getElementById('oth-roi').textContent      = roi!=='—' ? roi+'%' : '—';
-  if (document.getElementById('oth-staked'))   document.getElementById('oth-staked').textContent   = '$'+totalStaked.toFixed(2);
-  if (document.getElementById('oth-big-win'))  document.getElementById('oth-big-win').textContent  = pnls.length ? '+$'+bigWin.toFixed(2) : '—';
-  if (document.getElementById('oth-big-loss')) document.getElementById('oth-big-loss').textContent = pnls.length ? '$'+bigLoss.toFixed(2) : '—';
+  if (document.getElementById('oth-staked'))   document.getElementById('oth-staked').textContent   = fmtMoney(totalStaked);
+  if (document.getElementById('oth-big-win'))  document.getElementById('oth-big-win').textContent  = pnls.length ? fmtMoney(bigWin, true) : '—';
+  if (document.getElementById('oth-big-loss')) document.getElementById('oth-big-loss').textContent = pnls.length ? fmtMoney(bigLoss) : '—';
   if (document.getElementById('oth-pending'))  document.getElementById('oth-pending').textContent  = pending.length;
 
   renderOthBookCards(pool);
@@ -1311,15 +1322,15 @@ function renderOthBookCards(pool) {
     return `<div class="panel">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
         <span style="font-size:13px;font-weight:600">${book}</span>
-        <span style="font-size:13px;font-weight:600;color:${d.pnl>=0?'var(--green)':'var(--red)'}">${d.pnl>=0?'+':''}$${d.pnl.toFixed(2)}</span>
+        <span style="font-size:13px;font-weight:600;color:${d.pnl>=0?'var(--green)':'var(--red)'}">${fmtMoney(d.pnl, true)}</span>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px">
         <div><div style="font-size:10px;color:var(--text-muted)">Bets</div><div style="font-size:14px;font-weight:500">${d.bets}</div></div>
         <div><div style="font-size:10px;color:var(--text-muted)">Win rate</div><div style="font-size:14px;font-weight:500">${wr}%</div></div>
-        <div><div style="font-size:10px;color:var(--text-muted)">Net P&L</div><div style="font-size:14px;font-weight:500;color:${d.pnl>=0?'var(--green)':'var(--red)'}">${d.pnl>=0?'+':''}$${d.pnl.toFixed(2)}</div></div>
+        <div><div style="font-size:10px;color:var(--text-muted)">Net P&L</div><div style="font-size:14px;font-weight:500;color:${d.pnl>=0?'var(--green)':'var(--red)'}">${fmtMoney(d.pnl, true)}</div></div>
         <div><div style="font-size:10px;color:var(--text-muted)">ROI</div><div style="font-size:14px;font-weight:500">${roi}%</div></div>
-        <div><div style="font-size:10px;color:var(--text-muted)">Best win</div><div style="font-size:14px;font-weight:500;color:var(--green)">+$${d.bigWin.toFixed(2)}</div></div>
-        <div><div style="font-size:10px;color:var(--text-muted)">Total staked</div><div style="font-size:14px;font-weight:500">$${d.staked.toFixed(2)}</div></div>
+        <div><div style="font-size:10px;color:var(--text-muted)">Best win</div><div style="font-size:14px;font-weight:500;color:var(--green)">${fmtMoney(d.bigWin, true)}</div></div>
+        <div><div style="font-size:10px;color:var(--text-muted)">Total staked</div><div style="font-size:14px;font-weight:500">${fmtMoney(d.staked)}</div></div>
       </div>
     </div>`;
   }).join('');
@@ -1425,7 +1436,7 @@ function renderOthTable() {
   tbody.innerHTML=filtered.map(b=>{
     const pnl=b.pnl||0;
     const pnlColor=b.result==='pending'?'var(--blue)':pnl>=0?'var(--green)':'var(--red)';
-    const pnlStr=b.result==='pending'?'~$'+(Math.abs(pnl).toFixed(2)):(pnl>=0?'+':'')+'$'+Math.abs(pnl).toFixed(2);
+    const pnlStr=b.result==='pending'?fmtMoney(Math.abs(pnl)):(pnl>=0?'+':'')+fmtMoney(Math.abs(pnl));
     const badges={win:'background:#f0fdf4;color:#16a34a',loss:'background:#fef2f2;color:#dc2626',push:'background:#f3f4f6;color:#6b7280',pending:'background:#eff6ff;color:#1d4ed8'};
     const badge=badges[b.result]||badges.pending;
     const sport=(b.sport||'').replace(/^[^ ]+ /,'');
@@ -1436,7 +1447,7 @@ function renderOthTable() {
       <td style="padding:8px 10px;white-space:nowrap;color:var(--text-muted);font-size:11px">${b.league||'—'}</td>
       <td style="padding:8px 10px;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${b.game||''}">${b.game||'—'}</td>
       <td style="padding:8px 10px">${b.odds||'—'}</td>
-      <td style="padding:8px 10px">$${parseFloat(b.stake||0).toFixed(2)}</td>
+      <td style="padding:8px 10px">${fmtMoney(parseFloat(b.stake||0))}</td>
       <td style="padding:8px 10px;font-weight:600;color:${pnlColor}">${pnlStr}</td>
       <td style="padding:8px 10px"><span style="${badge};padding:2px 7px;border-radius:5px;font-size:11px;font-weight:600">${b.result}</span></td>
       <td style="padding:8px 10px">
