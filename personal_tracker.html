@@ -191,11 +191,16 @@ h1{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
 <div class="controls">
   <button class="btn primary" onclick="openForm()">+ Log bet</button>
   <button class="btn" id="btn-arb" onclick="setTypeFilter('all')" style="border-color:var(--green);color:var(--green);">Overview</button>
-  <button class="btn" id="btn-only-arb" onclick="setTypeFilter('arb')">Arb only</button>
-  <button class="btn" id="btn-only-ev" onclick="setTypeFilter('ev')">+EV only</button>
   <button class="btn" id="btn-other" onclick="setView('other')">Other</button>
   <button class="btn" onclick="exportCSV()" style="margin-left:auto;">Export CSV</button>
   <button class="btn danger" onclick="clearAll()">Clear all</button>
+</div>
+
+<!-- OVERVIEW SUBTABS -->
+<div id="overview-subtabs" style="display:flex;gap:0;padding:0 24px;background:var(--bg-card);border-bottom:.5px solid var(--border);">
+  <button id="sub-all" onclick="setTypeFilter('all')" style="font-size:12px;font-weight:600;padding:8px 16px;border:none;background:none;cursor:pointer;color:var(--blue);border-bottom:2px solid var(--blue);margin-bottom:-1px;">All</button>
+  <button id="sub-arb" onclick="setTypeFilter('arb')" style="font-size:12px;font-weight:600;padding:8px 16px;border:none;background:none;cursor:pointer;color:var(--text-secondary);border-bottom:2px solid transparent;margin-bottom:-1px;">Arb only</button>
+  <button id="sub-ev"  onclick="setTypeFilter('ev')"  style="font-size:12px;font-weight:600;padding:8px 16px;border:none;background:none;cursor:pointer;color:var(--text-secondary);border-bottom:2px solid transparent;margin-bottom:-1px;">+EV only</button>
 </div>
 
 <!-- STATS STRIP -->
@@ -623,40 +628,46 @@ function setView(mode) {
   ];
   const othSection = document.getElementById('other-section');
   const weekNav    = document.querySelector('.week-nav');
+  const subTabs = document.getElementById('overview-subtabs');
   if (mode === 'other') {
     mainEls.forEach(el => { if(el) el.style.display = 'none'; });
     if (othSection) othSection.style.display = 'block';
     if (weekNav)    weekNav.style.display    = 'none';
-    // Reset type filter buttons
-    ['btn-arb','btn-only-arb','btn-only-ev'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) { el.style.borderColor=''; el.style.color=''; }
-    });
+    if (subTabs)    subTabs.style.display    = 'none';
+    // Reset Overview button
+    const ab = document.getElementById('btn-arb');
+    if (ab) { ab.style.borderColor=''; ab.style.color=''; }
     renderOther();
   } else {
     mainEls.forEach(el => { if(el) el.style.display = ''; });
     if (othSection) othSection.style.display = 'none';
     if (weekNav)    weekNav.style.display    = '';
+    if (subTabs)    subTabs.style.display    = 'flex';
     // Reset Other button highlight
     const ob = document.getElementById('btn-other');
     if (ob) { ob.style.borderColor = ''; ob.style.color = ''; }
+    // Restore Overview button highlight
+    const ab = document.getElementById('btn-arb');
+    if (ab) { ab.style.borderColor = 'var(--green)'; ab.style.color = 'var(--green)'; }
     render();
   }
 }
 function changeWeek(dir) { weekOffset += dir; render(); }
 function setTypeFilter(f) {
-  // If on Other tab, switch back to week view first
-  if (viewMode === 'other') {
-    setView('week');
-  }
+  if (viewMode === 'other') setView('week');
   typeFilter = f;
-  ['btn-arb','btn-only-arb','btn-only-ev'].forEach(id => {
+  // Update Overview main button highlight
+  const arbBtn = document.getElementById('btn-arb');
+  if (arbBtn) { arbBtn.style.borderColor = 'var(--green)'; arbBtn.style.color = 'var(--green)'; }
+  // Update subtabs
+  const subMap = {all:'sub-all', arb:'sub-arb', ev:'sub-ev'};
+  ['sub-all','sub-arb','sub-ev'].forEach(id => {
     const el = document.getElementById(id);
-    if (el) { el.classList.remove('active'); el.style.borderColor = ''; el.style.color = ''; }
+    if (!el) return;
+    const active = id === subMap[f];
+    el.style.color = active ? 'var(--blue)' : 'var(--text-secondary)';
+    el.style.borderBottom = active ? '2px solid var(--blue)' : '2px solid transparent';
   });
-  const map = {all:'btn-arb', arb:'btn-only-arb', ev:'btn-only-ev'};
-  const target = document.getElementById(map[f]);
-  if (target) { target.style.borderColor = 'var(--green)'; target.style.color = 'var(--green)'; }
   render();
 }
 
