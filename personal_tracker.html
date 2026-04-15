@@ -674,9 +674,17 @@ h1{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
         </div>
         <div id="calc-result" style="display:none;margin-top:8px;padding:8px 10px;background:var(--bg-card);border:.5px solid var(--border);border-radius:6px;font-size:12px;color:var(--text-muted);"></div>
       </div>
+      <div class="form-group" id="fg-leg1-stake">
+        <label>Leg 1 stake ($) <span style="font-weight:400;color:var(--text-muted)">(auto-filled, editable)</span></label>
+        <input type="number" id="f-leg1-stake" placeholder="e.g. 29.72" step="0.01" oninput="updateTotalFromLegs()">
+      </div>
+      <div class="form-group" id="fg-leg2-stake">
+        <label>Leg 2 stake ($) <span style="font-weight:400;color:var(--text-muted)">(auto-filled, editable)</span></label>
+        <input type="number" id="f-leg2-stake" placeholder="e.g. 20.28" step="0.01" oninput="updateTotalFromLegs()">
+      </div>
       <div class="form-group" id="fg-stake">
         <label>Total staked ($)</label>
-        <input type="number" id="f-stake" placeholder="50">
+        <input type="number" id="f-stake" placeholder="50" readonly style="opacity:.7">
       </div>
       <div class="form-group" id="fg-profit">
         <label>Guaranteed profit ($)</label>
@@ -1038,7 +1046,7 @@ function renderLog(pool) {
 function toggleBetType() {
   const t = document.getElementById('f-type').value;
   const s = document.getElementById('f-status').value;
-  ['fg-book1','fg-book2','fg-stake','fg-profit'].forEach(id=>document.getElementById(id).style.display=t==='arb'?'':'none');
+  ['fg-book1','fg-book2','fg-leg1-stake','fg-leg2-stake','fg-stake','fg-profit'].forEach(id=>document.getElementById(id).style.display=t==='arb'?'':'none');
   ['fg-book-ev','fg-odds','fg-ev-pct','fg-ev-stake','fg-ev-profit'].forEach(id=>document.getElementById(id).style.display=t==='ev'?'':'none');
   const wl = document.getElementById('fg-winning-leg');
   if (wl) wl.style.display = (t==='arb' && s==='settled') ? '' : 'none';
@@ -1073,6 +1081,8 @@ function openForm(prefill={}) {
   if (document.getElementById('f-winning-leg')) {
     document.getElementById('f-winning-leg').value = prefill.winningLeg || '';
   }
+  if (document.getElementById('f-leg1-stake')) document.getElementById('f-leg1-stake').value = prefill.leg1Stake || '';
+  if (document.getElementById('f-leg2-stake')) document.getElementById('f-leg2-stake').value = prefill.leg2Stake || '';
   toggleBetType();
   document.getElementById('formOverlay').classList.add('open');
 }
@@ -1105,6 +1115,8 @@ function saveBet() {
     gametimeonly: document.getElementById('f-gametime-only') ? document.getElementById('f-gametime-only').value.trim() : '',
     betType: document.getElementById('f-bet-type') ? document.getElementById('f-bet-type').value : 'Moneyline',
     winningLeg: document.getElementById('f-winning-leg') ? (document.getElementById('f-winning-leg').value || null) : null,
+    leg1Stake: parseFloat(document.getElementById('f-leg1-stake') ? document.getElementById('f-leg1-stake').value : 0) || null,
+    leg2Stake: parseFloat(document.getElementById('f-leg2-stake') ? document.getElementById('f-leg2-stake').value : 0) || null,
     book1: document.getElementById('f-book1').value.trim(),
     book2: document.getElementById('f-book2').value.trim(),
     bookEv: document.getElementById('f-book-ev').value.trim(),
@@ -1164,6 +1176,8 @@ function editBet(id) {
   if (document.getElementById('f-winning-leg')) {
     document.getElementById('f-winning-leg').value = b.winningLeg || '';
   }
+  if (document.getElementById('f-leg1-stake')) document.getElementById('f-leg1-stake').value = b.leg1Stake || '';
+  if (document.getElementById('f-leg2-stake')) document.getElementById('f-leg2-stake').value = b.leg2Stake || '';
   toggleBetType();
   document.getElementById('formOverlay').classList.add('open');
 }
@@ -1306,9 +1320,13 @@ function calcArb() {
   var profit = (s1 * d1) - unit;
   var pct = (1 - impl) * 100;
 
-  // Auto-fill stake and profit fields
+  // Auto-fill leg stakes, total stake and profit fields
+  var leg1El  = document.getElementById('f-leg1-stake');
+  var leg2El  = document.getElementById('f-leg2-stake');
   var stakeEl = document.getElementById('f-stake');
   var profitEl = document.getElementById('f-profit');
+  if (leg1El)  leg1El.value  = s1.toFixed(2);
+  if (leg2El)  leg2El.value  = s2.toFixed(2);
   if (stakeEl) stakeEl.value = (s1 + s2).toFixed(2);
   if (profitEl) profitEl.value = profit.toFixed(2);
 
@@ -1321,6 +1339,13 @@ function calcArb() {
       'Leg 2 stake: <strong>$' + s2.toFixed(2) + '</strong> &nbsp;|&nbsp; ' +
       'Profit: <strong>$' + profit.toFixed(2) + '</strong>';
   }
+}
+
+function updateTotalFromLegs() {
+  var s1 = parseFloat(document.getElementById('f-leg1-stake').value) || 0;
+  var s2 = parseFloat(document.getElementById('f-leg2-stake').value) || 0;
+  var stakeEl = document.getElementById('f-stake');
+  if (stakeEl) stakeEl.value = (s1 + s2).toFixed(2);
 }
 
 function calcEVProfit() {
@@ -1951,7 +1976,12 @@ function getBookStats(book) {
 
   // ── Arb pending: count stake once per bet (not per leg) ──
   const arbPending  = arbBets.filter(b => b.status === 'pending');
-  const arbRisk     = arbPending.reduce((s, b) => s + parseFloat(b.stake||0), 0);
+  const arbRisk     = arbPending.reduce((s, b) => {
+    const isBook1 = bookMatch(b.book1);
+    // Use individual leg stake if available, otherwise split total stake 50/50
+    if (isBook1) return s + (b.leg1Stake != null ? b.leg1Stake : parseFloat(b.stake||0) / 2);
+    return s + (b.leg2Stake != null ? b.leg2Stake : parseFloat(b.stake||0) / 2);
+  }, 0);
 
   // ── Arb settled: per-book wins/losses using winningLeg ──
   const arbSettled  = arbBets.filter(b => b.status === 'settled');
