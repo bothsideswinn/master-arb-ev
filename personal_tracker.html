@@ -462,6 +462,7 @@ h1{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px">
       <div class="stat-card highlight"><div class="stat-lbl">Total balance</div><div class="stat-val green" id="bal-total">$0.00</div><div class="stat-sub">deposits + P&L</div></div>
       <div class="stat-card"><div class="stat-lbl">Total deposited</div><div class="stat-val" id="bal-deposited">$0.00</div><div class="stat-sub">all books</div></div>
+      <div class="stat-card"><div class="stat-lbl">Total withdrawn</div><div class="stat-val red" id="bal-withdrawn">$0.00</div><div class="stat-sub">all books</div></div>
       <div class="stat-card"><div class="stat-lbl">Net P&L</div><div class="stat-val" id="bal-pnl">$0.00</div><div class="stat-sub">settled bets</div></div>
       <div class="stat-card"><div class="stat-lbl">Total at risk</div><div class="stat-val blue" id="bal-risk">$0.00</div><div class="stat-sub">pending stakes</div></div>
     </div>
@@ -519,6 +520,55 @@ h1{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
       <tbody id="dep-table-body"></tbody>
     </table>
     <div id="dep-table-empty" style="text-align:center;padding:2rem;color:var(--text-muted);font-size:13px">No deposits logged yet</div>
+  </div>
+
+  <!-- Withdrawal history -->
+  <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:10px;margin-top:1.5rem">Withdrawal / Cash out history</div>
+
+  <!-- Add withdrawal form -->
+  <div class="panel" style="margin-bottom:1rem">
+    <div style="font-size:13px;font-weight:700;margin-bottom:12px">Log a withdrawal</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Book</span>
+        <select id="with-book" class="sel" style="min-width:150px">
+          <option value="Hard Rock Bet">Hard Rock Bet</option>
+          <option value="Bovada">Bovada</option>
+          <option value="BetOnline">BetOnline</option>
+        </select>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Amount ($)</span>
+        <input type="number" id="with-amount" class="inp" placeholder="e.g. 200" style="width:120px" min="0">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Date</span>
+        <input type="date" id="with-date" class="inp" style="width:140px">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)">Note (optional)</span>
+        <input type="text" id="with-note" class="inp" placeholder="e.g. Cash out winnings" style="width:180px">
+      </div>
+      <button class="btn danger" onclick="addWithdrawal()" style="padding:8px 20px;font-size:13px">Log withdrawal</button>
+    </div>
+    <div id="with-msg" style="font-size:12px;margin-top:8px"></div>
+  </div>
+
+  <!-- Withdrawal table -->
+  <div class="panel" style="overflow-x:auto;overflow-y:auto;max-height:400px;margin-bottom:2rem">
+    <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead>
+        <tr style="background:var(--bg);border-bottom:.5px solid var(--border)">
+          <th style="text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500;position:sticky;top:0;background:var(--bg)">Date</th>
+          <th style="text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500;position:sticky;top:0;background:var(--bg)">Book</th>
+          <th style="text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500;position:sticky;top:0;background:var(--bg)">Amount</th>
+          <th style="text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500;position:sticky;top:0;background:var(--bg)">Note</th>
+          <th style="padding:8px 10px;position:sticky;top:0;background:var(--bg)"></th>
+        </tr>
+      </thead>
+      <tbody id="with-table-body"></tbody>
+    </table>
+    <div id="with-table-empty" style="text-align:center;padding:2rem;color:var(--text-muted);font-size:13px">No withdrawals logged yet</div>
   </div>
 
 </div><!-- /balances-section -->
@@ -1761,10 +1811,14 @@ function importOthCSV(text) {
 
 // ── BOOK BALANCE TAB ──────────────────────────────────────────────────────────
 const BOOKS = ['Hard Rock Bet', 'Bovada', 'BetOnline'];
-let deposits = JSON.parse(localStorage.getItem('book_balances_v1') || '[]');
+let deposits    = JSON.parse(localStorage.getItem('book_balances_v1') || '[]');
+let withdrawals = JSON.parse(localStorage.getItem('book_withdrawals_v1') || '[]');
 
 function saveDeposits() {
   localStorage.setItem('book_balances_v1', JSON.stringify(deposits));
+}
+function saveWithdrawals() {
+  localStorage.setItem('book_withdrawals_v1', JSON.stringify(withdrawals));
 }
 
 function addDeposit() {
@@ -1792,6 +1846,29 @@ function deleteDeposit(id) {
   if (!confirm('Delete this deposit?')) return;
   deposits = deposits.filter(d => d.id !== id);
   saveDeposits();
+  renderBalances();
+}
+
+function addWithdrawal() {
+  const book   = document.getElementById('with-book').value;
+  const amount = parseFloat(document.getElementById('with-amount').value);
+  const date   = document.getElementById('with-date').value || new Date().toISOString().split('T')[0];
+  const note   = document.getElementById('with-note').value.trim();
+  const msgEl  = document.getElementById('with-msg');
+  if (!amount || amount <= 0) { msgEl.innerHTML = '<span style="color:var(--red)">Please enter a valid amount.</span>'; return; }
+  withdrawals.push({ id: String(Date.now()), book, amount, date, note });
+  saveWithdrawals();
+  document.getElementById('with-amount').value = '';
+  document.getElementById('with-note').value   = '';
+  msgEl.innerHTML = '<span style="color:var(--green)">Withdrawal logged!</span>';
+  setTimeout(() => { msgEl.innerHTML = ''; }, 2000);
+  renderBalances();
+}
+
+function deleteWithdrawal(id) {
+  if (!confirm('Delete this withdrawal?')) return;
+  withdrawals = withdrawals.filter(w => w.id !== id);
+  saveWithdrawals();
   renderBalances();
 }
 
@@ -1832,7 +1909,8 @@ function getBookStats(book) {
   const totalPnl      = arbPnl + othPnl;
   const atRisk        = arbRisk + othRisk;
   const totalDep      = deposits.filter(d => d.book === book).reduce((s, d) => s + d.amount, 0);
-  const balance       = totalDep + totalPnl;
+  const totalWithdraw = (typeof withdrawals !== 'undefined' ? withdrawals : []).filter(w => w.book === book).reduce((s, w) => s + w.amount, 0);
+  const balance       = totalDep - totalWithdraw + totalPnl;
   const wins          = arbWins + othWins;
   const losses        = arbSettled.filter(b => parseFloat(b.profit||0) < 0).length +
                         othSettled.filter(b => (b.pnl||0) < 0).length;
@@ -1869,10 +1947,15 @@ function renderBalances() {
     if (id === 'bal-pnl')   el.className = 'stat-val ' + (val >= 0 ? 'green' : 'red');
   };
 
-  setBal('bal-total',     totalBal);
-  setBal('bal-deposited', totalDep);
-  setBal('bal-pnl',       totalPnl, true);
-  setBal('bal-risk',      totalRisk);
+  let totalWithdrawAll = 0;
+  BOOKS.forEach(book => {
+    totalWithdrawAll += (typeof withdrawals !== 'undefined' ? withdrawals : []).filter(w => w.book === book).reduce((s, w) => s + w.amount, 0);
+  });
+  setBal('bal-total',      totalBal);
+  setBal('bal-deposited',  totalDep);
+  setBal('bal-withdrawn',  totalWithdrawAll);
+  setBal('bal-pnl',        totalPnl, true);
+  setBal('bal-risk',       totalRisk);
 
   // Per book cards
   const wrap = document.getElementById('book-cards-wrap');
@@ -1940,6 +2023,28 @@ function renderBalances() {
       <td style="padding:8px 10px;color:var(--text-muted)">${d.note || '—'}</td>
       <td style="padding:8px 10px">
         <button onclick="deleteDeposit('${d.id}')" style="font-size:10px;padding:3px 7px;border-radius:5px;border:.5px solid var(--border);background:var(--bg-input);cursor:pointer;color:var(--red)">✕</button>
+      </td>
+    </tr>`).join('');
+
+  // Render withdrawal table
+  const wtbody = document.getElementById('with-table-body');
+  const wempty = document.getElementById('with-table-empty');
+  if (!wtbody) return;
+  const wsorted = [...(typeof withdrawals !== 'undefined' ? withdrawals : [])].sort((a,b) => b.date.localeCompare(a.date));
+  if (!wsorted.length) {
+    wtbody.innerHTML = '';
+    if (wempty) wempty.style.display = 'block';
+    return;
+  }
+  if (wempty) wempty.style.display = 'none';
+  wtbody.innerHTML = wsorted.map(w => `
+    <tr style="border-bottom:.5px solid var(--border)">
+      <td style="padding:8px 10px;color:var(--text-muted);white-space:nowrap">${w.date}</td>
+      <td style="padding:8px 10px;font-weight:600">${w.book}</td>
+      <td style="padding:8px 10px;font-weight:700;color:var(--red)">-$${fmt(w.amount)}</td>
+      <td style="padding:8px 10px;color:var(--text-muted)">${w.note || '—'}</td>
+      <td style="padding:8px 10px">
+        <button onclick="deleteWithdrawal('${w.id}')" style="font-size:10px;padding:3px 7px;border-radius:5px;border:.5px solid var(--border);background:var(--bg-input);cursor:pointer;color:var(--red)">✕</button>
       </td>
     </tr>`).join('');
 }
