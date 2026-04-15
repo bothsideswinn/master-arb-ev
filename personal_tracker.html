@@ -1941,16 +1941,13 @@ function deleteWithdrawal(id) {
 function getBookStats(book) {
   const bk = book.toLowerCase();
 
-  // ── Arb bets where this book is leg1 or leg2 ──
-  const arbBets = bets.filter(b => b.type === 'arb' && (
-    (b.book1||'').toLowerCase() === bk || (b.book2||'').toLowerCase() === bk
-  ));
+  // ── Arb bets where this book is leg1 or leg2 (partial match for flexibility) ──
+  const bookMatch = s => { const sl=(s||'').toLowerCase(); return sl===bk || sl.includes(bk) || bk.includes(sl) || (sl.length>3 && bk.includes(sl)); };
+  const arbBets = bets.filter(b => b.type === 'arb' && (bookMatch(b.book1) || bookMatch(b.book2)));
   // ── EV bets where this book is the EV book ──
-  const evBets = bets.filter(b => b.type === 'ev' && (b.bookEv||'').toLowerCase() === bk);
+  const evBets = bets.filter(b => b.type === 'ev' && bookMatch(b.bookEv));
   // ── Other tab bets ──
-  const othBets = (typeof otherBets !== 'undefined' ? otherBets : []).filter(b =>
-    (b.book||'').toLowerCase() === bk
-  );
+  const othBets = (typeof otherBets !== 'undefined' ? otherBets : []).filter(b => bookMatch(b.book));
 
   // ── Arb pending: count stake once per bet (not per leg) ──
   const arbPending  = arbBets.filter(b => b.status === 'pending');
@@ -1961,8 +1958,8 @@ function getBookStats(book) {
   let arbWins = 0, arbLosses = 0, arbPnl = 0, arbBestWin = 0;
   arbSettled.forEach(b => {
     const profit  = parseFloat(b.profit||0);
-    const isBook1 = (b.book1||'').toLowerCase() === bk;
-    const isBook2 = (b.book2||'').toLowerCase() === bk;
+    const isBook1 = bookMatch(b.book1);
+    const isBook2 = bookMatch(b.book2);
     if (!b.winningLeg) {
       // No winning leg set — skip win/loss attribution, but count P&L neutrally
       arbPnl += profit * 0.5; // split equally until we know
@@ -2032,14 +2029,16 @@ function renderBalances() {
   const depDateEl = document.getElementById('dep-date');
   if (depDateEl && !depDateEl.value) depDateEl.value = new Date().toISOString().split('T')[0];
   // Summary totals
-  let totalBal = 0, totalDep = 0, totalPnl = 0, totalRisk = 0;
+  let totalBal = 0, totalDep = 0, totalPnl = 0;
   BOOKS.forEach(book => {
     const s = getBookStats(book);
-    totalBal  += s.balance;
-    totalDep  += s.totalDep;
-    totalPnl  += s.pnl;
-    totalRisk += s.atRisk;
+    totalBal += s.balance;
+    totalDep += s.totalDep;
+    totalPnl += s.pnl;
   });
+  // At risk: count unique pending bets only once (arb bets span 2 books so don't double count)
+  const totalRisk = bets.filter(b => b.status === 'pending').reduce((s,b) => s + parseFloat(b.stake||0), 0)
+    + (typeof otherBets !== 'undefined' ? otherBets : []).filter(b => b.result === 'pending').reduce((s,b) => s + parseFloat(b.stake||0), 0);
 
   const fmt = n => Math.abs(n).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
 
