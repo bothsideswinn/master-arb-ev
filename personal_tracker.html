@@ -1796,28 +1796,53 @@ function deleteDeposit(id) {
 }
 
 function getBookStats(book) {
-  const bookBets = bets.filter(b => {
-    const b1 = (b.book1 || '').toLowerCase();
-    const b2 = (b.book2 || '').toLowerCase();
+  const bk = book.toLowerCase();
+
+  // Match from arb/EV bets (book1, book2, bookEv fields)
+  const arbEvBets = bets.filter(b => {
+    const b1  = (b.book1  || '').toLowerCase();
+    const b2  = (b.book2  || '').toLowerCase();
     const bEv = (b.bookEv || '').toLowerCase();
-    const bk  = book.toLowerCase();
     return b1 === bk || b2 === bk || bEv === bk;
   });
 
-  const settled  = bookBets.filter(b => b.status === 'settled');
-  const pending  = bookBets.filter(b => b.status === 'pending');
+  // Match from Other tab bets (book field, result field instead of status)
+  const othBets = (typeof otherBets !== 'undefined' ? otherBets : []).filter(b => {
+    return (b.book || '').toLowerCase() === bk;
+  });
 
-  const pnl      = settled.reduce((s, b) => s + parseFloat(b.profit || 0), 0);
-  const atRisk   = pending.reduce((s, b) => s + parseFloat(b.stake || 0), 0);
-  const totalDep = deposits.filter(d => d.book === book).reduce((s, d) => s + d.amount, 0);
-  const balance  = totalDep + pnl;
-  const wins     = settled.filter(b => parseFloat(b.profit || 0) > 0).length;
-  const losses   = settled.filter(b => parseFloat(b.profit || 0) < 0).length;
-  const winRate  = settled.length ? Math.round(wins / settled.length * 100) : 0;
-  const bestWin  = settled.length ? Math.max(0, ...settled.map(b => parseFloat(b.profit || 0))) : 0;
-  const totalStaked = bookBets.reduce((s, b) => s + parseFloat(b.stake || 0), 0);
+  // Normalize Other bets to same shape for calculations
+  // Other bets use result: win/loss/push/pending, and pnl field
+  const othSettled = othBets.filter(b => b.result === 'win' || b.result === 'loss' || b.result === 'push');
+  const othPending = othBets.filter(b => b.result === 'pending');
+  const othPnl     = othSettled.reduce((s, b) => s + (b.pnl || 0), 0);
+  const othRisk    = othPending.reduce((s, b) => s + parseFloat(b.stake || 0), 0);
+  const othWins    = othSettled.filter(b => (b.pnl || 0) > 0).length;
+  const othBestWin = othSettled.length ? Math.max(0, ...othSettled.map(b => b.pnl || 0)) : 0;
 
-  return { pnl, atRisk, totalDep, balance, wins, losses, winRate, bestWin, totalStaked, totalBets: bookBets.length, settled: settled.length };
+  // Arb/EV calculations (use status + profit fields)
+  const arbSettled  = arbEvBets.filter(b => b.status === 'settled');
+  const arbPending  = arbEvBets.filter(b => b.status === 'pending');
+  const arbPnl      = arbSettled.reduce((s, b) => s + parseFloat(b.profit || 0), 0);
+  const arbRisk     = arbPending.reduce((s, b) => s + parseFloat(b.stake || 0), 0);
+  const arbWins     = arbSettled.filter(b => parseFloat(b.profit || 0) > 0).length;
+  const arbBestWin  = arbSettled.length ? Math.max(0, ...arbSettled.map(b => parseFloat(b.profit || 0))) : 0;
+
+  // Combined
+  const totalPnl      = arbPnl + othPnl;
+  const atRisk        = arbRisk + othRisk;
+  const totalDep      = deposits.filter(d => d.book === book).reduce((s, d) => s + d.amount, 0);
+  const balance       = totalDep + totalPnl;
+  const wins          = arbWins + othWins;
+  const losses        = arbSettled.filter(b => parseFloat(b.profit||0) < 0).length +
+                        othSettled.filter(b => (b.pnl||0) < 0).length;
+  const settledCount  = arbSettled.length + othSettled.length;
+  const winRate       = settledCount ? Math.round(wins / settledCount * 100) : 0;
+  const bestWin       = Math.max(arbBestWin, othBestWin);
+  const totalStaked   = [...arbEvBets, ...othBets].reduce((s, b) => s + parseFloat(b.stake || 0), 0);
+  const totalBets     = arbEvBets.length + othBets.length;
+
+  return { pnl: totalPnl, atRisk, totalDep, balance, wins, losses, winRate, bestWin, totalStaked, totalBets, settled: settledCount };
 }
 
 function renderBalances() {
