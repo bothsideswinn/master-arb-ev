@@ -670,11 +670,11 @@ h1{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;">
           <div style="display:flex;flex-direction:column;gap:3px;flex:1;min-width:80px;">
             <span style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">Leg 1 odds</span>
-            <input type="text" id="calc-odds1" placeholder="+150" oninput="calcArb()" style="font-size:13px;padding:6px 8px;border-radius:6px;border:.5px solid var(--border);background:var(--bg-input);color:var(--text);">
+            <input type="text" id="calc-odds1" placeholder="+150" oninput="calcArb(); if(document.getElementById('f-leg1-odds')) document.getElementById('f-leg1-odds').value=this.value;" style="font-size:13px;padding:6px 8px;border-radius:6px;border:.5px solid var(--border);background:var(--bg-input);color:var(--text);">
           </div>
           <div style="display:flex;flex-direction:column;gap:3px;flex:1;min-width:80px;">
             <span style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">Leg 2 odds</span>
-            <input type="text" id="calc-odds2" placeholder="-140" oninput="calcArb()" style="font-size:13px;padding:6px 8px;border-radius:6px;border:.5px solid var(--border);background:var(--bg-input);color:var(--text);">
+            <input type="text" id="calc-odds2" placeholder="-140" oninput="calcArb(); if(document.getElementById('f-leg2-odds')) document.getElementById('f-leg2-odds').value=this.value;" style="font-size:13px;padding:6px 8px;border-radius:6px;border:.5px solid var(--border);background:var(--bg-input);color:var(--text);">
           </div>
           <div style="display:flex;flex-direction:column;gap:3px;flex:1;min-width:80px;">
             <span style="font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">Unit ($)</span>
@@ -693,7 +693,7 @@ h1{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
       </div>
       <div class="form-group" id="fg-stake">
         <label>Total staked ($)</label>
-        <input type="number" id="f-stake" placeholder="50" readonly style="opacity:.7">
+        <input type="number" id="f-stake" placeholder="50">
       </div>
       <div class="form-group" id="fg-profit">
         <label>Guaranteed profit ($)</label>
@@ -1110,10 +1110,19 @@ function handleOverlayClick(e) { if(e.target===document.getElementById('formOver
 function saveBet() {
   const type = document.getElementById('f-type').value;
   const isArb = type === 'arb';
-  const stakeEl = isArb ? document.getElementById('f-stake') : document.getElementById('f-ev-stake');
   const profitEl = document.getElementById('f-profit');
-  const stake = parseFloat(stakeEl ? stakeEl.value : 0) || 0;
   const profit = parseFloat(profitEl ? profitEl.value : 0) || 0;
+  let stake = 0;
+  if (isArb) {
+    const l1 = parseFloat(document.getElementById('f-leg1-stake') ? document.getElementById('f-leg1-stake').value : 0) || 0;
+    const l2 = parseFloat(document.getElementById('f-leg2-stake') ? document.getElementById('f-leg2-stake').value : 0) || 0;
+    stake = l1 + l2 || parseFloat(document.getElementById('f-stake') ? document.getElementById('f-stake').value : 0) || 0;
+    // Keep f-stake in sync
+    if (document.getElementById('f-stake')) document.getElementById('f-stake').value = stake.toFixed(2);
+  } else {
+    const stakeEl = document.getElementById('f-ev-stake');
+    stake = parseFloat(stakeEl ? stakeEl.value : 0) || 0;
+  }
   const game = document.getElementById('f-game').value.trim();
   const gamedate = document.getElementById('f-gamedate') ? document.getElementById('f-gamedate').value.trim() : '';
   const gametime_only = document.getElementById('f-gametime-only') ? document.getElementById('f-gametime-only').value.trim() : '';
