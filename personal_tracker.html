@@ -2094,7 +2094,13 @@ function handleOthPaste() { importOthCSV(document.getElementById('oth-paste-area
 
 function importOthCSV(text) {
   const msgEl = document.getElementById('oth-import-msg');
-  const lines = text.trim().split('\n').filter(l => l.trim());
+  let lines = text.trim().split('\n').filter(l => l.trim());
+  if (lines.length < 2) { msgEl.innerHTML = '<span style="color:var(--red)">No valid rows found.</span>'; return; }
+  // Skip any leading non-header lines (e.g. sheet name from Numbers export)
+  const knownHeaders = ['date','sport','league','book','game','match','wager','bet slip id'];
+  while (lines.length > 1 && !knownHeaders.some(h => lines[0].toLowerCase().includes(h))) {
+    lines = lines.slice(1);
+  }
   if (lines.length < 2) { msgEl.innerHTML = '<span style="color:var(--red)">No valid rows found.</span>'; return; }
 
   function parseCSVLine(line) {
