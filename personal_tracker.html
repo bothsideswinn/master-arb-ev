@@ -2195,17 +2195,29 @@ function importOthCSV(text) {
     });
   } else {
     rows.filter(r => r['date'] || r['game'] || r['matchup']).forEach(r => {
+      const stake = parseFloat(r['stake'] || 0) || 0;
+      const unitsize = parseFloat(r['unitsize'] || 0) || 0;
+      const result = mapResult(r['result']);
+      const dec = (() => { const o=parseFloat(r['odds']); if(isNaN(o)) return null; return o>=0?(o/100)+1:(100/Math.abs(o))+1; })();
+      const profitIfWin = dec && stake ? +((dec-1)*stake).toFixed(2) : parseFloat(r['pnl']||0)||0;
+      const pnl = result==='win' ? profitIfWin : result==='loss' ? -stake : result==='push' ? 0 : profitIfWin;
       newBets.push({
         id: String(Date.now() + Math.random()),
         date: r['date'] || '',
-        sport: r['sport'] || '⚽ Soccer',
+        sport: r['sport'] || '',
+        league: r['league'] || '',
         book: r['book'] || '',
         game: r['game'] || r['matchup'] || r['description'] || '',
-        league: r['league'] || '',
+        betdesc: r['betdesc'] || r['bet description'] || r['bet_desc'] || '',
+        bettype: r['bettype'] || r['bet type'] || r['bet_type'] || 'Moneyline',
         odds: r['odds'] || '',
-        stake: parseFloat(r['stake'] || 0) || 0,
-        result: mapResult(r['result']),
-        pnl: parseFloat(r['pnl'] || r['p&l'] || 0) || 0,
+        stake,
+        result,
+        pnl,
+        gamedate: r['gamedate'] || r['game date'] || r['game_date'] || '',
+        gametime: r['gametime'] || r['game time'] || r['game_time'] || '',
+        unitsize: unitsize || null,
+        units: unitsize > 0 ? +(stake/unitsize).toFixed(2) : null,
         notes: r['notes'] || '',
       });
     });
