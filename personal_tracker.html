@@ -2424,7 +2424,10 @@ function getBookStats(book) {
   let balance;
   if (mb) {
     // Per-book P&L for post-baseline arb bets using winningLeg + leg odds
-    const postArbPnl = arbSettled.filter(b => b.date > mb.date).reduce((s, b) => {
+    const postArbPnl = arbSettled.filter(b => {
+      const d = b.gamedate || b.date || '';
+      return d > mb.date && b.date > mb.date;
+    }).reduce((s, b) => {
       const profit  = parseFloat(b.profit||0);
       const stake   = parseFloat(b.stake||0);
       const l1s     = b.leg1Stake != null ? parseFloat(b.leg1Stake) : stake / 2;
@@ -2446,8 +2449,11 @@ function getBookStats(book) {
       }
       return s;
     }, 0);
-    const postEvPnl  = evSettled.filter(b => b.date > mb.date).reduce((s,b) => s + parseFloat(b.profit||0), 0);
-    const postOthPnl = othSettled.filter(b => b.date > mb.date).reduce((s,b) => s + (b.pnl||0), 0);
+    const postEvPnl  = evSettled.filter(b => b.date > mb.date && (b.gamedate||b.date) > mb.date).reduce((s,b) => s + parseFloat(b.profit||0), 0);
+    const postOthPnl = othSettled.filter(b => {
+      const d = b.gamedate || b.date || '';
+      return d > mb.date && b.date > mb.date;
+    }).reduce((s,b) => s + (b.pnl||0), 0);
     const pnlNew = postArbPnl + postEvPnl + postOthPnl;
     const depNew  = deposits.filter(d => d.book === book && d.date > mb.date).reduce((s,d) => s + d.amount, 0);
     const withNew = (typeof withdrawals !== 'undefined' ? withdrawals : []).filter(w => w.book === book && w.date > mb.date).reduce((s,w) => s + w.amount, 0);
