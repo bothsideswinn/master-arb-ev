@@ -2457,9 +2457,9 @@ function getBookStats(book) {
     const pnlNew = postArbPnl + postEvPnl + postOthPnl;
     const depNew  = deposits.filter(d => d.book === book && d.date > mb.date).reduce((s,d) => s + d.amount, 0);
     const withNew = (typeof withdrawals !== 'undefined' ? withdrawals : []).filter(w => w.book === book && w.date > mb.date).reduce((s,w) => s + w.amount, 0);
-    balance = mb.amount + pnlNew + depNew - withNew - atRisk;
+    balance = mb.amount + pnlNew + depNew - withNew;
   } else {
-    balance = totalDep - totalWithdraw + totalPnl - atRisk;
+    balance = totalDep - totalWithdraw + totalPnl;
   }
 
   return { pnl: totalPnl, atRisk, totalDep, balance, wins, losses, winRate, bestWin, totalStaked, totalBets, settled: settledCount };
