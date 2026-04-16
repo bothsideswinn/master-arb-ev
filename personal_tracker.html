@@ -353,8 +353,6 @@ h1{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
     <table style="width:100%;border-collapse:collapse;font-size:12px">
       <thead>
         <tr style="border-bottom:.5px solid var(--border);background:var(--bg)">
-          <th style="text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500;white-space:nowrap;position:sticky;top:0;background:var(--bg);z-index:1">Date</th>
-          <th style="position:sticky;top:0;background:var(--bg);z-index:1;text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500">Book</th>
           <th style="position:sticky;top:0;background:var(--bg);z-index:1;text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500">Date</th>
           <th style="position:sticky;top:0;background:var(--bg);z-index:1;text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500">Time</th>
           <th style="position:sticky;top:0;background:var(--bg);z-index:1;text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500">Book</th>
@@ -362,9 +360,10 @@ h1{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
           <th style="position:sticky;top:0;background:var(--bg);z-index:1;text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500">League</th>
           <th style="position:sticky;top:0;background:var(--bg);z-index:1;text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500">Matchup</th>
           <th style="position:sticky;top:0;background:var(--bg);z-index:1;text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500">Bet desc</th>
+          <th style="position:sticky;top:0;background:var(--bg);z-index:1;text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500">Bet type</th>
           <th style="position:sticky;top:0;background:var(--bg);z-index:1;text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500">Odds</th>
           <th style="position:sticky;top:0;background:var(--bg);z-index:1;text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500">Stake</th>
-          <th style="position:sticky;top:0;background:var(--bg);z-index:1;text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500">P&amp;L</th>
+          <th style="position:sticky;top:0;background:var(--bg);z-index:1;text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500">P&L</th>
           <th style="position:sticky;top:0;background:var(--bg);z-index:1;text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500">Result</th>
           <th style="position:sticky;top:0;background:var(--bg);z-index:1;text-align:left;padding:8px 10px;color:var(--text-muted);font-weight:500"></th>
         </tr>
@@ -2047,6 +2046,7 @@ function renderOthTable() {
       <td style="padding:8px 10px;white-space:nowrap;color:var(--text-muted);font-size:11px">${b.league||'—'}</td>
       <td style="padding:8px 10px;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${b.game||''}">${b.game||'—'}</td>
       <td style="padding:8px 10px;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11px;color:var(--blue)" title="${b.betdesc||''}">${b.betdesc||'—'}</td>
+      <td style="padding:8px 10px;font-size:11px;color:var(--text-secondary)">${b.bettype||'—'}</td>
       <td style="padding:8px 10px">${b.odds||'—'}</td>
       <td style="padding:8px 10px">${fmtMoney(parseFloat(b.stake||0))}</td>
       <td style="padding:8px 10px;font-weight:600;color:${pnlColor}">${pnlStr}</td>
