@@ -537,7 +537,7 @@ h1{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
   <div style="margin-bottom:1.25rem;margin-top:1rem">
     <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:10px">Combined — all books</div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px">
-      <div class="stat-card highlight"><div class="stat-lbl">Total balance</div><div class="stat-val green" id="bal-total">$0.00</div><div class="stat-sub">deposits + P&L</div></div>
+      <div class="stat-card highlight"><div class="stat-lbl">Available balance</div><div class="stat-val green" id="bal-total">$0.00</div><div class="stat-sub">after pending stakes</div></div>
       <div class="stat-card"><div class="stat-lbl">Total deposited</div><div class="stat-val" id="bal-deposited">$0.00</div><div class="stat-sub">all books</div></div>
       <div class="stat-card"><div class="stat-lbl">Total withdrawn</div><div class="stat-val red" id="bal-withdrawn">$0.00</div><div class="stat-sub">all books</div></div>
       <div class="stat-card"><div class="stat-lbl">Net P&L</div><div class="stat-val" id="bal-pnl">$0.00</div><div class="stat-sub">settled bets</div></div>
@@ -2424,7 +2424,7 @@ function getBookStats(book) {
   let balance;
   if (mb) {
     // Per-book P&L for post-baseline arb bets using winningLeg + leg odds
-    const postArbPnl = arbSettled.filter(b => b.date >= mb.date).reduce((s, b) => {
+    const postArbPnl = arbSettled.filter(b => b.date > mb.date).reduce((s, b) => {
       const profit  = parseFloat(b.profit||0);
       const stake   = parseFloat(b.stake||0);
       const l1s     = b.leg1Stake != null ? parseFloat(b.leg1Stake) : stake / 2;
@@ -2446,14 +2446,14 @@ function getBookStats(book) {
       }
       return s;
     }, 0);
-    const postEvPnl  = evSettled.filter(b => b.date >= mb.date).reduce((s,b) => s + parseFloat(b.profit||0), 0);
-    const postOthPnl = othSettled.filter(b => b.date >= mb.date).reduce((s,b) => s + (b.pnl||0), 0);
+    const postEvPnl  = evSettled.filter(b => b.date > mb.date).reduce((s,b) => s + parseFloat(b.profit||0), 0);
+    const postOthPnl = othSettled.filter(b => b.date > mb.date).reduce((s,b) => s + (b.pnl||0), 0);
     const pnlNew = postArbPnl + postEvPnl + postOthPnl;
-    const depNew  = deposits.filter(d => d.book === book && d.date >= mb.date).reduce((s,d) => s + d.amount, 0);
-    const withNew = (typeof withdrawals !== 'undefined' ? withdrawals : []).filter(w => w.book === book && w.date >= mb.date).reduce((s,w) => s + w.amount, 0);
-    balance = mb.amount + pnlNew + depNew - withNew;
+    const depNew  = deposits.filter(d => d.book === book && d.date > mb.date).reduce((s,d) => s + d.amount, 0);
+    const withNew = (typeof withdrawals !== 'undefined' ? withdrawals : []).filter(w => w.book === book && w.date > mb.date).reduce((s,w) => s + w.amount, 0);
+    balance = mb.amount + pnlNew + depNew - withNew - atRisk;
   } else {
-    balance = totalDep - totalWithdraw + totalPnl;
+    balance = totalDep - totalWithdraw + totalPnl - atRisk;
   }
 
   return { pnl: totalPnl, atRisk, totalDep, balance, wins, losses, winRate, bestWin, totalStaked, totalBets, settled: settledCount };
@@ -2507,7 +2507,10 @@ function renderBalances() {
       const pnlColor = s.pnl >= 0 ? 'var(--green)' : 'var(--red)';
       return `<div class="panel">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;padding-bottom:12px;border-bottom:.5px solid var(--border)">
-          <span style="font-size:15px;font-weight:700">${book}</span>
+          <div>
+            <span style="font-size:15px;font-weight:700">${book}</span>
+            <div style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);margin-top:1px">Available balance</div>
+          </div>
           <span style="font-size:20px;font-weight:800;color:${balColor}">${s.balance < 0 ? '-' : ''}$${fmt(s.balance)}</span>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
