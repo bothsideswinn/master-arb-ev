@@ -1672,8 +1672,138 @@ function fmtMoney(n, forceSign=false) {
   return (n < 0 ? '-$' : '$') + abs;
 }
 let otherBets = JSON.parse(localStorage.getItem('other_bets_v1') || '[]');
+let editingOthId = null;
 
 function saveOther() { localStorage.setItem('other_bets_v1', JSON.stringify(otherBets)); }
+
+function saveOthBet() {
+  const sport = document.getElementById('oth-f-sport').value || '';
+  const customSport = document.getElementById('oth-f-sport-custom');
+  const finalSport = sport === 'Other' ? (customSport ? customSport.value.trim() : '') : sport;
+  
+  const book = document.getElementById('oth-f-book').value.trim() || document.getElementById('oth-f-book-select').value || '';
+  const league = document.getElementById('oth-f-league').value.trim() || document.getElementById('oth-f-league-select').value || '';
+  const game = document.getElementById('oth-f-game').value.trim();
+  const stake = parseFloat(document.getElementById('oth-f-stake').value) || 0;
+  const odds = document.getElementById('oth-f-odds').value.trim();
+  
+  if (!game || !stake || !odds || !book) {
+    alert('Please fill in all required fields (game, stake, odds, book).');
+    return;
+  }
+  
+  // Get bet type
+  const betType = document.getElementById('oth-f-bettype').value || '';
+  const customBetType = document.getElementById('oth-f-bettype-custom');
+  const finalBetType = betType === 'Other' ? (customBetType ? customBetType.value.trim() : '') : betType;
+  
+  const bet = {
+    id: editingOthId || String(Date.now()),
+    date: document.getElementById('oth-f-date').value || new Date().toISOString().split('T')[0],
+    sport: finalSport,
+    book: book,
+    league: league,
+    game: game,
+    gamedate: document.getElementById('oth-f-gamedate').value.trim(),
+    gametime: document.getElementById('oth-f-gametime').value.trim(),
+    bettype: finalBetType,
+    betdesc: document.getElementById('oth-f-betdesc').value.trim(),
+    odds: odds,
+    stake: stake,
+    profit: parseFloat(document.getElementById('oth-f-profit').value) || 0,
+    payout: parseFloat(document.getElementById('oth-f-payout').value) || 0,
+    unitsize: parseFloat(document.getElementById('oth-f-unitsize').value) || 0,
+    units: parseFloat(document.getElementById('oth-f-units').value) || 0,
+    result: document.getElementById('oth-f-result').value || 'pending',
+    notes: document.getElementById('oth-f-notes').value.trim(),
+    pnl: 0  // Will be calculated by cycleOthStatus
+  };
+  
+  // Calculate PnL based on result
+  if (bet.result === 'win') {
+    bet.pnl = bet.profit;
+  } else if (bet.result === 'loss') {
+    bet.pnl = -bet.stake;
+  } else if (bet.result === 'push') {
+    bet.pnl = 0;
+  } else {
+    bet.pnl = 0; // pending
+  }
+  
+  if (editingOthId) {
+    const idx = otherBets.findIndex(b => b.id === editingOthId);
+    if (idx > -1) {
+      otherBets[idx] = bet;
+    } else {
+      otherBets.push(bet);
+    }
+  } else {
+    otherBets.push(bet);
+  }
+  
+  editingOthId = null;
+  saveOther();
+  renderOther();
+  
+  // Clear form
+  document.getElementById('oth-f-sport').value = '';
+  document.getElementById('oth-f-book-select').value = '';
+  document.getElementById('oth-f-book').value = '';
+  document.getElementById('oth-f-book').style.display = 'none';
+  document.getElementById('oth-f-league-select').innerHTML = '<option value="">Select league...</option>';
+  document.getElementById('oth-f-game').value = '';
+  document.getElementById('oth-f-odds').value = '';
+  document.getElementById('oth-f-stake').value = '';
+  document.getElementById('oth-f-profit').value = '';
+  document.getElementById('oth-f-payout').value = '';
+  document.getElementById('oth-f-units').value = '';
+  document.getElementById('oth-f-betdesc').value = '';
+  document.getElementById('oth-f-notes').value = '';
+  
+  const msgEl = document.getElementById('oth-form-msg');
+  if (msgEl) {
+    msgEl.innerHTML = '<span style="color:var(--green)">Bet saved!</span>';
+    setTimeout(() => { msgEl.innerHTML = ''; }, 2000);
+  }
+  
+  if (viewMode === 'balances') renderBalances();
+}
+
+function editOthBet(id) {
+  const bet = otherBets.find(b => b.id === id);
+  if (!bet) return;
+  
+  editingOthId = id;
+  
+  // Populate form fields
+  document.getElementById('oth-f-date').value = bet.date || '';
+  document.getElementById('oth-f-sport').value = bet.sport || '';
+  document.getElementById('oth-f-book-select').value = bet.book || '';
+  document.getElementById('oth-f-book').value = bet.book || '';
+  document.getElementById('oth-f-game').value = bet.game || '';
+  document.getElementById('oth-f-gamedate').value = bet.gamedate || '';
+  document.getElementById('oth-f-gametime').value = bet.gametime || '';
+  document.getElementById('oth-f-bettype').value = bet.bettype || '';
+  document.getElementById('oth-f-betdesc').value = bet.betdesc || '';
+  document.getElementById('oth-f-odds').value = bet.odds || '';
+  document.getElementById('oth-f-stake').value = bet.stake || '';
+  document.getElementById('oth-f-profit').value = bet.profit || '';
+  document.getElementById('oth-f-payout').value = bet.payout || '';
+  document.getElementById('oth-f-unitsize').value = bet.unitsize || '';
+  document.getElementById('oth-f-units').value = bet.units || '';
+  document.getElementById('oth-f-result').value = bet.result || 'pending';
+  document.getElementById('oth-f-notes').value = bet.notes || '';
+  
+  // Update league dropdown based on sport
+  updateOthLeagueDropdown();
+  document.getElementById('oth-f-league-select').value = bet.league || '';
+  document.getElementById('oth-f-league').value = bet.league || '';
+  
+  const msgEl = document.getElementById('oth-form-msg');
+  if (msgEl) {
+    msgEl.innerHTML = '<span style="color:var(--blue)">Editing — click Save bet to update.</span>';
+  }
+}
 
 function deleteOthBet(id) {
   if (!confirm('Delete this bet?')) return;
