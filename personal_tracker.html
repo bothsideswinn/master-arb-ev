@@ -3343,6 +3343,36 @@ let deposits    = JSON.parse(localStorage.getItem('book_balances_v1') || '[]');
 let withdrawals    = JSON.parse(localStorage.getItem('book_withdrawals_v1') || '[]');
 let manualBalances = JSON.parse(localStorage.getItem('book_manual_v1') || '{}');
 
+// Set 4/16 end-of-day baselines (one-time initialization)
+function initializeBaselineBalances() {
+  const baselineDate = '2026-04-16';
+  const baselineBalances = {
+    'Hard Rock Bet': 226.40,
+    'Bovada': 3.11,
+    'BetOnline': 151.83
+  };
+  
+  // Only set if not already set for this date
+  let needsUpdate = false;
+  Object.keys(baselineBalances).forEach(book => {
+    if (!manualBalances[book] || manualBalances[book].date !== baselineDate) {
+      manualBalances[book] = {
+        amount: baselineBalances[book],
+        date: baselineDate
+      };
+      needsUpdate = true;
+    }
+  });
+  
+  if (needsUpdate) {
+    saveManualBalances();
+    console.log('✅ 4/16 end-of-day baselines set:', baselineBalances);
+  }
+}
+
+// Initialize baselines on load
+initializeBaselineBalances();
+
 function saveDeposits() {
   localStorage.setItem('book_balances_v1', JSON.stringify(deposits));
 }
@@ -3558,6 +3588,17 @@ function getBookStats(book) {
     const depNew  = deposits.filter(d => d.book === book && (d.date||'') > cutoff).reduce((s,d) => s + d.amount, 0);
     const withNew = (typeof withdrawals !== 'undefined' ? withdrawals : []).filter(w => w.book === book && (w.date||'') > cutoff).reduce((s,w) => s + w.amount, 0);
     balance = mb.amount + postOthPnl + postArbEvPnl + depNew - withNew;
+    
+    // Debug logging for balance calculations (can be removed later)
+    if (typeof console !== 'undefined' && console.log) {
+      console.log(`📊 Balance calculation for ${book}:`);
+      console.log(`  💰 Baseline: $${mb.amount.toFixed(2)} (${mb.date})`);
+      console.log(`  📈 Other bets P&L: $${postOthPnl.toFixed(2)}`);
+      console.log(`  🎯 Arb/EV bets P&L: $${postArbEvPnl.toFixed(2)}`);
+      console.log(`  ➕ New deposits: $${depNew.toFixed(2)}`);
+      console.log(`  ➖ New withdrawals: $${withNew.toFixed(2)}`);
+      console.log(`  🏆 Final balance: $${balance.toFixed(2)}`);
+    }
   } else {
     balance = totalDep - totalWithdraw + totalPnl;
   }
