@@ -1623,6 +1623,8 @@ function fmtMoney(n, forceSign=false) {
 }
 let otherBets = JSON.parse(localStorage.getItem('other_bets_v1') || '[]');
 
+function saveOther() { localStorage.setItem('other_bets_v1', JSON.stringify(otherBets)); }
+
 function deleteOthBet(id) {
   if (!confirm('Delete this bet?')) return;
   otherBets = otherBets.filter(b => b.id !== id);
@@ -2241,24 +2243,26 @@ function getBookStats(book) {
   const mb = (typeof manualBalances !== 'undefined' && manualBalances[book]) ? manualBalances[book] : null;
   let balance;
   if (mb) {
+    const cutoff = mb.date;
     // Per-book P&L for post-baseline arb bets using winningLeg + leg odds
     // Balance formula:
     // Pending bet placed → deduct stake immediately
     // Bet wins → add profit (stake was already out)
     // Bet loses → no change (stake was already out)
-    // Bet pushes → no change (net 0)
+    // Bet pushes → return stake (was deducted when pending)
 
-    // Other tab bets after baseline
-    const othAfter = othBets.filter(b => (b.date||'') > cutoff);
+    // Other tab bets after baseline OR currently pending (regardless of date)
+    const othAfter = othBets.filter(b => (b.date||'') > cutoff || b.result === 'pending');
     const postOthPnl = othAfter.reduce((s, b) => {
       const stake = parseFloat(b.stake||0);
       if (b.result === 'pending') return s - stake;
       if (b.result === 'win')     return s + (b.pnl||0);
-      return s; // loss or push
+      if (b.result === 'push')    return s + stake;  // Return stake
+      return s; // loss only
     }, 0);
 
-    // Arb/EV bets after baseline
-    const arbEvAfter = [...arbBets, ...evBets].filter(b => (b.date||'') > cutoff);
+    // Arb/EV bets after baseline OR currently pending (regardless of date)
+    const arbEvAfter = [...arbBets, ...evBets].filter(b => (b.date||'') > cutoff || b.status === 'pending');
     const postArbEvPnl = arbEvAfter.reduce((s, b) => {
       const profit = parseFloat(b.profit||0);
       const stake  = parseFloat(b.stake||0);
