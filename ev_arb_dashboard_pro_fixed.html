@@ -1,0 +1,2481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Arb Dashboard Pro</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#ffffff;--bg2:#f6f6f4;--bg3:#eeede9;
+  --text:#1a1a18;--text2:#5f5e5a;--text3:#95938d;
+  --border:rgba(0,0,0,0.10);--border2:rgba(0,0,0,0.18);
+  --green:#2d9e5f;--green-bg:#eaf3de;
+  --blue:#185FA5;--blue-bg:#e6f1fb;--blue-border:#b5d4f4;
+  --amber:#ba7517;--amber-bg:#faeeda;
+  --red:#a32d2d;--red-bg:#fcebeb;
+  --r:8px;--r-lg:12px;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#1c1c1a;--bg2:#252523;--bg3:#2c2c29;
+  --text:#e8e7e3;--text2:#a8a7a2;--text3:#706f6a;
+  --border:rgba(255,255,255,0.09);--border2:rgba(255,255,255,0.16);
+  --green:#52c47a;--green-bg:#1b3d25;
+  --blue:#5ba3e8;--blue-bg:#0d2540;--blue-border:#1a4a7a;
+  --amber:#e09f3e;--amber-bg:#2d2010;
+  --red:#e06060;--red-bg:#2d1010;
+}}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg3);color:var(--text);font-size:14px;-webkit-text-size-adjust:100%}
+.page{max-width:900px;margin:0 auto;padding:1rem 0.85rem 5rem}
+
+/* topbar */
+.topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:1rem;flex-wrap:wrap}
+.app-title{font-size:20px;font-weight:700;letter-spacing:-.3px}
+.app-sub{font-size:12px;color:var(--text3);margin-top:2px}
+.refreshed{font-size:11px;color:var(--text3);margin-bottom:4px;text-align:right}
+.status-pills{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+.spill{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:500;color:var(--text2);background:var(--bg2);border:.5px solid var(--border);border-radius:20px;padding:2px 8px}
+.dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.dot-on{background:var(--green)}.dot-warn{background:var(--amber)}.dot-off{background:var(--red)}
+
+/* panel */
+.panel{background:var(--bg);border:.5px solid var(--border2);border-radius:var(--r-lg);padding:14px 16px;margin-bottom:.65rem}
+.panel-row{padding:11px 0;border-top:.5px solid var(--border)}
+.panel-row:first-child{padding-top:0;border-top:none}
+.panel-row:last-child{padding-bottom:0}
+
+/* section label */
+.slbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);display:block;margin-bottom:6px}
+
+/* inputs */
+.inp{font-size:13px;padding:8px 10px;border-radius:var(--r);border:.5px solid var(--border2);background:var(--bg2);color:var(--text);outline:none;font-family:inherit}
+.inp:focus{border-color:var(--blue);background:var(--bg)}
+.inp-sm{font-size:12px;padding:7px 9px;border-radius:var(--r);border:.5px solid var(--border2);background:var(--bg2);color:var(--text);outline:none;font-family:inherit}
+.inp-sm:focus{border-color:var(--blue)}
+
+/* flex row helpers */
+.row{display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap}
+.row-mid{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.field{display:flex;flex-direction:column;gap:3px}
+
+/* book chips */
+.bk-row{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.bk-chip{display:inline-flex;align-items:center;gap:4px;padding:5px 11px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;background:transparent;opacity:.32;transition:opacity .15s;font-family:inherit;border-width:1.5px;border-style:solid;-webkit-tap-highlight-color:transparent}
+.bk-chip.active{opacity:1}
+.bk-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.bk-btn{font-size:11px;font-weight:600;padding:5px 11px;border-radius:20px;border:.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-family:inherit;white-space:nowrap;transition:color .12s,border-color .12s}
+.bk-btn:hover{color:var(--blue);border-color:var(--blue)}
+.bk-divider{width:.5px;height:18px;background:var(--border2);margin:0 2px;flex-shrink:0}
+
+/* sport picker */
+.sport-wrap{position:relative}
+.sport-btn{display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:13px;padding:8px 10px;border-radius:var(--r);border:.5px solid var(--border2);background:var(--bg2);color:var(--text);cursor:pointer;min-width:140px;white-space:nowrap;user-select:none;-webkit-tap-highlight-color:transparent}
+.sport-btn::after{content:"▾";font-size:10px;color:var(--text3);flex-shrink:0;margin-left:4px}
+.sport-dd{display:none;position:absolute;top:calc(100% + 4px);left:0;z-index:500;background:var(--bg);border:.5px solid var(--border2);border-radius:var(--r-lg);box-shadow:0 4px 20px rgba(0,0,0,.12);min-width:230px;max-height:360px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.sport-dd.open{display:block}
+.sp-grp{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);padding:8px 14px 3px;border-top:.5px solid var(--border)}
+.sp-grp:first-child{border-top:none}
+.sp-item{display:flex;align-items:center;gap:8px;padding:7px 14px;font-size:13px;cursor:pointer;color:var(--text);-webkit-tap-highlight-color:transparent}
+.sp-item:hover{background:var(--bg2)}
+.sp-item input[type=checkbox]{width:14px;height:14px;cursor:pointer;accent-color:var(--blue);flex-shrink:0}
+.sp-actions{display:flex;gap:6px;padding:9px 12px;border-top:.5px solid var(--border);position:sticky;bottom:0;background:var(--bg)}
+.sp-act{flex:1;text-align:center;font-size:12px;font-weight:600;padding:6px;border-radius:var(--r);border:.5px solid var(--border2);cursor:pointer;color:var(--text2);background:var(--bg2);font-family:inherit}
+.sp-act:hover{border-color:var(--blue);color:var(--blue)}
+.sp-act.done{background:var(--blue);color:#fff;border-color:var(--blue)}
+.sp-chips{display:flex;flex-wrap:wrap;gap:3px;margin-top:4px}
+.sp-chip{display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;background:var(--blue-bg);color:var(--blue)}
+.sp-chip-x{cursor:pointer;margin-left:1px;opacity:.7;font-size:12px}
+
+/* inline select */
+.sel{font-size:13px;padding:8px 10px;border-radius:var(--r);border:.5px solid var(--border2);background:var(--bg2);color:var(--text);font-family:inherit;outline:none;cursor:pointer}
+.sel:focus{border-color:var(--blue)}
+.sel-sm{font-size:12px;padding:7px 9px;border-radius:var(--r);border:.5px solid var(--border2);background:var(--bg2);color:var(--text);font-family:inherit;outline:none;cursor:pointer}
+.sel-sm:focus{border-color:var(--blue)}
+
+/* toggles */
+.tgl-row{display:flex;gap:0;flex-wrap:wrap}
+.tgl-pill{display:flex;align-items:center;gap:8px;padding:9px 14px;background:var(--bg2);border:.5px solid var(--border2);cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
+.tgl-pill:first-child{border-radius:var(--r) 0 0 var(--r)}
+.tgl-pill:not(:first-child){border-left:none;border-radius:0 var(--r) var(--r) 0}
+.tgl-pill:hover{background:var(--bg3)}
+.tgl-track{position:relative;width:34px;height:19px;background:var(--border2);border-radius:10px;transition:background .2s;flex-shrink:0}
+.tgl-thumb{position:absolute;top:2px;left:2px;width:15px;height:15px;background:#fff;border-radius:50%;transition:left .18s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.tgl-lbl{font-size:12px;font-weight:600;color:var(--text2)}
+.tgl-note{font-size:10px;color:var(--amber);font-weight:700;display:none;margin-left:2px}
+
+/* fetch buttons */
+.fetch-btn{font-size:13px;font-weight:700;padding:8px 20px;border-radius:var(--r);border:none;cursor:pointer;white-space:nowrap;font-family:inherit;-webkit-tap-highlight-color:transparent;transition:opacity .15s}
+.fetch-btn:hover{opacity:.88}
+.fetch-btn:disabled{opacity:.45;cursor:not-allowed}
+.btn-blue{background:var(--blue);color:#fff}
+.btn-green{background:var(--green);color:#fff}
+
+/* usage */
+.usage-row{display:flex;align-items:center;gap:8px;margin:.4rem 0 .2rem}
+.usage-bg{flex:1;height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.usage-fill{height:100%;background:var(--green);border-radius:2px;width:0;transition:width .3s}
+.usage-lbl{font-size:11px;color:var(--text3);white-space:nowrap}
+.conn-log{font-size:11px;color:var(--text3);font-family:monospace;min-height:14px;margin-bottom:.25rem}
+.all-sport-log{font-size:11px;color:var(--text3);font-family:monospace;min-height:14px}
+
+/* banners */
+.banner{padding:10px 14px;border-radius:var(--r);margin-bottom:.65rem;font-size:13px;line-height:1.5}
+.banner.blue{background:var(--blue-bg);color:var(--blue);border:.5px solid var(--blue-border)}
+.banner.red{background:var(--red-bg);color:var(--red);border:.5px solid rgba(163,45,45,.3)}
+.banner a{color:inherit}
+
+/* post-fetch panel */
+.pf-panel{background:var(--bg);border:.5px solid var(--border2);border-radius:var(--r-lg);padding:12px 16px;margin-bottom:.65rem}
+.pf-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 0;border-top:.5px solid var(--border)}
+.pf-row:first-child{padding-top:0;border-top:none}
+.pf-row:last-child{padding-bottom:0}
+.pf-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);white-space:nowrap}
+.fval{font-size:13px;font-weight:700;min-width:36px;color:var(--text)}
+
+/* sort row */
+.sort-row{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-bottom:.5rem}
+.sort-lbl{font-size:12px;color:var(--text3);display:flex;align-items:center;gap:5px}
+.sort-icon{font-size:14px;color:var(--text3)}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1rem}
+@media(max-width:540px){.stats{grid-template-columns:repeat(2,1fr)}}
+.stat{background:var(--bg2);border:.5px solid var(--border);border-radius:var(--r);padding:11px 13px}
+.stat-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin-bottom:5px}
+.stat-val{font-size:22px;font-weight:700}
+.stat-sub{font-size:11px;color:var(--text3);margin-top:2px}
+
+/* section header */
+.sec-hd{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin:1rem 0 .5rem}
+
+/* arb cards */
+.arb-card{background:var(--bg);border:.5px solid var(--border2);border-radius:var(--r-lg);margin-bottom:.75rem;overflow:visible}
+.arb-hd{padding:12px 14px;border-bottom:.5px solid var(--border)}
+.arb-event{font-size:15px;font-weight:700}
+.arb-meta{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+.bet-leg{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:.5px solid var(--border);gap:10px;flex-wrap:wrap}
+.bet-leg:last-of-type{border-bottom:none}
+.leg-book{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3)}
+.leg-name{font-size:14px;font-weight:600;margin:2px 0}
+.leg-labels{display:flex;gap:16px;flex-wrap:wrap}
+.leg-lbl-row{display:flex;flex-direction:column;gap:1px}
+.lbl{font-size:10px;color:var(--text3)}
+.val{font-size:14px;font-weight:700}
+.val.pos{color:var(--green)}
+.val.blue{color:var(--blue)}
+.arb-footer{display:flex;gap:16px;flex-wrap:wrap;padding:8px 14px;background:var(--bg2);border-top:.5px solid var(--border);border-radius:0 0 var(--r-lg) var(--r-lg)}
+.foot-item{display:flex;flex-direction:column}
+.foot-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text3)}
+.foot-val{font-size:13px;font-weight:700}
+
+/* ev cards */
+.ev-card{background:var(--bg);border:.5px solid var(--border2);border-radius:var(--r-lg);margin-bottom:.5rem}
+.ev-row{padding:11px 14px}
+.ev-row-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;flex-wrap:wrap}
+.ev-event{font-size:13px;font-weight:700}
+.leg-grid{display:flex;gap:16px;flex-wrap:wrap}
+
+/* tags */
+.tag{font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;white-space:nowrap}
+.tag-sport{background:var(--bg3);color:var(--text3);border:.5px solid var(--border)}
+.tag-mkt{background:var(--blue-bg);color:var(--blue)}
+.tag-arb{background:var(--blue-bg);color:var(--blue)}
+.tag-profit{background:var(--green-bg);color:var(--green)}
+.tag-ev{background:var(--green-bg);color:var(--green)}
+.tag-live{background:#fee2e2;color:#991b1b;animation:pulse 1.5s infinite}
+.tag-upcoming{background:var(--blue-bg);color:var(--blue)}
+.tag-past{background:var(--bg3);color:var(--text3)}
+
+/* book buttons */
+.book-btn{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:5px 10px;border-radius:var(--r);border:.5px solid var(--border2);background:var(--bg2);color:var(--text2);cursor:pointer;text-decoration:none;white-space:nowrap;-webkit-tap-highlight-color:transparent;flex-shrink:0}
+.book-btn:hover{background:var(--bg3)}
+.btn-fanduel{border-color:#1890ff;color:#1890ff;background:rgba(24,144,255,.07)}
+.btn-draftkings{border-color:#53c028;color:#53c028;background:rgba(83,192,40,.07)}
+.btn-betmgm{border-color:#b8960c;color:#b8960c;background:rgba(184,150,12,.07)}
+.btn-caesars{border-color:#0c7c3e;color:#0c7c3e;background:rgba(12,124,62,.07)}
+.btn-bovada{border-color:#c8960a;color:#c8960a;background:rgba(200,150,10,.07)}
+.btn-betonline{border-color:#0a6b9e;color:#0a6b9e;background:rgba(10,107,158,.07)}
+.btn-hardrock{border-color:#b0174e;color:#b0174e;background:rgba(176,23,78,.07)}
+.btn-default{border-color:var(--border2);color:var(--text2)}
+
+/* hamburger menu */
+.arb-menu-wrap{position:relative;flex-shrink:0}
+.arb-menu-btn{background:none;border:.5px solid var(--border2);border-radius:var(--r);width:32px;height:32px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:0;color:var(--text2)}
+.arb-menu-btn span{display:block;width:13px;height:1.5px;background:currentColor;border-radius:2px}
+.arb-menu-dropdown{display:none;position:absolute;top:calc(100% + 4px);right:0;background:var(--bg);border:.5px solid var(--border2);border-radius:var(--r-lg);min-width:190px;z-index:300;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.18)}
+.arb-menu-dropdown.open{display:block}
+.arb-menu-item{display:flex;align-items:center;gap:10px;padding:11px 14px;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;border-bottom:.5px solid var(--border)}
+.arb-menu-item:last-child{border-bottom:none}
+.arb-menu-item:hover{background:var(--bg2)}
+.arb-menu-icon{font-size:14px;width:20px;text-align:center;flex-shrink:0}
+.arb-menu-item.clr-green{color:var(--green)}
+.arb-menu-item.clr-blue{color:var(--blue)}
+.arb-menu-item.clr-x{color:#1DA1F2}
+.log-bet-btn{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:5px 10px;border-radius:var(--r);border:1.5px solid var(--green);color:var(--green);background:var(--green-bg);cursor:pointer;white-space:nowrap;font-family:inherit}
+
+.results-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:.75rem;}
+@media(max-width:768px){.results-grid{grid-template-columns:1fr;}}
+.results-col{display:flex;flex-direction:column;gap:.5rem;min-width:0;}
+.col-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.col-filter-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--bg2);border:.5px solid var(--border2);border-radius:var(--r);padding:8px 12px;}
+
+/* empty */
+.empty{padding:28px;text-align:center;color:var(--text3);font-size:13px}
+
+/* mobile bar */
+.mob-bar{display:none}
+@media(max-width:600px){
+  .mob-bar{display:flex;position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:.5px solid var(--border2);padding:10px 12px;gap:8px;z-index:200;align-items:center}
+  .mob-bar .fetch-btn{flex:1}
+}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- ═══ 1. TOPBAR ═══════════════════════════════════════════════════════ -->
+<div class="topbar">
+  <div>
+    <div class="app-title">Arb Dashboard Pro</div>
+    <div class="app-sub">8 books &middot; 21 arb combinations &middot; Pinnacle EV reference</div>
+  </div>
+  <div>
+    <div class="refreshed" id="refreshed"></div>
+    <div class="status-pills" id="status-pills">
+      <span class="spill"><span class="dot dot-off"></span>FanDuel</span>
+      <span class="spill"><span class="dot dot-off"></span>DraftKings</span>
+      <span class="spill"><span class="dot dot-off"></span>BetMGM</span>
+      <span class="spill"><span class="dot dot-off"></span>Caesars</span>
+      <span class="spill"><span class="dot dot-off"></span>Bovada</span>
+      <span class="spill"><span class="dot dot-off"></span>BetOnline</span>
+      <span class="spill"><span class="dot dot-off"></span>Hard Rock</span>
+      <span class="spill"><span class="dot dot-off"></span>Pinnacle</span>
+    </div>
+  </div>
+</div>
+
+<!-- banners -->
+<div class="banner blue" id="help">Get your free API key at <a href="https://the-odds-api.com" target="_blank">the-odds-api.com</a> and paste it below. Scans <strong>21 book-pair combinations</strong> for arb opportunities using Pinnacle as the sharp EV benchmark.</div>
+<div class="banner red" id="err" style="display:none;"></div>
+<div class="all-sport-log" id="all-sport-log"></div>
+
+<!-- ═══ PRE-FETCH PANEL ════════════════════════════════════════════════ -->
+<div class="panel">
+
+  <!-- 2. API KEY -->
+  <div class="panel-row">
+    <span class="slbl">API key</span>
+    <input class="inp" type="password" id="f-key" placeholder="paste key from the-odds-api.com" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" style="width:100%;">
+  </div>
+
+  <!-- 3. PRE-FETCH BOOK CHIPS -->
+  <div class="panel-row">
+    <span class="slbl">Books — select which to include in fetch</span>
+    <div class="bk-row">
+      <button class="bk-chip active" id="bchip-fanduel"        data-key="fanduel"        style="border-color:#1890ff;color:#1890ff;" onclick="toggleBook('fanduel')"><span class="bk-dot" style="background:#1890ff"></span>FanDuel</button>
+      <button class="bk-chip active" id="bchip-draftkings"     data-key="draftkings"     style="border-color:#53c028;color:#53c028;" onclick="toggleBook('draftkings')"><span class="bk-dot" style="background:#53c028"></span>DraftKings</button>
+      <button class="bk-chip active" id="bchip-betmgm"         data-key="betmgm"         style="border-color:#b8960c;color:#b8960c;" onclick="toggleBook('betmgm')"><span class="bk-dot" style="background:#b8960c"></span>BetMGM</button>
+      <button class="bk-chip active" id="bchip-williamhill_us" data-key="williamhill_us" style="border-color:#0c7c3e;color:#0c7c3e;" onclick="toggleBook('williamhill_us')"><span class="bk-dot" style="background:#0c7c3e"></span>Caesars</button>
+      <button class="bk-chip active" id="bchip-bovada"         data-key="bovada"         style="border-color:#c8960a;color:#c8960a;" onclick="toggleBook('bovada')"><span class="bk-dot" style="background:#c8960a"></span>Bovada</button>
+      <button class="bk-chip active" id="bchip-betonlineag"    data-key="betonlineag"    style="border-color:#0a6b9e;color:#0a6b9e;" onclick="toggleBook('betonlineag')"><span class="bk-dot" style="background:#0a6b9e"></span>BetOnline</button>
+      <button class="bk-chip active" id="bchip-hardrockbet"    data-key="hardrockbet"    style="border-color:#b0174e;color:#b0174e;" onclick="toggleBook('hardrockbet')"><span class="bk-dot" style="background:#b0174e"></span>Hard Rock</button>
+      <button class="bk-chip active" id="bchip-pinnacle"       data-key="pinnacle"       style="border-color:#8b5cf6;color:#8b5cf6;" onclick="toggleBook('pinnacle')"><span class="bk-dot" style="background:#8b5cf6"></span>Pinnacle (EV ref)</button>
+      <div class="bk-divider"></div>
+      <button class="bk-btn" onclick="selectAllBooks()">Select all</button>
+      <button class="bk-btn" onclick="deselectAllBooks()">Deselect all</button>
+    </div>
+  </div>
+
+  <!-- 4. SPORT | STATUS | DATE — single row -->
+  <div class="panel-row">
+    <div class="row">
+      <div class="field">
+        <span class="slbl">Sport</span>
+        <div class="sport-wrap" id="sport-picker-wrap">
+          <div class="sport-btn" id="sport-picker-btn" onclick="toggleSportPicker()">
+            <span id="sport-picker-label">Select sports…</span>
+          </div>
+          <div class="sport-dd" id="sport-picker-dropdown">
+            <div class="sp-grp">American Football</div>
+            <label class="sp-item"><input type="checkbox" value="americanfootball_nfl"> NFL</label>
+            <label class="sp-item"><input type="checkbox" value="americanfootball_nfl_preseason"> NFL Preseason</label>
+            <label class="sp-item"><input type="checkbox" value="americanfootball_nfl_super_bowl_winner"> NFL Super Bowl Winner</label>
+            <label class="sp-item"><input type="checkbox" value="americanfootball_ncaaf"> NCAAF</label>
+            <label class="sp-item"><input type="checkbox" value="americanfootball_ncaaf_championship_winner"> NCAAF Championship Winner</label>
+            <label class="sp-item"><input type="checkbox" value="americanfootball_cfl"> CFL</label>
+            <label class="sp-item"><input type="checkbox" value="americanfootball_ufl"> UFL</label>
+
+            <div class="sp-grp">Baseball</div>
+            <label class="sp-item"><input type="checkbox" value="baseball_mlb"> MLB</label>
+            <label class="sp-item"><input type="checkbox" value="baseball_mlb_preseason"> MLB Preseason</label>
+            <label class="sp-item"><input type="checkbox" value="baseball_mlb_world_series_winner"> MLB World Series Winner</label>
+            <label class="sp-item"><input type="checkbox" value="baseball_ncaa"> NCAA Baseball</label>
+            <label class="sp-item"><input type="checkbox" value="baseball_milb"> MiLB</label>
+            <label class="sp-item"><input type="checkbox" value="baseball_kbo"> KBO (Korea)</label>
+            <label class="sp-item"><input type="checkbox" value="baseball_npb"> NPB (Japan)</label>
+
+            <div class="sp-grp">Basketball</div>
+            <label class="sp-item"><input type="checkbox" value="basketball_nba"> NBA</label>
+            <label class="sp-item"><input type="checkbox" value="basketball_nba_preseason"> NBA Preseason</label>
+            <label class="sp-item"><input type="checkbox" value="basketball_nba_all_stars"> NBA All-Star</label>
+            <label class="sp-item"><input type="checkbox" value="basketball_nba_summer_league"> NBA Summer League</label>
+            <label class="sp-item"><input type="checkbox" value="basketball_nba_championship_winner"> NBA Championship Winner</label>
+            <label class="sp-item"><input type="checkbox" value="basketball_wnba"> WNBA</label>
+            <label class="sp-item"><input type="checkbox" value="basketball_ncaab"> NCAAB</label>
+            <label class="sp-item"><input type="checkbox" value="basketball_wncaab"> WNCAAB</label>
+            <label class="sp-item"><input type="checkbox" value="basketball_ncaab_championship_winner"> NCAAB Championship Winner</label>
+            <label class="sp-item"><input type="checkbox" value="basketball_euroleague"> EuroLeague</label>
+            <label class="sp-item"><input type="checkbox" value="basketball_nbl"> NBL (Australia)</label>
+
+            <div class="sp-grp">Ice Hockey</div>
+            <label class="sp-item"><input type="checkbox" value="icehockey_nhl"> NHL</label>
+            <label class="sp-item"><input type="checkbox" value="icehockey_nhl_preseason"> NHL Preseason</label>
+            <label class="sp-item"><input type="checkbox" value="icehockey_nhl_championship_winner"> NHL Championship Winner</label>
+            <label class="sp-item"><input type="checkbox" value="icehockey_ahl"> AHL</label>
+            <label class="sp-item"><input type="checkbox" value="icehockey_liiga"> Finnish Liiga</label>
+            <label class="sp-item"><input type="checkbox" value="icehockey_mestis"> Finnish Mestis</label>
+            <label class="sp-item"><input type="checkbox" value="icehockey_sweden_hockey_league"> SHL (Sweden)</label>
+            <label class="sp-item"><input type="checkbox" value="icehockey_sweden_allsvenskan"> HockeyAllsvenskan</label>
+
+            <div class="sp-grp">Soccer — USA & Mexico</div>
+            <label class="sp-item"><input type="checkbox" value="soccer_usa_mls"> MLS</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_mexico_ligamx"> Liga MX</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_concacaf_gold_cup"> CONCACAF Gold Cup</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_concacaf_leagues_cup"> CONCACAF Leagues Cup</label>
+
+            <div class="sp-grp">Soccer — England</div>
+            <label class="sp-item"><input type="checkbox" value="soccer_epl"> EPL (Premier League)</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_efl_champ"> Championship</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_england_league1"> League 1</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_england_league2"> League 2</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_fa_cup"> FA Cup</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_england_efl_cup"> EFL Cup</label>
+
+            <div class="sp-grp">Soccer — Spain</div>
+            <label class="sp-item"><input type="checkbox" value="soccer_spain_la_liga"> La Liga</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_spain_segunda_division"> La Liga 2</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_spain_copa_del_rey"> Copa del Rey</label>
+
+            <div class="sp-grp">Soccer — Italy</div>
+            <label class="sp-item"><input type="checkbox" value="soccer_italy_serie_a"> Serie A</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_italy_serie_b"> Serie B</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_italy_coppa_italia"> Coppa Italia</label>
+
+            <div class="sp-grp">Soccer — Germany</div>
+            <label class="sp-item"><input type="checkbox" value="soccer_germany_bundesliga"> Bundesliga</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_germany_bundesliga2"> Bundesliga 2</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_germany_liga3"> 3. Liga</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_germany_dfb_pokal"> DFB-Pokal</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_germany_bundesliga_women"> Frauen-Bundesliga</label>
+
+            <div class="sp-grp">Soccer — France</div>
+            <label class="sp-item"><input type="checkbox" value="soccer_france_ligue_one"> Ligue 1</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_france_ligue_two"> Ligue 2</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_france_coupe_de_france"> Coupe de France</label>
+
+            <div class="sp-grp">Soccer — Rest of Europe</div>
+            <label class="sp-item"><input type="checkbox" value="soccer_netherlands_eredivisie"> Eredivisie (Netherlands)</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_portugal_primeira_liga"> Primeira Liga (Portugal)</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_turkey_super_league"> Süper Lig (Turkey)</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_spl"> Scottish Premiership</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_austria_bundesliga"> Austrian Bundesliga</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_belgium_first_div"> Belgian First Division</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_denmark_superliga"> Danish Superliga</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_norway_eliteserien"> Eliteserien (Norway)</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_sweden_allsvenskan"> Allsvenskan (Sweden)</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_sweden_superettan"> Superettan (Sweden)</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_switzerland_superleague"> Swiss Super League</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_poland_ekstraklasa"> Ekstraklasa (Poland)</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_greece_super_league"> Super League (Greece)</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_finland_veikkausliiga"> Veikkausliiga (Finland)</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_league_of_ireland"> League of Ireland</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_russia_premier_league"> Russian Premier League</label>
+
+            <div class="sp-grp">Soccer — UEFA Competitions</div>
+            <label class="sp-item"><input type="checkbox" value="soccer_uefa_champs_league"> UEFA Champions League</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_uefa_champs_league_qualification"> UCL Qualification</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_uefa_champs_league_women"> UEFA Women's Champions League</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_uefa_europa_league"> UEFA Europa League</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_uefa_europa_conference_league"> UEFA Conference League</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_uefa_european_championship"> UEFA Euro</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_uefa_euro_qualification"> UEFA Euro Qualifiers</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_uefa_nations_league"> UEFA Nations League</label>
+
+            <div class="sp-grp">Soccer — South America</div>
+            <label class="sp-item"><input type="checkbox" value="soccer_argentina_primera_division"> Argentina Primera</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_brazil_campeonato"> Brazil Série A</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_brazil_serie_b"> Brazil Série B</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_chile_campeonato"> Chile Primera</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_conmebol_copa_libertadores"> Copa Libertadores</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_conmebol_copa_sudamericana"> Copa Sudamericana</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_conmebol_copa_america"> Copa América</label>
+
+            <div class="sp-grp">Soccer — Asia & Oceania</div>
+            <label class="sp-item"><input type="checkbox" value="soccer_japan_j_league"> J-League (Japan)</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_korea_kleague1"> K-League 1 (Korea)</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_china_superleague"> Chinese Super League</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_saudi_arabia_pro_league"> Saudi Pro League</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_australia_aleague"> A-League (Australia)</label>
+
+            <div class="sp-grp">Soccer — International</div>
+            <label class="sp-item"><input type="checkbox" value="soccer_fifa_world_cup"> FIFA World Cup</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_fifa_world_cup_winner"> FIFA World Cup Winner</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_fifa_world_cup_qualifiers_europe"> WC Qualifiers — Europe</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_fifa_world_cup_qualifiers_south_america"> WC Qualifiers — S. America</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_fifa_world_cup_womens"> FIFA Women's World Cup</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_fifa_club_world_cup"> FIFA Club World Cup</label>
+            <label class="sp-item"><input type="checkbox" value="soccer_africa_cup_of_nations"> Africa Cup of Nations</label>
+
+            <div class="sp-grp">Tennis — ATP Grand Slams</div>
+            <label class="sp-item"><input type="checkbox" value="tennis_atp_aus_open_singles"> Australian Open</label>
+            <label class="sp-item"><input type="checkbox" value="tennis_atp_french_open"> French Open</label>
+            <label class="sp-item"><input type="checkbox" value="tennis_atp_wimbledon"> Wimbledon</label>
+            <label class="sp-item"><input type="checkbox" value="tennis_atp_us_open"> US Open</label>
+
+            <div class="sp-grp">Tennis — ATP Masters & 500s</div>
+            <label class="sp-item"><input type="checkbox" value="tennis_atp_indian_wells"> Indian Wells</label>
+            <label class="sp-item"><input type="checkbox" value="tennis_atp_miami_open"> Miami Open</label>
+            <label class="sp-item"><input type="checkbox" value="tennis_atp_monte_carlo_masters"> Monte-Carlo Masters</label>
+            <label class="sp-item"><input type="checkbox" value="tennis_atp_madrid_open"> Madrid Open</label>
+            <label class="sp-item"><input type="checkbox" value="tennis_atp_italian_open"> Italian Open</label>
+            <label class="sp-item"><input type="checkbox" value="tennis_atp_canadian_open"> Canadian Open</label>
+            <label class="sp-item"><input type="checkbox" value="tennis_atp_cincinnati_open"> Cincinnati Open</label>
+            <label class="sp-item"><input type="checkbox" value="tennis_atp_shanghai_masters"> Shanghai Masters</label>
+            <label class="sp-item"><input type="checkbox" value="tennis_atp_paris_masters"> Paris Masters</label>
+            <label class="sp-item"><input type="checkbox" value="tennis_atp_barcelona_open"> Barcelona Open</label>
+            <label class="sp-item"><input type="checkbox" value="tennis_atp_china_open"> China Open</label>
+            <label class="sp-item"><input type="checkbox" value="tennis_atp_dubai"> Dubai Championships</label>
+            <label class="sp-item"><input type="checkbox" value="tennis_atp_qatar_open"> Qatar Open</label>
+            <label class="sp-item"><input type="checkbox" value="tennis_atp_munich"> Munich</label>
+
+            <div class="sp-grp">Tennis — WTA Grand Slams</div>
+            <label class="sp-item"><input type="checkbox" value="tennis_wta_aus_open_singles"> Australian Open</label>
+            <label class="sp-item"><input type="checkbox" value="tennis_wta_french_open"> French Open</label>
+            <label class="sp-item"><input type="checkbox" value="tennis_wta_wimbledon"> Wimbledon</label>
+            <label class="sp-item"><input type="checkbox" value="tennis_wta_us_open"> US Open</label>
+
+            <div class="sp-grp">Tennis — WTA Masters & 500s</div>
+            <label class="sp-item"><input type="checkbox" value="tennis_wta_indian_wells"> Indian Wells</label>
+            <label class="sp-item"><input type="checkbox" value="tennis_wta_miami_open"> Miami Open</label>
+            <label class="sp-item"><input type="checkbox" value="tennis_wta_madrid_open"> Madrid Open</label>
+            <label class="sp-item"><input type="checkbox" value="tennis_wta_italian_open"> Italian Open</label>
+            <label class="sp-item"><input type="checkbox" value="tennis_wta_canadian_open"> Canadian Open</label>
+            <label class="sp-item"><input type="checkbox" value="tennis_wta_cincinnati_open"> Cincinnati Open</label>
+            <label class="sp-item"><input type="checkbox" value="tennis_wta_china_open"> China Open</label>
+            <label class="sp-item"><input type="checkbox" value="tennis_wta_wuhan_open"> Wuhan Open</label>
+            <label class="sp-item"><input type="checkbox" value="tennis_wta_charleston_open"> Charleston Open</label>
+            <label class="sp-item"><input type="checkbox" value="tennis_wta_stuttgart_open"> Stuttgart Open</label>
+            <label class="sp-item"><input type="checkbox" value="tennis_wta_dubai"> Dubai Championships</label>
+            <label class="sp-item"><input type="checkbox" value="tennis_wta_qatar_open"> Qatar Open</label>
+
+            <div class="sp-grp">MMA &amp; Boxing</div>
+            <label class="sp-item"><input type="checkbox" value="mma_mixed_martial_arts"> MMA / UFC</label>
+            <label class="sp-item"><input type="checkbox" value="boxing_boxing"> Boxing</label>
+
+            <div class="sp-grp">Cricket</div>
+            <label class="sp-item"><input type="checkbox" value="cricket_ipl"> IPL</label>
+            <label class="sp-item"><input type="checkbox" value="cricket_big_bash"> Big Bash</label>
+            <label class="sp-item"><input type="checkbox" value="cricket_t20_blast"> T20 Blast</label>
+            <label class="sp-item"><input type="checkbox" value="cricket_psl"> Pakistan Super League</label>
+            <label class="sp-item"><input type="checkbox" value="cricket_caribbean_premier_league"> Caribbean Premier League</label>
+            <label class="sp-item"><input type="checkbox" value="cricket_the_hundred"> The Hundred</label>
+            <label class="sp-item"><input type="checkbox" value="cricket_international_t20"> International T20</label>
+            <label class="sp-item"><input type="checkbox" value="cricket_odi"> One Day Internationals</label>
+            <label class="sp-item"><input type="checkbox" value="cricket_test_match"> Test Matches</label>
+            <label class="sp-item"><input type="checkbox" value="cricket_t20_world_cup"> T20 World Cup</label>
+            <label class="sp-item"><input type="checkbox" value="cricket_icc_world_cup"> ICC World Cup</label>
+            <label class="sp-item"><input type="checkbox" value="cricket_icc_trophy"> ICC Champions Trophy</label>
+            <label class="sp-item"><input type="checkbox" value="cricket_asia_cup"> Asia Cup</label>
+
+            <div class="sp-grp">Rugby</div>
+            <label class="sp-item"><input type="checkbox" value="rugbyleague_nrl"> NRL</label>
+            <label class="sp-item"><input type="checkbox" value="rugbyleague_nrl_state_of_origin"> State of Origin</label>
+            <label class="sp-item"><input type="checkbox" value="rugbyunion_six_nations"> Six Nations</label>
+
+            <div class="sp-grp">Aussie Rules</div>
+            <label class="sp-item"><input type="checkbox" value="aussierules_afl"> AFL</label>
+
+            <div class="sp-grp">Golf (Outrights)</div>
+            <label class="sp-item"><input type="checkbox" value="golf_masters_tournament_winner"> Masters Winner</label>
+            <label class="sp-item"><input type="checkbox" value="golf_pga_championship_winner"> PGA Championship Winner</label>
+            <label class="sp-item"><input type="checkbox" value="golf_us_open_winner"> US Open Winner</label>
+            <label class="sp-item"><input type="checkbox" value="golf_the_open_championship_winner"> The Open Winner</label>
+
+            <div class="sp-grp">Lacrosse</div>
+            <label class="sp-item"><input type="checkbox" value="lacrosse_pll"> PLL</label>
+            <label class="sp-item"><input type="checkbox" value="lacrosse_ncaa"> NCAA Lacrosse</label>
+
+            <div class="sp-grp">Handball</div>
+            <label class="sp-item"><input type="checkbox" value="handball_germany_bundesliga"> Handball-Bundesliga</label>
+
+            <div class="sp-grp">Politics</div>
+            <label class="sp-item"><input type="checkbox" value="politics_us_presidential_election_winner"> US Presidential Election</label>
+
+            <div class="sp-actions">
+              <button class="sp-act" onclick="selectAllSports()">All</button>
+              <button class="sp-act" onclick="clearAllSports()">Clear</button>
+              <button class="sp-act done" onclick="closeSportPicker()">Done</button>
+            </div>
+          </div>
+          <div class="sp-chips" id="sport-chips"></div>
+        </div>
+      </div>
+      <div class="field">
+        <span class="slbl">Status</span>
+        <select class="sel" id="status-filter-pre" onchange="syncFilters('status')">
+          <option value="all">All events</option>
+          <option value="upcoming">Upcoming</option>
+          <option value="live">Live only</option>
+        </select>
+      </div>
+      <div class="field">
+        <span class="slbl">Date</span>
+        <select class="sel" id="date-preset-pre" onchange="syncFilters('date')">
+          <option value="all">All dates</option>
+          <option value="today">Today</option>
+          <option value="tomorrow">Tomorrow</option>
+          <option value="week">Next 7 days</option>
+          <option value="custom">Custom&hellip;</option>
+        </select>
+      </div>
+      <div id="custom-date-wrap-pre" style="display:none;align-items:center;gap:6px;flex-wrap:wrap;">
+        <input type="date" id="date-from-pre" class="inp-sm" onchange="syncFilters('date')">
+        <span style="font-size:11px;color:var(--text3);">to</span>
+        <input type="date" id="date-to-pre" class="inp-sm" onchange="syncFilters('date')">
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. PLAYER PROPS + TIER 2 TOGGLES -->
+  <div class="panel-row">
+    <span class="slbl">Optional markets <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:var(--text3);">— uses 1 extra API request per game</span></span>
+    <div class="tgl-row">
+      <div class="tgl-pill" onclick="toggleProps(event)">
+        <div class="tgl-track" id="props-track"><div class="tgl-thumb" id="props-thumb"></div></div>
+        <span class="tgl-lbl">Player props</span>
+        <span class="tgl-note" id="props-cost-note">enabled</span>
+      </div>
+      <div class="tgl-pill" onclick="toggleT2(event)">
+        <div class="tgl-track" id="t2-track"><div class="tgl-thumb" id="t2-thumb"></div></div>
+        <span class="tgl-lbl">Tier 2 props</span>
+        <span class="tgl-note" id="t2-cost-note">enabled</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. FETCH BUTTONS -->
+  <div class="panel-row">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="fetch-btn btn-blue" id="fetch-btn" onclick="go()">Fetch odds</button>
+      <button class="fetch-btn btn-green" id="fetch-all-btn" onclick="goAll()">Fetch all in-season</button>
+    </div>
+  </div>
+
+</div><!-- /pre-fetch panel -->
+
+<!-- 7. USAGE BAR -->
+<div class="usage-row">
+  <div class="usage-bg"><div class="usage-fill" id="ufill"></div></div>
+  <span class="usage-lbl" id="ulbl">&mdash; / 500 req</span>
+</div>
+<div class="conn-log" id="conn-log"></div>
+
+<!-- ═══ POST-FETCH PANEL ═══════════════════════════════════════════════ -->
+<div class="pf-panel">
+
+  <!-- 8. POST-FETCH BOOK CHIPS -->
+  <div class="pf-row">
+    <span class="pf-lbl" style="width:100%;display:block;margin-bottom:6px;">Filter by book</span>
+    <div class="bk-row">
+      <button class="bk-chip active" id="pf-bchip-fanduel"        data-key="fanduel"        style="border-color:#1890ff;color:#1890ff;" onclick="pfToggleBook('fanduel')"><span class="bk-dot" style="background:#1890ff"></span>FanDuel</button>
+      <button class="bk-chip active" id="pf-bchip-draftkings"     data-key="draftkings"     style="border-color:#53c028;color:#53c028;" onclick="pfToggleBook('draftkings')"><span class="bk-dot" style="background:#53c028"></span>DraftKings</button>
+      <button class="bk-chip active" id="pf-bchip-betmgm"         data-key="betmgm"         style="border-color:#b8960c;color:#b8960c;" onclick="pfToggleBook('betmgm')"><span class="bk-dot" style="background:#b8960c"></span>BetMGM</button>
+      <button class="bk-chip active" id="pf-bchip-williamhill_us" data-key="williamhill_us" style="border-color:#0c7c3e;color:#0c7c3e;" onclick="pfToggleBook('williamhill_us')"><span class="bk-dot" style="background:#0c7c3e"></span>Caesars</button>
+      <button class="bk-chip active" id="pf-bchip-bovada"         data-key="bovada"         style="border-color:#c8960a;color:#c8960a;" onclick="pfToggleBook('bovada')"><span class="bk-dot" style="background:#c8960a"></span>Bovada</button>
+      <button class="bk-chip active" id="pf-bchip-betonlineag"    data-key="betonlineag"    style="border-color:#0a6b9e;color:#0a6b9e;" onclick="pfToggleBook('betonlineag')"><span class="bk-dot" style="background:#0a6b9e"></span>BetOnline</button>
+      <button class="bk-chip active" id="pf-bchip-hardrockbet"    data-key="hardrockbet"    style="border-color:#b0174e;color:#b0174e;" onclick="pfToggleBook('hardrockbet')"><span class="bk-dot" style="background:#b0174e"></span>Hard Rock</button>
+      <button class="bk-chip active" id="pf-bchip-pinnacle"       data-key="pinnacle"       style="border-color:#8b5cf6;color:#8b5cf6;" onclick="pfToggleBook('pinnacle')"><span class="bk-dot" style="background:#8b5cf6"></span>Pinnacle</button>
+      <div class="bk-divider"></div>
+      <button class="bk-btn" onclick="pfSelectAll()">Select all</button>
+      <button class="bk-btn" onclick="pfDeselectAll()">Deselect all</button>
+    </div>
+  </div>
+
+  <!-- 9. SPORT | MARKET | STATUS | DATE -->
+  <div class="pf-row">
+    <div class="row-mid">
+      <div class="field">
+        <span class="slbl">Sport</span>
+        <select class="sel-sm" id="pf-sport" onchange="renderAll()">
+          <option value="all">All sports</option>
+          <optgroup label="American Football">
+            <option value="americanfootball_nfl">NFL</option>
+            <option value="americanfootball_ncaaf">NCAAF</option>
+            <option value="americanfootball_cfl">CFL</option>
+            <option value="americanfootball_ufl">UFL</option>
+          </optgroup>
+          <optgroup label="Baseball">
+            <option value="baseball_mlb">MLB</option>
+            <option value="baseball_ncaa">NCAA Baseball</option>
+            <option value="baseball_kbo">KBO</option>
+            <option value="baseball_npb">NPB</option>
+          </optgroup>
+          <optgroup label="Basketball">
+            <option value="basketball_nba">NBA</option>
+            <option value="basketball_wnba">WNBA</option>
+            <option value="basketball_ncaab">NCAAB</option>
+            <option value="basketball_wncaab">WNCAAB</option>
+            <option value="basketball_euroleague">EuroLeague</option>
+            <option value="basketball_nbl">NBL</option>
+          </optgroup>
+          <optgroup label="Ice Hockey">
+            <option value="icehockey_nhl">NHL</option>
+            <option value="icehockey_ahl">AHL</option>
+            <option value="icehockey_liiga">Finnish Liiga</option>
+            <option value="icehockey_sweden_hockey_league">SHL</option>
+          </optgroup>
+          <optgroup label="Soccer - Top Leagues">
+            <option value="soccer_epl">EPL</option>
+            <option value="soccer_spain_la_liga">La Liga</option>
+            <option value="soccer_italy_serie_a">Serie A</option>
+            <option value="soccer_germany_bundesliga">Bundesliga</option>
+            <option value="soccer_france_ligue_one">Ligue 1</option>
+            <option value="soccer_usa_mls">MLS</option>
+            <option value="soccer_mexico_ligamx">Liga MX</option>
+          </optgroup>
+          <optgroup label="Soccer - Cups & International">
+            <option value="soccer_uefa_champs_league">Champions League</option>
+            <option value="soccer_uefa_europa_league">Europa League</option>
+            <option value="soccer_uefa_europa_conference_league">Conference League</option>
+            <option value="soccer_fifa_world_cup">FIFA World Cup</option>
+            <option value="soccer_uefa_european_championship">UEFA Euro</option>
+            <option value="soccer_conmebol_copa_libertadores">Copa Libertadores</option>
+          </optgroup>
+          <optgroup label="Soccer - Other Leagues">
+            <option value="soccer_efl_champ">Championship</option>
+            <option value="soccer_netherlands_eredivisie">Eredivisie</option>
+            <option value="soccer_portugal_primeira_liga">Primeira Liga</option>
+            <option value="soccer_argentina_primera_division">Argentina Primera</option>
+            <option value="soccer_brazil_campeonato">Brazil Série A</option>
+            <option value="soccer_japan_j_league">J-League</option>
+            <option value="soccer_australia_aleague">A-League</option>
+          </optgroup>
+          <optgroup label="Tennis">
+            <option value="tennis_atp_aus_open_singles">ATP Australian Open</option>
+            <option value="tennis_atp_french_open">ATP French Open</option>
+            <option value="tennis_atp_wimbledon">ATP Wimbledon</option>
+            <option value="tennis_atp_us_open">ATP US Open</option>
+            <option value="tennis_wta_aus_open_singles">WTA Australian Open</option>
+            <option value="tennis_wta_french_open">WTA French Open</option>
+            <option value="tennis_wta_wimbledon">WTA Wimbledon</option>
+            <option value="tennis_wta_us_open">WTA US Open</option>
+          </optgroup>
+          <optgroup label="Other Sports">
+            <option value="mma_mixed_martial_arts">MMA / UFC</option>
+            <option value="boxing_boxing">Boxing</option>
+            <option value="cricket_ipl">IPL Cricket</option>
+            <option value="rugbyleague_nrl">NRL</option>
+            <option value="aussierules_afl">AFL</option>
+          </optgroup>
+        </select>
+      </div>
+      <div class="field">
+        <span class="slbl">Market</span>
+        <select class="sel-sm" id="mkt-filter" onchange="renderAll()">
+          <option value="all">All markets</option>
+          <option value="h2h">Moneyline</option>
+          <option value="spreads">Spreads</option>
+          <option value="totals">Totals</option>
+          <option value="alternate_spreads">Alt spreads</option>
+          <option value="alternate_totals">Alt totals</option>
+        </select>
+      </div>
+      <div class="field">
+        <span class="slbl">Status</span>
+        <select class="sel-sm" id="status-filter" onchange="syncFilters('status')">
+          <option value="all">All events</option>
+          <option value="upcoming">Upcoming</option>
+          <option value="live">Live only</option>
+        </select>
+      </div>
+      <div class="field">
+        <span class="slbl">Date</span>
+        <select class="sel-sm" id="date-preset" onchange="applyDatePreset()">
+          <option value="all">All dates</option>
+          <option value="today">Today</option>
+          <option value="tomorrow">Tomorrow</option>
+          <option value="week">Next 7 days</option>
+          <option value="custom">Custom&hellip;</option>
+        </select>
+      </div>
+      <div id="custom-date-wrap" style="display:none;align-items:center;gap:6px;flex-wrap:wrap;">
+        <input type="date" id="date-from" class="inp-sm" onchange="renderAll()">
+        <span style="font-size:11px;color:var(--text3);">to</span>
+        <input type="date" id="date-to" class="inp-sm" onchange="renderAll()">
+      </div>
+    </div>
+  </div>
+
+  <!-- 10. UNIT ONLY — min arb% and min ev% moved to columns -->
+  <div class="pf-row">
+    <div class="row-mid">
+      <div class="field">
+        <span class="slbl">Unit ($)</span>
+        <input class="inp-sm" type="number" id="f-unit" value="50" min="1" max="999999" style="width:80px;" oninput="renderAll()">
+      </div>
+    </div>
+  </div>
+
+</div><!-- /post-fetch panel -->
+
+<!-- TWO COLUMN LAYOUT -->
+<div class="results-grid">
+
+  <!-- LEFT: ARB COLUMN -->
+  <div class="results-col">
+    <div class="col-filter-row">
+      <span class="slbl">Min arb %</span>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <input type="range" id="arb-min" min="0" max="10" step="0.1" value="0.5" oninput="document.getElementById('arb-min-v').textContent=parseFloat(this.value).toFixed(1)+'%';renderAll()">
+        <span class="fval" id="arb-min-v">0.5%</span>
+      </div>
+    </div>
+    <div class="col-stats">
+      <div class="stat"><div class="stat-lbl">Arb opps</div><div class="stat-val" id="s-arb">&mdash;</div><div class="stat-sub">21 combinations</div></div>
+      <div class="stat"><div class="stat-lbl">Best arb %</div><div class="stat-val" id="s-arb-pct">&mdash;</div><div class="stat-sub">highest edge</div></div>
+      <div class="stat"><div class="stat-lbl">Best profit</div><div class="stat-val" id="s-best">&mdash;</div><div class="stat-sub" id="s-best-sub">on unit</div></div>
+    </div>
+    <div class="sort-row">
+      <span class="sort-lbl">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M3 3h10v1.5L9 9v4l-2-1V9L3 4.5V3z"/></svg>
+        Sort by
+      </span>
+      <select class="sel-sm" id="sort-by" onchange="renderAll()">
+        <option value="pct">Arb % (highest first)</option>
+        <option value="profit">Profit $ (highest first)</option>
+        <option value="time_asc">Date — soonest first</option>
+        <option value="time_desc">Date — latest first</option>
+        <option value="sport">Sport A&ndash;Z</option>
+        <option value="book">Book A&ndash;Z</option>
+      </select>
+    </div>
+    <div class="sec-hd">Arbitrage opportunities</div>
+    <div id="arb-out"><div class="arb-card"><div class="empty">Fetch odds to scan all 28 book combinations for arb opportunities</div></div></div>
+    <div class="sec-hd" id="t2-hd" style="display:none;margin-top:1.1rem;">Tier 2 arb &amp; EV opportunities</div>
+    <div id="t2-out"></div>
+  </div>
+
+  <!-- RIGHT: EV COLUMN -->
+  <div class="results-col">
+    <div class="col-filter-row">
+      <span class="slbl">Min EV %</span>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <input type="range" id="ev-min" min="0" max="15" step="0.5" value="2" oninput="document.getElementById('ev-min-v').textContent=parseFloat(this.value).toFixed(1)+'%';renderAll()">
+        <span class="fval" id="ev-min-v">2.0%</span>
+      </div>
+    </div>
+    <div class="col-stats">
+      <div class="stat"><div class="stat-lbl">+EV bets</div><div class="stat-val" id="s-ev">&mdash;</div><div class="stat-sub">vs Pinnacle</div></div>
+      <div class="stat"><div class="stat-lbl">Best EV %</div><div class="stat-val" id="s-ev-best">&mdash;</div><div class="stat-sub">highest edge</div></div>
+      <div class="stat"><div class="stat-lbl">Best profit</div><div class="stat-val" id="s-ev-win">&mdash;</div><div class="stat-sub">on unit size</div></div>
+    </div>
+    <div class="sort-row">
+      <span class="sort-lbl">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M3 3h10v1.5L9 9v4l-2-1V9L3 4.5V3z"/></svg>
+        Sort by
+      </span>
+      <select class="sel-sm" id="ev-sort-by" onchange="renderAll()">
+        <option value="ev_desc">EV % (highest first)</option>
+        <option value="time_asc">Date — soonest first</option>
+        <option value="time_desc">Date — latest first</option>
+        <option value="sport">Sport A&ndash;Z</option>
+        <option value="book">Book A&ndash;Z</option>
+      </select>
+    </div>
+    <div class="sec-hd">+EV opportunities vs Pinnacle</div>
+    <div id="ev-out"><div class="ev-card"><div class="empty">Fetch odds to see +EV bets benchmarked against Pinnacle</div></div></div>
+    <div class="sec-hd" id="props-hd" style="display:none;margin-top:1.1rem;">Player prop +EV vs Pinnacle</div>
+    <div id="props-out"></div>
+  </div>
+
+</div><!-- /results-grid -->
+
+</div><!-- /page -->
+
+<div class="mob-bar">
+  <button class="fetch-btn btn-blue" id="mob-btn" onclick="go()">Fetch odds</button>
+  <button class="fetch-btn btn-green" id="mob-all-btn" onclick="goAll()">All sports</button>
+</div>
+
+<script>
+const BOOK_NAMES = {
+  fanduel:'FanDuel', draftkings:'DraftKings', betmgm:'BetMGM',
+  williamhill_us:'Caesars', bovada:'Bovada', betonlineag:'BetOnline',
+  hardrockbet:'Hard Rock Bet', pinnacle:'Pinnacle'
+};
+const BOOK_SHORT = {
+  fanduel:'FanDuel', draftkings:'DraftKings', betmgm:'BetMGM',
+  williamhill_us:'Caesars', bovada:'Bovada', betonlineag:'BetOnline',
+  hardrockbet:'Hard Rock'
+};
+const BOOK_URLS = {
+  fanduel:       'https://sportsbook.fanduel.com',
+  draftkings:    'https://sportsbook.draftkings.com',
+  betmgm:        'https://sports.betmgm.com/en/sports',
+  williamhill_us:'https://www.caesars.com/sportsbook-and-casino',
+  bovada:        'https://www.bovada.lv/sports',
+  betonlineag:   'https://www.betonline.ag/sportsbook',
+  hardrockbet:   'https://app.hardrock.bet/home/games'
+};
+const BOOK_BTN = {
+  fanduel:'btn-fanduel', draftkings:'btn-draftkings', betmgm:'btn-betmgm',
+  williamhill_us:'btn-caesars', bovada:'btn-bovada', betonlineag:'btn-betonline',
+  hardrockbet:'btn-hardrock'
+};
+const MKT_LABEL = { h2h:'Moneyline', spreads:'Spread', totals:'Total', alternate_spreads:'Alt Spread', alternate_totals:'Alt Total', btts:'Both Teams Score', draw_no_bet:'Draw No Bet', h2h_3_way:'3-Way (Draw)' };
+const TARGETS = ['fanduel','draftkings','betmgm','williamhill_us','bovada','betonlineag','hardrockbet'];
+const ALL_BOOKS = ['fanduel','draftkings','betmgm','williamhill_us','bovada','betonlineag','hardrockbet','pinnacle'];
+
+let data = [];
+const $ = id => document.getElementById(id);
+const aDec = o => o > 0 ? o/100+1 : 100/Math.abs(o)+1;
+const iProb = d => 1/d;
+const arbPct = (d1,d2) => { const i=1/d1+1/d2; return i<1?(1-i)*100:null; };
+const stk = (u,d1,d2) => { const i=1/d1+1/d2,s1=(1/d1/i)*u,s2=(1/d2/i)*u; return {s1,s2,profit:s1*d1-u}; };
+const evCalc = (bd,pd) => { const fp=iProb(pd); return ((bd-1)*fp-(1-fp))*100; };
+const fmt = o => (o>=0?'+':'')+o;
+const setErr = m => { $('err').innerHTML=m; $('err').style.display=m?'block':'none'; };
+const log = m => $('conn-log').textContent=m;
+
+function makeProxyUrl(api, i) {
+  if(i===0) return `https://api.allorigins.win/raw?url=${encodeURIComponent(api)}`;
+  if(i===1) return `https://corsproxy.io/?url=${encodeURIComponent(api)}`;
+  if(i===2) return `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(api)}`;
+  if(i===3) return api;
+  return null;
+}
+
+async function tryFetch(api) {
+  const names = ['allorigins.win','corsproxy.io','codetabs.com','direct'];
+  for(let i=0;i<4;i++) {
+    const url = makeProxyUrl(api,i);
+    if(!url) break;
+    try {
+      log(`Connecting via ${names[i]}…`);
+      const r = await fetch(url, {signal:AbortSignal.timeout(9000)});
+      if(r.status===401) return {err:401};
+      if(r.status===429) return {err:429};
+      if(r.status===403||r.status===407){log(`${names[i]}: blocked, trying next…`);continue;}
+      if(!r.ok){log(`${names[i]}: HTTP ${r.status}, trying next…`);continue;}
+      const json = await r.json();
+      log(`Connected via ${names[i]}`);
+      const rem=r.headers.get('x-requests-remaining'), used=r.headers.get('x-requests-used');
+      if(rem!==null){
+        const rN=parseInt(rem),uN=used?parseInt(used):0,tot=uN+rN,pct=Math.min(100,(uN/tot)*100);
+        $('ufill').style.width=pct.toFixed(0)+'%';
+        $('ufill').style.background=pct>80?'#cc3030':pct>50?'#cc8800':'#52a020';
+        $('ulbl').textContent=uN+' / '+tot+' req';
+      }
+      return {json};
+    } catch(e){log(`${names[i]}: ${e.message}, trying next…`);}
+  }
+  return {err:'fail'};
+}
+
+async function go() {
+  const key = $('f-key').value.trim();
+  if(!key){setErr('Please enter your Odds API key.');return;}
+  setErr('');
+  $('help').style.display='none';
+  const selectedSports = getSelectedSports();
+  if(!selectedSports.length){ setErr('Please select at least one sport.'); return; }
+  const btns = [$('fetch-btn'),$('mob-btn')];
+  btns.forEach(b=>{if(b){b.textContent='Loading…';b.disabled=true;}});
+  data=[];
+
+  const bookList = getSelectedBookmarks();
+  const allEvents = [];
+  for(let si=0; si<selectedSports.length; si++){
+    const sport = selectedSports[si];
+    log(`Fetching ${sport} (${si+1}/${selectedSports.length})…`);
+    const api = `https://api.the-odds-api.com/v4/sports/${sport}/odds/?apiKey=${key}&regions=us,us2,eu&markets=h2h,spreads,totals&bookmakers=${bookList}&oddsFormat=american`;
+    const res = await tryFetch(api);
+    if(res.json && Array.isArray(res.json)) {
+      allEvents.push(...res.json);
+    } else if(res.json && res.json.message) {
+      setErr('API error: ' + res.json.message);
+      btns.forEach(b=>{b.textContent='Fetch odds';b.disabled=false;});
+      return;
+    } else if(res.err === 401) {
+      setErr('Invalid API key — double-check at the-odds-api.com');
+      btns.forEach(b=>{b.textContent='Fetch odds';b.disabled=false;});
+      return;
+    } else if(res.err === 429) {
+      setErr('Monthly request limit reached — upgrade your plan or wait until next month.');
+      btns.forEach(b=>{b.textContent='Fetch odds';b.disabled=false;});
+      return;
+    } else if(res.err === 'fail') {
+      setErr(`All connection methods failed. Check your internet connection and try again. If the issue persists, re-deploy the file on <a href="https://app.netlify.com/drop" target="_blank">Netlify Drop</a>.`);
+      btns.forEach(b=>{b.textContent='Fetch odds';b.disabled=false;});
+      return;
+    } else if(res.err) {
+      setErr('Connection failed. Check your API key and try again.');
+      btns.forEach(b=>{b.textContent='Fetch odds';b.disabled=false;});
+      return;
+    }
+    if(selectedSports.length > 1) await new Promise(r=>setTimeout(r,120));
+  }
+  btns.forEach(b=>{b.textContent='Fetch odds';b.disabled=false;});
+
+  data = allEvents;
+  $('refreshed').textContent = 'Updated '+new Date().toLocaleTimeString();
+  updateDots();
+  renderAll();
+  if(propsEnabled) fetchAndRenderProps(key, selectedSports);
+  if(t2Enabled) fetchAndRenderT2(key, selectedSports);
+  if(!data.length) setErr('No events found — this sport may be off-season. Try NBA, MLB, or NHL.');
+}
+
+function updateDots() {
+  const found={};
+  [...selectedBooks].forEach(k=>{found[k]=false;});
+  data.forEach(e=>(e.bookmakers||[]).forEach(b=>{if(b.key in found)found[b.key]=true;}));
+  // Offshore books (Bovada, BetOnline, Hard Rock) don't cover every sport.
+  // If data came back at all, mark them as connected — they're live, just sport-selective.
+  if (data.length > 0) {
+    ['bovada','betonlineag','hardrockbet'].forEach(k=>{ if(!found[k]) found[k]='partial'; });
+  }
+  const cfg = [
+    ['fanduel','FanDuel'],['draftkings','DraftKings'],['betmgm','BetMGM'],
+    ['williamhill_us','Caesars'],['bovada','Bovada'],['betonlineag','BetOnline'],
+    ['hardrockbet','Hard Rock'],['pinnacle','Pinnacle']
+  ];
+  $('status-pills').innerHTML = cfg.map(([k,n])=>
+    `<span class="spill"><span class="dot ${found[k]?'dot-on':'dot-warn'}"></span>${n}</span>`).join('');
+}
+
+function buildOpps() {
+  const arbs=[], evs=[];
+  const mf=$('mkt-filter').value;
+  const unit=parseFloat($('f-unit').value)||50;
+
+  data.forEach(event=>{
+    const bks={};(event.bookmakers||[]).forEach(b=>bks[b.key]=b);
+    const pinn=bks['pinnacle'];
+
+    ['h2h','spreads','totals','alternate_spreads','alternate_totals','btts','draw_no_bet','h2h_3_way'].forEach(mkt=>{
+      const mktGroup=mkt==='alternate_spreads'?'spreads':mkt==='alternate_totals'?'totals':mkt;
+      if(mf!=='all'&&mf!==mkt&&mf!==mktGroup) return;
+      const pm=pinn&&(pinn.markets||[]).find(m=>m.key===mkt);
+      const bm={};
+      TARGETS.forEach(bk=>{if(!bks[bk])return;const m=(bks[bk].markets||[]).find(m=>m.key===mkt);if(m)bm[bk]=m;});
+      const bKeys=Object.keys(bm);
+      if(!bKeys.length) return;
+
+      if(mkt==='h2h'||mkt==='btts'||mkt==='draw_no_bet'||mkt==='h2h_3_way') {
+        const sides={};
+        bKeys.forEach(bk=>{(bm[bk].outcomes||[]).forEach(o=>{if(!sides[o.name])sides[o.name]=[];sides[o.name].push({bk,odds:o.price,dec:aDec(o.price),name:o.name});});});
+        const sk=Object.keys(sides);if(sk.length<2)return;
+
+        // Determine market structure. A 2-way market has 2 outcomes (e.g., NBA h2h: Home/Away; BTTS: Yes/No).
+        // A 3-way market has 3 outcomes (soccer h2h: Home/Draw/Away). Pairing only 2 of 3 outcomes
+        // creates a FALSE ARB — the ignored outcome can result in both legs losing.
+        // We detect 3-way by checking the max outcomes any single book offers for this market.
+        let maxOutcomesPerBook = 0;
+        bKeys.forEach(bk=>{ const n=(bm[bk].outcomes||[]).length; if(n>maxOutcomesPerBook) maxOutcomesPerBook=n; });
+
+        if (maxOutcomesPerBook >= 3) {
+          // TRUE 3-WAY ARB SCAN: find best price per side across all books, check if 1/d1+1/d2+1/d3 < 1.
+          // Only build an arb if we have outcomes for all three distinct sides.
+          if (sk.length >= 3) {
+            // Order sides: home first, away second, draw/other third.
+            const hk = sk.find(k => k === event.home_team);
+            const ak = sk.find(k => k === event.away_team);
+            const dk = sk.find(k => k !== hk && k !== ak);
+            if (hk && ak && dk) {
+              // Try all combinations across books for the three legs.
+              const homeArr = sides[hk] || [], awayArr = sides[ak] || [], drawArr = sides[dk] || [];
+              homeArr.forEach(h => { awayArr.forEach(a => { drawArr.forEach(d => {
+                // All three legs must be on different books for a true arb (or at minimum,
+                // no single book can carry two legs of the same event — same-book arb isn't an arb).
+                if (h.bk === a.bk || h.bk === d.bk || a.bk === d.bk) return;
+                const i = 1/h.dec + 1/a.dec + 1/d.dec;
+                if (i >= 1) return;
+                const pct = (1 - i) * 100;
+                const s1 = (1/h.dec / i) * unit;
+                const s2 = (1/a.dec / i) * unit;
+                const s3 = (1/d.dec / i) * unit;
+                const profit = s1 * h.dec - unit; // identical payout on any outcome
+                arbs.push({
+                  event: `${event.home_team} vs ${event.away_team}`,
+                  sport: event.sport_title, sport_key: event.sport_key,
+                  mkt: MKT_LABEL[mkt] + ' (3-way)',
+                  commenceTime: event.commence_time,
+                  threeWay: true,
+                  leg1:{bk:h.bk,name:h.name,odds:h.odds,dec:h.dec,stake:s1},
+                  leg2:{bk:a.bk,name:a.name,odds:a.odds,dec:a.dec,stake:s2},
+                  leg3:{bk:d.bk,name:d.name,odds:d.odds,dec:d.dec,stake:s3},
+                  pct, profit, unit
+                });
+              }); }); });
+            }
+          }
+          // NOTE: we deliberately do NOT run the 2-way pairing on 3-outcome markets — it would produce
+          // false arbs that lose on the ignored outcome (e.g., soccer draws).
+        } else {
+          // 2-WAY MARKET: safe to pair the two sides across books.
+          const hk=sk.find(k=>k===event.home_team)||sk[0], ak=sk.find(k=>k!==hk)||sk[1];
+          const homeSides=sides[hk]||[], awaySides=sides[ak]||[];
+          homeSides.forEach(h=>{
+            awaySides.forEach(a=>{
+              if(h.bk===a.bk)return;
+              const pct=arbPct(h.dec,a.dec);
+              if(pct!=null){const st=stk(unit,h.dec,a.dec);
+                arbs.push({event:`${event.home_team} vs ${event.away_team}`,sport:event.sport_title,sport_key:event.sport_key,mkt:MKT_LABEL[mkt],commenceTime:event.commence_time,
+                  leg1:{bk:h.bk,name:h.name,odds:h.odds,dec:h.dec,stake:st.s1},
+                  leg2:{bk:a.bk,name:a.name,odds:a.odds,dec:a.dec,stake:st.s2},pct,profit:st.profit,unit});}
+            });
+          });
+        }
+
+        // EV scan vs Pinnacle is per-outcome so it works correctly for both 2-way and 3-way markets.
+        if(pm){
+          bKeys.forEach(bk=>{
+            const bookSides=(bm[bk].outcomes||[]);
+            bookSides.forEach(o=>{
+              const ps=(pm.outcomes||[]).find(p=>p.name===o.name);if(!ps)return;
+              const dec=aDec(o.price), e=evCalc(dec,aDec(ps.price));
+              if(e>0) evs.push({event:`${event.home_team} vs ${event.away_team}`,sport:event.sport_title,sport_key:event.sport_key,commenceTime:event.commence_time,
+                mkt:MKT_LABEL[mkt],bet:o.name,bk,odds:o.price,pinnOdds:ps.price,ev:e,unit});
+            });
+          });
+        }
+      }
+
+      if(mkt==='spreads'||mkt==='alternate_spreads') {
+        // Group outcomes by team+point combination
+        const grouped={};
+        bKeys.forEach(bk=>{(bm[bk].outcomes||[]).forEach(o=>{
+          const k=o.name+'|'+o.point;
+          if(!grouped[k])grouped[k]=[];
+          grouped[k].push({bk,odds:o.price,dec:aDec(o.price),name:o.name,point:parseFloat(o.point)});
+        });});
+        const gk=Object.keys(grouped);
+        for(let i=0;i<gk.length;i++) for(let j=i+1;j<gk.length;j++){
+          const ga=grouped[gk[i]],gb=grouped[gk[j]];
+          if(!ga.length||!gb.length) continue;
+          const nameA=ga[0].name, nameB=gb[0].name;
+          const ptA=ga[0].point, ptB=gb[0].point;
+          // Must be OPPOSITE teams
+          if(nameA===nameB) continue;
+          // Must provide FULL COVERAGE: no margin exists where both legs lose
+          // Full coverage requires: ptB >= -ptA (leg2 point covers the gap left by leg1)
+          if(ptB < -ptA) continue;
+          ga.forEach(a=>{ gb.forEach(b=>{
+            if(a.bk===b.bk) return;
+            const pct=arbPct(a.dec,b.dec);
+            if(pct!=null){const st=stk(unit,a.dec,b.dec);
+              arbs.push({event:`${event.home_team} vs ${event.away_team}`,sport:event.sport_title,sport_key:event.sport_key,commenceTime:event.commence_time,mkt:`Spread (${a.point>0?'+':''}${a.point} / ${b.point>0?'+':''}${b.point})`,
+                leg1:{bk:a.bk,name:a.name+' '+(a.point>0?'+':'')+a.point,odds:a.odds,dec:a.dec,stake:st.s1},
+                leg2:{bk:b.bk,name:b.name+' '+(b.point>0?'+':'')+b.point,odds:b.odds,dec:b.dec,stake:st.s2},
+                pct,profit:st.profit,unit});}
+          });});
+        }
+      }
+
+      if(mkt==='totals'||mkt==='alternate_totals') {
+        const ov={},un={};
+        bKeys.forEach(bk=>{(bm[bk].outcomes||[]).forEach(o=>{const bucket=o.name==='Over'?ov:un;if(!bucket[o.point])bucket[o.point]=[];bucket[o.point].push({bk,odds:o.price,dec:aDec(o.price),name:o.name,point:o.point});});});
+        Object.keys(ov).forEach(pt=>{
+          if(!un[pt])return;
+          ov[pt].forEach(o=>{ un[pt].forEach(u=>{ if(o.bk===u.bk)return;
+            const pct=arbPct(o.dec,u.dec);
+            if(pct!=null){const st=stk(unit,o.dec,u.dec);
+              arbs.push({event:`${event.home_team} vs ${event.away_team}`,sport:event.sport_title,sport_key:event.sport_key,commenceTime:event.commence_time,mkt:`Total O/U ${pt}`,
+                leg1:{bk:o.bk,name:'Over '+pt,odds:o.odds,dec:o.dec,stake:st.s1},
+                leg2:{bk:u.bk,name:'Under '+pt,odds:u.odds,dec:u.dec,stake:st.s2},pct,profit:st.profit,unit});}
+          });});
+          if(pm){
+            [...ov[pt],...un[pt]].forEach(s=>{
+              const ps=(pm.outcomes||[]).find(o=>o.name===s.name&&String(o.point)===String(pt));if(!ps)return;
+              const e=evCalc(s.dec,aDec(ps.price));
+              if(e>0) evs.push({event:`${event.home_team} vs ${event.away_team}`,sport:event.sport_title,sport_key:event.sport_key,commenceTime:event.commence_time,
+                mkt:`Total ${pt}`,bet:s.name+' '+pt,bk:s.bk,odds:s.odds,pinnOdds:ps.price,ev:e,unit});
+            });
+          }
+        });
+        // MIDDLE ARBS: scan for Over point < Under point (e.g., Over 210.5 vs Under 212.5).
+        // These create a "middle" where both legs can win but no scenario exists where both lose.
+        const ovPts = Object.keys(ov).map(parseFloat).sort((a,b)=>a-b);
+        const unPts = Object.keys(un).map(parseFloat).sort((a,b)=>a-b);
+        ovPts.forEach(ovPt => {
+          unPts.forEach(unPt => {
+            if (ovPt >= unPt) return; // Only consider Over point < Under point
+            if (!ov[ovPt] || !un[unPt]) return;
+            ov[ovPt].forEach(o => { un[unPt].forEach(u => {
+              if (o.bk === u.bk) return;
+              const pct = arbPct(o.dec, u.dec);
+              if (pct != null) {
+                const st = stk(unit, o.dec, u.dec);
+                arbs.push({
+                  event: `${event.home_team} vs ${event.away_team}`,
+                  sport: event.sport_title, sport_key: event.sport_key,
+                  commenceTime: event.commence_time,
+                  mkt: `Total Middle O${ovPt}/U${unPt}`,
+                  leg1: {bk: o.bk, name: 'Over ' + ovPt, odds: o.odds, dec: o.dec, stake: st.s1},
+                  leg2: {bk: u.bk, name: 'Under ' + unPt, odds: u.odds, dec: u.dec, stake: st.s2},
+                  pct, profit: st.profit, unit
+                });
+              }
+            }); });
+          });
+        });
+      }
+    });
+  });
+
+  // Deduplicate arbs (same event+mkt+legs, keep best pct).
+  // For 3-way arbs, sort legs by book key so order-insensitive keys match.
+  const seen=new Map();
+  arbs.forEach(a=>{
+    const legs = a.leg3 ? [a.leg1,a.leg2,a.leg3] : [a.leg1,a.leg2];
+    const sig = legs.map(l=>l.bk+':'+l.name).sort().join('|');
+    const key = [a.event,a.mkt,sig].join('||');
+    const ex = seen.get(key);
+    if(!ex || a.pct>ex.pct) seen.set(key,a);
+  });
+
+  // Deduplicate EVs
+  const evSeen=new Map();
+  evs.forEach(e=>{const k=e.event+'|'+e.mkt+'|'+e.bet+'|'+e.bk;if(!evSeen.has(k)||e.ev>evSeen.get(k).ev)evSeen.set(k,e);});
+
+  return {arbs:[...seen.values()], evs:[...evSeen.values()]};
+}
+
+function bookBtn(bk) {
+  const url  = BOOK_URLS[bk]||'#';
+  const cls  = BOOK_BTN[bk]||'btn-default';
+  const name = BOOK_SHORT[bk]||BOOK_NAMES[bk]||bk;
+  return `<a href="${url}" target="_blank" rel="noopener" class="book-btn ${cls}">
+    <svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor"><path d="M13.5 3a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5H6a.5.5 0 0 1 0-1H2.5A1.5 1.5 0 0 0 1 3.5v9A1.5 1.5 0 0 0 2.5 14h11a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 13.5 2H10a.5.5 0 0 1 0-1h3.5z"/><path d="M9.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L10 1.707V10.5a.5.5 0 0 1-1 0V1.707L7.854 3.854a.5.5 0 1 1-.708-.708l2-2z"/></svg>
+    Bet ${name}
+  </a>`;
+}
+
+function renderLeg(leg) {
+  return `<div class="bet-leg">
+    <div class="leg-info">
+      <div class="leg-book">${BOOK_NAMES[leg.bk]||leg.bk}</div>
+      <div class="leg-name">${leg.name}</div>
+      <div class="leg-labels">
+        <div class="leg-lbl-row"><span class="lbl">Odds</span><span class="val ${leg.odds>=0?'pos':''}">${fmt(leg.odds)}</span></div>
+        <div class="leg-lbl-row"><span class="lbl">Stake</span><span class="val">$${leg.stake.toFixed(2)}</span></div>
+        <div class="leg-lbl-row"><span class="lbl">Implied</span><span class="val">${(iProb(leg.dec)*100).toFixed(1)}%</span></div>
+      </div>
+    </div>
+    ${bookBtn(leg.bk)}
+  </div>`;
+}
+
+function renderAll() {
+  if(!data.length) return;
+  const unit=parseFloat($('f-unit').value)||50;
+  if($('s-unit')) $('s-unit').textContent='$'+unit.toLocaleString();
+  const at=parseFloat($('arb-min').value), et=parseFloat($('ev-min').value), sb=$('sort-by').value;
+  const {arbs,evs}=buildOpps();
+  const pfSport = document.getElementById('pf-sport') ? document.getElementById('pf-sport').value : 'all';
+  // Arb passes sport filter if at least one leg matches. 3-way arbs also checked via leg3.
+  const fa=arbs.filter(a=>{
+    if(a.pct<at) return false;
+    if(!eventPassesFilters(a.commenceTime)) return false;
+    const bookMatch = pfSelectedBooks.has(a.leg1.bk) || pfSelectedBooks.has(a.leg2.bk) || (a.leg3 && pfSelectedBooks.has(a.leg3.bk));
+    if(!bookMatch) return false;
+    if(pfSport!=='all' && a.sport_key!==pfSport) return false;
+    return true;
+  }).sort((a,b)=>{
+    if(sb==='pct')       return b.pct - a.pct;
+    if(sb==='profit')    return b.profit - a.profit;
+    if(sb==='time_asc')  return new Date(a.commenceTime||0) - new Date(b.commenceTime||0);
+    if(sb==='time_desc') return new Date(b.commenceTime||0) - new Date(a.commenceTime||0);
+    if(sb==='sport')     return (a.sport||'').localeCompare(b.sport||'');
+    if(sb==='ev_desc')   return b.pct - a.pct;
+    if(sb==='book')      return (BOOK_NAMES[a.leg1?.bk]||a.leg1?.book||'').localeCompare(BOOK_NAMES[b.leg1?.bk]||b.leg1?.book||'');
+    return b.pct - a.pct;
+  });
+  const evSb = $('ev-sort-by') ? $('ev-sort-by').value : 'ev_desc';
+  const fe=evs.filter(e=>{
+    if(e.ev<et) return false;
+    if(!eventPassesFilters(e.commenceTime)) return false;
+    if(!pfSelectedBooks.has(e.bk)) return false;
+    if(pfSport!=='all' && e.sport_key!==pfSport) return false;
+    return true;
+  }).sort((a,b)=>{
+    if(evSb==='time_asc')  return new Date(a.commenceTime||0) - new Date(b.commenceTime||0);
+    if(evSb==='time_desc') return new Date(b.commenceTime||0) - new Date(a.commenceTime||0);
+    if(evSb==='sport')     return (a.sport||'').localeCompare(b.sport||'');
+    if(evSb==='book')      return (a.bk||'').localeCompare(b.bk||'');
+    return b.ev - a.ev;
+  });
+
+  $('s-arb').textContent=fa.length;
+  $('s-ev').textContent=fe.length;
+  if(fe.length){
+    var bestEv=fe[0].ev||0;
+    var bestWin=((aDec(fe[0].odds)-1)*(fe[0].unit||unit)).toFixed(2);
+    if($('s-ev-best')) $('s-ev-best').textContent='+'+bestEv.toFixed(1)+'%';
+    if($('s-ev-win'))  $('s-ev-win').textContent='$'+bestWin;
+  } else {
+    if($('s-ev-best')) $('s-ev-best').textContent='—';
+    if($('s-ev-win'))  $('s-ev-win').textContent='—';
+  }
+  if($('event-count-note')) $('event-count-note').textContent = fa.length || fe.length ? `${fa.length} arbs · ${fe.length} EV bets shown` : '';
+  if(fa.length){
+    if($('s-arb-pct')) $('s-arb-pct').textContent='+'+fa[0].pct.toFixed(2)+'%';
+    $('s-best').textContent='$'+fa[0].profit.toFixed(2);
+    const sh=fa[0].event;$('s-best-sub').textContent=sh.length>26?sh.slice(0,24)+'…':sh;
+  } else {
+    if($('s-arb-pct')) $('s-arb-pct').textContent='—';
+    $('s-best').textContent='—';$('s-best-sub').textContent='none above min';
+  }
+
+  $('arb-out').innerHTML = fa.length ? fa.map((a,arbIdx)=>{ const arbId='arb_'+arbIdx; arbStore[arbId]=a;
+    const legs = a.leg3 ? [a.leg1,a.leg2,a.leg3] : [a.leg1,a.leg2];
+    const total=legs.reduce((s,l)=>s+l.stake,0).toFixed(2);
+    const ci=(legs.reduce((s,l)=>s+iProb(l.dec),0)*100).toFixed(1);
+    // Integer-point spreads on 2-way markets can push on an exact margin (both legs refunded, $0 net).
+    // Flag those so "guaranteed profit" isn't misleading.
+    let pushWarn = '';
+    if(!a.leg3 && /^Spread/.test(a.mkt||'') && a.leg1.name && a.leg2.name){
+      const m1 = a.leg1.name.match(/([+-]?\d+(\.\d+)?)$/);
+      const m2 = a.leg2.name.match(/([+-]?\d+(\.\d+)?)$/);
+      if(m1 && m2){
+        const p1 = parseFloat(m1[1]), p2 = parseFloat(m2[1]);
+        if(Number.isInteger(p1) && Number.isInteger(p2) && p1 === -p2){
+          pushWarn = `<div style="font-size:11px;color:var(--amber);padding:4px 14px 0;">⚠ Integer-point spread — at an exact ${Math.abs(p1)}-point margin both legs push (refund, $0 profit)</div>`;
+        }
+      }
+    }
+    return `<div class="arb-card">
+      <div class="arb-hd">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap;">
+          <div>
+            <div class="arb-event">${a.event}</div>
+            ${(()=>{ const t=fmtEventTime(a.commenceTime); return t?`<span class="tag tag-${t.status}" style="flex-shrink:0;display:inline-block;margin-top:4px;">${t.status==='live'?'LIVE · ':''}${t.label}</span>`:''; })()}
+          </div>
+          <div class="arb-menu-wrap" onclick="event.stopPropagation()">
+            <button class="arb-menu-btn" onclick="toggleArbMenu('${arbId}',event)" title="Options">
+              <span></span><span></span><span></span>
+            </button>
+            <div class="arb-menu-dropdown" id="menu-${arbId}">
+              <div class="arb-menu-item clr-green" onclick="logArbById('${arbId}','personal')"><span class="arb-menu-icon">↗</span>Log to personal tracker</div>
+              <div class="arb-menu-item clr-green" onclick="logArbById('${arbId}','public')"><span class="arb-menu-icon">↗</span>Log to public tracker</div>
+              <div class="arb-menu-item clr-blue" onclick="downloadArbCard('${arbId}')"><span class="arb-menu-icon">⬇</span>Download card</div>
+              <div class="arb-menu-item clr-x" onclick="shareToX('${arbId}')"><span class="arb-menu-icon">𝕏</span>Share to X</div>
+            </div>
+          </div>
+        </div>
+        <div class="arb-meta">
+          <span class="tag tag-sport">${a.sport}</span>
+          <span class="tag tag-mkt">${a.mkt}</span>
+          <span class="tag tag-arb">Arb ${a.pct.toFixed(2)}%</span>
+          <span class="tag tag-profit">+$${a.profit.toFixed(2)} guaranteed</span>
+        </div>
+      </div>
+      ${legs.map(renderLeg).join('')}
+      ${pushWarn}
+      <div class="arb-footer">
+        <div class="foot-item"><span class="foot-lbl">Total staked</span><span class="foot-val">$${total}</span></div>
+        <div class="foot-item"><span class="foot-lbl">Combined implied</span><span class="foot-val">${ci}%</span></div>
+        <div class="foot-item"><span class="foot-lbl">Guaranteed profit</span><span class="foot-val" style="color:var(--green)">$${a.profit.toFixed(2)}</span></div>
+        <div class="foot-item"><span class="foot-lbl">Return on unit</span><span class="foot-val">${((a.profit/a.unit)*100).toFixed(2)}%</span></div>
+      </div>
+    </div>`;
+  }).join('')
+  : `<div class="arb-card"><div class="empty">No arb opportunities above ${at.toFixed(1)}% — lower the threshold or switch sports</div></div>`;
+
+  $('ev-out').innerHTML = fe.length ? fe.map(function(e,evIdx){
+    var evId='ev_'+evIdx;
+    evStore[evId]=e;
+    var dec=aDec(e.odds);
+    var unit=e.unit||parseFloat($('f-unit').value)||50;
+    var win=((dec-1)*unit).toFixed(2);
+    var timeTag='';
+    try{ var t=fmtEventTime(e.commenceTime); if(t) timeTag='<span style="font-size:10px;color:var(--text3);">'+(t.status==='live'?'🔴 LIVE · ':'')+t.label+'</span>'; }catch(ex){}
+    return '<div class="ev-card"><div class="ev-row">'
+      +'<div class="ev-row-top">'
+        +'<div><div class="ev-event">'+e.event+'</div>'+timeTag+'</div>'
+        +'<div style="display:flex;gap:5px;align-items:center;flex-shrink:0;">'
+          +bookBtn(e.bk)
+          +'<div class="arb-menu-wrap" onclick="event.stopPropagation()">'
+            +'<button class="arb-menu-btn" onclick="toggleArbMenu(\''+evId+'\',event)" title="Options"><span></span><span></span><span></span></button>'
+            +'<div class="arb-menu-dropdown" id="menu-'+evId+'">'
+              +'<div class="arb-menu-item clr-green" onclick="logEVById(\''+evId+'\',\'personal\')" ><span class="arb-menu-icon">↗</span>Log to personal tracker</div>'
+              +'<div class="arb-menu-item clr-green" onclick="logEVById(\''+evId+'\',\'public\')" ><span class="arb-menu-icon">↗</span>Log to public tracker</div>'
+              +'<div class="arb-menu-item clr-blue" onclick="downloadEVCard(\''+evId+'\')" ><span class="arb-menu-icon">⬇</span>Download card</div>'
+              +'<div class="arb-menu-item clr-x" onclick="shareEVToX(\''+evId+'\')" ><span class="arb-menu-icon">𝕏</span>Share to X</div>'
+            +'</div>'
+          +'</div>'
+        +'</div>'
+      +'</div>'
+      +'<div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;">'
+        +'<span class="tag tag-sport">'+(e.sport||'')+'</span>'
+        +'<span class="tag tag-mkt">'+(e.mkt||'')+'</span>'
+        +'<span class="tag tag-ev">+'+(e.ev||0).toFixed(1)+'% EV</span>'
+      +'</div>'
+      +'<div class="leg-labels">'
+        +'<div class="leg-lbl-row"><span class="lbl">Bet</span><span class="val">'+(e.bet||'')+'</span></div>'
+        +'<div class="leg-lbl-row"><span class="lbl">Book odds</span><span class="val '+(e.odds>=0?'pos':'')+'">'+(e.odds>=0?'+':'')+e.odds+'</span></div>'
+        +'<div class="leg-lbl-row"><span class="lbl">Pinnacle</span><span class="val" style="color:var(--text2)">'+(e.pinnOdds>=0?'+':'')+e.pinnOdds+'</span></div>'
+        +'<div class="leg-lbl-row"><span class="lbl">EV edge</span><span class="val" style="color:var(--green)">+'+(e.ev||0).toFixed(1)+'%</span></div>'
+        +'<div class="leg-lbl-row"><span class="lbl">Win on $'+unit+'</span><span class="val blue">$'+win+'</span></div>'
+      +'</div>'
+      
+      +'</div></div>';
+  }).join('')
+  : '<div class="ev-card"><div class="empty">No +EV bets above '+et.toFixed(1)+'% — lower the EV threshold</div></div>';
+}
+
+$('f-unit').addEventListener('input',function(){if($('s-unit')) $('s-unit').textContent='$'+(parseFloat(this.value)||50).toLocaleString();renderAll();});
+$('f-key').addEventListener('keydown',e=>{if(e.key==='Enter')go();});
+
+
+async function goAll() {
+  const key = $('f-key').value.trim();
+  if (!key) { setErr('Please enter your Odds API key.'); return; }
+  setErr('');
+  $('help').style.display = 'none';
+
+  const allBtn = $('fetch-all-btn');
+  const fetchBtn = $('fetch-btn');
+  allBtn.textContent = 'Fetching…'; allBtn.disabled = true;
+  fetchBtn.disabled = true;
+  if($('mob-all-btn')){$('mob-all-btn').disabled=true;$('mob-all-btn').textContent='Fetching…';}
+  data = [];
+  $('all-sport-log').textContent = 'Checking which sports are currently in season…';
+
+  // Step 1: get in-season sports list (free, no quota cost)
+  const sportsUrl = `https://api.the-odds-api.com/v4/sports/?apiKey=${key}`;
+  let activeSports = [];
+  try {
+    const sResp = await fetch(sportsUrl, { signal: AbortSignal.timeout(8000) });
+    if (!sResp.ok) {
+      setErr('Could not fetch sports list — check your API key.');
+      allBtn.textContent = 'Fetch all in-season'; allBtn.disabled = false; fetchBtn.disabled = false;
+      return;
+    }
+    const sData = await sResp.json();
+    // Filter to active (in-season) sports only
+    activeSports = sData.filter(s => s.active && !s.key.includes('winner') && !s.key.includes('preseason') && !s.key.includes('all_star') && !s.key.includes('summer_league'));
+  } catch(e) {
+    setErr('Network error fetching sports list: ' + e.message);
+    allBtn.textContent = 'Fetch all in-season'; allBtn.disabled = false; fetchBtn.disabled = false;
+    return;
+  }
+
+  if (!activeSports.length) {
+    setErr('No in-season sports found.');
+    allBtn.textContent = 'Fetch all in-season'; allBtn.disabled = false; fetchBtn.disabled = false;
+  if($('mob-all-btn')){$('mob-all-btn').disabled=false;$('mob-all-btn').textContent='All sports';}
+    return;
+  }
+
+  $('all-sport-log').textContent = `Found ${activeSports.length} in-season sports. Fetching odds… (uses ${activeSports.length} of your monthly requests)`;
+
+  // Step 2: fetch each sport sequentially to avoid rate limits
+  const allEvents = [];
+  let fetched = 0;
+  for (const sport of activeSports) {
+    $('all-sport-log').textContent = `Fetching ${sport.title} (${fetched + 1} / ${activeSports.length})…`;
+    const apiUrl = `https://api.the-odds-api.com/v4/sports/${sport.key}/odds/?apiKey=${key}&regions=us,us2,eu&markets=h2h,spreads,totals&bookmakers=${getSelectedBookmarks()}&oddsFormat=american`;
+    const res = await tryFetch(apiUrl);
+    if (res.json && Array.isArray(res.json)) {
+      allEvents.push(...res.json);
+    }
+    fetched++;
+    // Small delay to be polite to the API
+    await new Promise(r => setTimeout(r, 120));
+  }
+
+  allBtn.textContent = 'Fetch all in-season'; allBtn.disabled = false; fetchBtn.disabled = false;
+
+  if (!allEvents.length) {
+    setErr('No events returned across any in-season sport.');
+    $('all-sport-log').textContent = '';
+    return;
+  }
+
+  data = allEvents;
+  $('refreshed').textContent = 'All sports updated ' + new Date().toLocaleTimeString();
+  $('all-sport-log').textContent = `Loaded ${allEvents.length} events across ${activeSports.length} sports. Used ${fetched} API requests.`;
+  updateDots(data);
+  renderAll();
+  if(propsEnabled){ if($('props-hd')) $('props-hd').style.display='block'; fetchAndRenderProps(key, getSelectedSports()[0]||'basketball_nba'); }
+}
+
+
+
+const PROP_MARKETS = [
+  'player_points','player_rebounds','player_assists','player_threes',
+  'player_blocks','player_steals','player_turnovers',
+  'player_pass_tds','player_pass_yds','player_rush_yds','player_receptions','player_reception_yds',
+  'player_hits','player_total_bases','player_pitcher_strikeouts',
+  'player_shots_on_target','player_goals','player_anytime_goal_scorer'
+];
+const PROP_LABEL = {
+  player_points:'Points',player_rebounds:'Rebounds',player_assists:'Assists',
+  player_threes:'3-Pointers',player_blocks:'Blocks',player_steals:'Steals',
+  player_turnovers:'Turnovers',player_pass_tds:'Pass TDs',player_pass_yds:'Pass Yards',
+  player_rush_yds:'Rush Yards',player_receptions:'Receptions',player_reception_yds:'Rec Yards',
+  player_hits:'Hits',player_total_bases:'Total Bases',player_pitcher_strikeouts:'Strikeouts',
+  player_shots_on_target:'Shots on Target',player_goals:'Goals',
+  player_anytime_goal_scorer:'Anytime Goalscorer'
+};
+
+async function fetchPropsForEvent(key, eventId, sportKey) {
+  const markets = PROP_MARKETS.join(',');
+  // Respect user's bookmaker selection. If user deselected Pinnacle, props will be fetched
+  // without it (EV column for props will be empty until Pinnacle is re-enabled).
+  const apiUrl = `https://api.the-odds-api.com/v4/sports/${sportKey}/events/${eventId}/odds/?apiKey=${key}&regions=us,us2,eu&markets=${markets}&bookmakers=${getSelectedBookmarks()}&oddsFormat=american`;
+  const res = await tryFetch(apiUrl);
+  return res.json || null;
+}
+
+function calcPropsEV(eventData, unit) {
+  if (!eventData || !eventData.bookmakers) return [];
+  const propEvs = [];
+  const pinnData = (eventData.bookmakers || []).find(b => b.key === 'pinnacle');
+  const targetBks = ['fanduel','draftkings','betmgm','bovada','betonlineag','hardrockbet'];
+
+  PROP_MARKETS.forEach(mkt => {
+    const pinnMkt = pinnData && (pinnData.markets || []).find(m => m.key === mkt);
+    if (!pinnMkt) return;
+
+    targetBks.forEach(bk => {
+      const bkData = (eventData.bookmakers || []).find(b => b.key === bk);
+      if (!bkData) return;
+      const bkMkt = (bkData.markets || []).find(m => m.key === mkt);
+      if (!bkMkt) return;
+
+      (bkMkt.outcomes || []).forEach(o => {
+        const pinnOutcome = (pinnMkt.outcomes || []).find(p =>
+          p.name === o.name && p.description === o.description &&
+          (o.point === undefined || String(p.point) === String(o.point))
+        );
+        if (!pinnOutcome) return;
+        const bookDec = aDec(o.price);
+        const pinnDec = aDec(pinnOutcome.price);
+        const evPct = evCalc(bookDec, pinnDec);
+        if (evPct >= parseFloat($('ev-min').value)) {
+          propEvs.push({
+            event: `${eventData.home_team} vs ${eventData.away_team}`,
+            sport: eventData.sport_title || '',
+            player: o.description || o.name,
+            market: PROP_LABEL[mkt] || mkt,
+            line: o.point !== undefined ? o.point : '',
+            side: o.name,
+            bk, odds: o.price, pinnOdds: pinnOutcome.price,
+            ev: evPct, unit
+          });
+        }
+      });
+    });
+  });
+  return propEvs;
+}
+
+async function fetchAndRenderProps(key, sports) {
+  if (!propsEnabled) return;
+  if (!data.length) return;
+  const unit = parseFloat($('f-unit').value) || 50;
+  const propsOut = $('props-out');
+  if (!propsOut) return;
+
+  // Only fetch props for sports that support them according to the API documentation
+  const propSports = [
+    'basketball_nba','basketball_wnba','basketball_ncaab','basketball_wncaab',
+    'americanfootball_nfl','americanfootball_ncaaf',
+    'baseball_mlb','icehockey_nhl',
+    'soccer_epl','soccer_usa_mls','soccer_spain_la_liga','soccer_germany_bundesliga',
+    'soccer_italy_serie_a','soccer_france_ligue_one',
+    'aussierules_afl','rugbyleague_nrl'
+  ];
+  const sportsArr = Array.isArray(sports) ? sports : [sports];
+  const validSports = sportsArr.filter(s => propSports.includes(s));
+  if (!validSports.length) {
+    propsOut.innerHTML = '<div class="ev-card"><div class="empty">Player props are not available for the selected sport(s) via the API.</div></div>';
+    return;
+  }
+
+  propsOut.innerHTML = '<div class="ev-card"><div class="empty" id="props-loading">Fetching player props for each game… this uses 1 API request per game.</div></div>';
+
+  // Filter events by date/status and valid prop sports
+  const filteredEvents = getFilteredEventsForProps(data).filter(e => validSports.includes(e.sport_key));
+  const totalPropGames = filteredEvents.length;
+  if (!totalPropGames) {
+    propsOut.innerHTML = '<div class="ev-card"><div class="empty">No games match your current date/status filter — adjust the pre-fetch filters above and try again.</div></div>';
+    return;
+  }
+
+  const allPropEvs = [];
+  let count = 0;
+  for (const event of filteredEvents) {
+    if ($('props-loading')) {
+      $('props-loading').textContent = `Fetching props: ${event.home_team} vs ${event.away_team} (${count+1}/${totalPropGames})…`;
+    }
+    const propData = await fetchPropsForEvent(key, event.id, event.sport_key);
+    if (propData) {
+      const evs = calcPropsEV(propData, unit);
+      allPropEvs.push(...evs);
+    }
+    count++;
+    await new Promise(r => setTimeout(r, 150));
+  }
+
+  if (!allPropEvs.length) {
+    propsOut.innerHTML = `<div class="ev-card"><div class="empty">No +EV prop opportunities found above ${parseFloat($('ev-min').value).toFixed(1)}% — try lowering the EV threshold</div></div>`;
+    return;
+  }
+
+  allPropEvs.sort((a,b) => b.ev - a.ev);
+  propsOut.innerHTML = allPropEvs.map(e => {
+    const dec = aDec(e.odds);
+    const win = ((dec - 1) * e.unit).toFixed(2);
+    return `<div class="ev-card"><div class="ev-row">
+      <div class="ev-row-top">
+        <div class="ev-event" style="font-size:12px;">${e.event}</div>
+        <div>${bookBtn(e.bk)}</div>
+      </div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;">
+        <span class="tag tag-sport">${e.sport}</span>
+        <span class="tag tag-mkt">${e.market}</span>
+        <span class="tag tag-ev">+${e.ev.toFixed(1)}% EV</span>
+      </div>
+      <div class="leg-labels" style="grid-template-columns:repeat(6,auto);">
+        <div class="leg-lbl-row"><span class="lbl">Player</span><span class="val" style="font-size:13px;">${e.player}</span></div>
+        <div class="leg-lbl-row"><span class="lbl">Prop</span><span class="val" style="font-size:13px;">${e.market}${e.line!==''?' '+e.line:''}</span></div>
+        <div class="leg-lbl-row"><span class="lbl">Side</span><span class="val" style="font-size:13px;">${e.side}</span></div>
+        <div class="leg-lbl-row"><span class="lbl">Book odds</span><span class="val ${e.odds>=0?'pos':''}">${fmt(e.odds)}</span></div>
+        <div class="leg-lbl-row"><span class="lbl">Pinnacle</span><span class="val" style="color:var(--text2)">${fmt(e.pinnOdds)}</span></div>
+        <div class="leg-lbl-row"><span class="lbl">Win on $${e.unit}</span><span class="val blue">$${win}</span></div>
+
+      </div>
+    </div></div>`;
+  }).join('');
+}
+
+
+// ── Date / status helpers ──
+function applyDatePreset() {
+  const preset = $('date-preset').value;
+  const wrap = $('custom-date-wrap');
+  if (preset === 'custom') {
+    wrap.style.display = 'flex';
+    // Default to today → +7 days if blank
+    if (!$('date-from').value) {
+      const now = new Date();
+      $('date-from').value = now.toISOString().slice(0,10);
+      const next = new Date(now); next.setDate(next.getDate()+7);
+      $('date-to').value = next.toISOString().slice(0,10);
+    }
+  } else {
+    wrap.style.display = 'none';
+  }
+  renderAll();
+}
+
+function fmtEventTime(isoStr) {
+  if (!isoStr) return '';
+  const d = new Date(isoStr);
+  const now = new Date();
+  const diffMs = d - now;
+  const isLive = diffMs < 0 && diffMs > -7200000; // started within last 2 hrs
+  const isUpcoming = diffMs >= 0;
+
+  const dateStr = d.toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric'});
+  const timeStr = d.toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit', hour12:true});
+
+  if (isLive) return {label:`${dateStr} · ${timeStr}`, status:'live'};
+  if (isUpcoming) return {label:`${dateStr} · ${timeStr}`, status:'upcoming'};
+  return {label:`${dateStr} · ${timeStr}`, status:'past'};
+}
+
+function eventPassesFilters(commenceTime) {
+  const statusF = ($('status-filter-pre') ? $('status-filter-pre').value : null)
+                || ($('status-filter') ? $('status-filter').value : 'all');
+  const preset  = ($('date-preset-pre') ? $('date-preset-pre').value : null)
+                || ($('date-preset') ? $('date-preset').value : 'all');
+
+  if (!commenceTime) return true;
+  const d = new Date(commenceTime);
+  const now = new Date();
+  const diffMs = d - now;
+  const isLive = diffMs < 0 && diffMs > -7200000;
+  const isUpcoming = diffMs >= 0;
+
+  // Status filter
+  if (statusF === 'live'     && !isLive)     return false;
+  if (statusF === 'upcoming' && !isUpcoming)  return false;
+
+  // Date preset filter
+  const today = new Date(); today.setHours(0,0,0,0);
+  const tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate()+1);
+  const dayAfter = new Date(tomorrow); dayAfter.setDate(dayAfter.getDate()+1);
+  const weekOut  = new Date(today); weekOut.setDate(weekOut.getDate()+7);
+
+  if (preset === 'today')    { if (d < today || d >= tomorrow) return false; }
+  if (preset === 'tomorrow') { if (d < tomorrow || d >= dayAfter) return false; }
+  if (preset === 'week')     { if (d < today || d > weekOut) return false; }
+  if (preset === 'custom') {
+    const fromEl = $('date-from'), toEl = $('date-to');
+    if (fromEl && fromEl.value) { const from = new Date(fromEl.value); from.setHours(0,0,0,0); if (d < from) return false; }
+    if (toEl   && toEl.value)   { const to   = new Date(toEl.value);   to.setHours(23,59,59,999); if (d > to) return false; }
+  }
+  return true;
+}
+
+
+// ── Multi-sport picker ──
+function toggleSportPicker() {
+  const dd = $('sport-picker-dropdown');
+  dd.classList.toggle('open');
+  if (dd.classList.contains('open')) {
+    // Close when clicking outside
+    setTimeout(() => document.addEventListener('click', closeSportPickerOutside), 0);
+  }
+}
+function closeSportPickerOutside(e) {
+  const wrap = $('sport-picker-wrap');
+  if (wrap && !wrap.contains(e.target)) {
+    closeSportPicker();
+  }
+}
+function closeSportPicker() {
+  const dd = $('sport-picker-dropdown');
+  if (dd) dd.classList.remove('open');
+  document.removeEventListener('click', closeSportPickerOutside);
+  }
+function getSelectedSports() {
+  return Array.from(document.querySelectorAll('#sport-picker-dropdown input[type="checkbox"]:checked')).map(cb => cb.value);
+}
+function selectAllSports() {
+  document.querySelectorAll('#sport-picker-dropdown input[type="checkbox"]').forEach(cb => cb.checked = true);
+  }
+function clearAllSports() {
+  document.querySelectorAll('#sport-picker-dropdown input[type="checkbox"]').forEach(cb => cb.checked = false);
+  }
+function updateSportChips() {
+  const selected = getSelectedSports();
+  // Build label map from checkboxes
+  const labels = {};
+  document.querySelectorAll('#sport-picker-dropdown .sp-item').forEach(item => {
+    const cb = item.querySelector('input[type="checkbox"]');
+    if (cb) labels[cb.value] = item.textContent.trim();
+  });
+  // Update chips area
+  const chips = document.getElementById('sport-chips');
+  // Update button label — try both the span and the button div as fallback
+  const btnSpan = document.getElementById('sport-picker-label');
+  const btnDiv  = document.getElementById('sport-picker-btn');
+
+  function setLabel(text) {
+    if (btnSpan) btnSpan.textContent = text;
+    // Also update the button div's first text node as fallback
+    if (btnDiv) {
+      const span = btnDiv.querySelector('#sport-picker-label');
+      if (span) span.textContent = text;
+    }
+  }
+
+  if (!chips) return;
+
+  if (selected.length === 0) {
+    chips.innerHTML = '';
+    setLabel('Select sports…');
+  } else if (selected.length === 1) {
+    const name = labels[selected[0]] || selected[0];
+    chips.innerHTML = '';
+    setLabel(name);
+  } else if (selected.length <= 4) {
+    chips.innerHTML = selected.map(v =>
+      `<span class="sp-chip">${labels[v]||v}<span class="sp-chip-x" onclick="removeSport('${v}')">×</span></span>`
+    ).join('');
+    setLabel(selected.length + ' sports');
+  } else {
+    chips.innerHTML = `<span class="sp-chip">${selected.length} sports selected<span class="sp-chip-x" onclick="clearAllSports()">×</span></span>`;
+    setLabel(selected.length + ' sports');
+  }
+}
+function removeSport(val) {
+  const cb = document.querySelector(`#sport-picker-dropdown input[value="${val}"]`);
+  if (cb) { cb.checked = false;  }
+}
+// Use event delegation for checkbox changes — more reliable
+const spDropdown = document.getElementById('sport-picker-dropdown');
+if (spDropdown) {
+  spDropdown.addEventListener('change', function(e) {
+    if (e.target && e.target.type === 'checkbox') {
+          }
+  });
+}
+
+
+// ── Log bet to tracker ──
+function logArbById(arbId, tracker) {
+  const a = arbStore[arbId];
+  if (!a) { alert('Could not find arb data. Please re-fetch odds and try again.'); return; }
+  const trackerUrl = (tracker === 'personal')
+    ? 'https://bothsideswinn.github.io/master-arb-ev/personal_tracker.html'
+    : 'https://bothsideswinn.github.io/master-arb-ev/public_tracker.html';
+  const ctDate = a.commenceTime ? new Date(a.commenceTime) : null;
+  const gamedate = ctDate ? ctDate.toISOString().split('T')[0] : '';
+  const gametimeonly = ctDate ? ctDate.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true}) : '';
+  const gt = ctDate ? ctDate.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}) + ' · ' + gametimeonly : '';
+  // Pass sport key (lowercase) so tracker can map it accurately
+  const sportKey = (a.sport||'').toLowerCase();
+  const params = new URLSearchParams({
+    type: 'arb',
+    game: a.event || '',
+    sport: sportKey,
+    mkt: a.mkt || '',
+    book1: a.leg1?.book || a.leg1?.bk || '',
+    book2: a.leg2?.book || a.leg2?.bk || '',
+    stake: ((a.leg1?.stake||0) + (a.leg2?.stake||0)).toFixed(2),
+    profit: (a.profit||0).toFixed(2),
+    gametime: gt,
+    gamedate: gamedate,
+    gametimeonly: gametimeonly,
+    notes: (a.leg1?.name||'') + ' / ' + (a.leg2?.name||''),
+  });
+  window.open(trackerUrl + '?' + params.toString(), '_blank');
+}
+
+
+function logEVById(evId, tracker) {
+  const e = evStore[evId];
+  if (!e) { alert('Could not find EV data. Please re-fetch and try again.'); return; }
+  const trackerUrl = (tracker === 'personal')
+    ? 'https://bothsideswinn.github.io/master-arb-ev/personal_tracker.html'
+    : 'https://bothsideswinn.github.io/master-arb-ev/public_tracker.html';
+  const ctDate2 = e.commenceTime ? new Date(e.commenceTime) : null;
+  const gamedate2 = ctDate2 ? ctDate2.toISOString().split('T')[0] : '';
+  const gametimeonly2 = ctDate2 ? ctDate2.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true}) : '';
+  const gt = ctDate2 ? ctDate2.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}) + ' · ' + gametimeonly2 : '';
+  const params = new URLSearchParams({
+    type: 'ev',
+    game: e.event || '',
+    sport: e.sport || '',
+    bookEv: e.book || '',
+    odds: String(e.odds || ''),
+    evPct: (e.ev||0).toFixed(1),
+    stake: String(e.unit || 50),
+    gametime: gt,
+    gamedate: gamedate2,
+    gametimeonly: gametimeonly2,
+    sport: (e.sport||'').toLowerCase(),
+    notes: (e.bet||'') + ' · +' + (e.ev||0).toFixed(1) + '% EV',
+  });
+  window.open(trackerUrl + '?' + params.toString(), '_blank');
+}
+
+
+
+function toggleArbMenu(id,ev){ev.stopPropagation();var m=document.getElementById('menu-'+id);if(!m)return;if(openMenuId&&openMenuId!==id){var p=document.getElementById('menu-'+openMenuId);if(p)p.classList.remove('open');}m.classList.toggle('open');openMenuId=m.classList.contains('open')?id:null;}
+document.addEventListener('click',function(){if(openMenuId){var m=document.getElementById('menu-'+openMenuId);if(m)m.classList.remove('open');openMenuId=null;}});
+
+function roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();}
+function roundRectTop(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h);ctx.lineTo(x,y+h);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();}
+function roundRectBottom(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+w,y);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y);ctx.closePath();}
+
+function downloadArbCard(arbId){
+  var a=arbStore[arbId];if(!a){alert('Could not find arb data.');return;}
+  var m=document.getElementById('menu-'+arbId);if(m)m.classList.remove('open');openMenuId=null;
+  var canvas=document.createElement('canvas');
+  var sc=2,W=600,H=380;
+  canvas.width=W*sc;canvas.height=H*sc;
+  var ctx=canvas.getContext('2d');ctx.scale(sc,sc);
+  var dark=window.matchMedia('(prefers-color-scheme: dark)').matches;
+  var bg=dark?'#111814':'#ffffff';
+  var bg2=dark?'#182319':'#f6f6f4';
+  var tp=dark?'#e8f5e9':'#1a1a18';
+  var tm=dark?'#5A7A60':'#888780';
+  var gr='#2d9e5f';
+  var bl='#185FA5';
+  var bord=dark?'rgba(255,255,255,0.1)':'rgba(0,0,0,0.1)';
+  // Background
+  ctx.fillStyle=bg;roundRect(ctx,0,0,W,H,14);ctx.fill();
+  // Header band
+  ctx.fillStyle=bg2;roundRectTop(ctx,0,0,W,60,14);ctx.fill();
+  // Event
+  ctx.fillStyle=tp;ctx.font='bold 17px -apple-system,sans-serif';
+  var ev=a.event||'';
+  if(ctx.measureText(ev).width>W-140)ev=ev.slice(0,Math.floor(ev.length*(W-140)/ctx.measureText(ev).width)-3)+'...';
+  ctx.fillText(ev,20,26);
+  // Time tag
+  var ct=a.commenceTime?new Date(a.commenceTime):null;
+  var ts=ct?ct.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})+' · '+ct.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true}):'';
+  if(ts){
+    ctx.font='bold 11px -apple-system,sans-serif';
+    var tw=ctx.measureText(ts).width;
+    ctx.fillStyle=dark?'#0C447C':'#E6F1FB';roundRect(ctx,20,34,tw+14,18,9);ctx.fill();
+    ctx.fillStyle=dark?'#B5D4F4':'#0C447C';ctx.fillText(ts,27,47);
+  }
+  // Tags
+  var tagX=20,tagY=ct?60:36;
+  [[a.sport,'#E6F1FB','#0C447C'],['Arb '+a.pct.toFixed(2)+'%','#E6F1FB','#185FA5'],['+$'+a.profit.toFixed(2)+' guaranteed','#EAF3DE','#2d6a0f']].forEach(function(t){
+    if(!t[0])return;
+    ctx.font='bold 10px -apple-system,sans-serif';
+    var w=ctx.measureText(t[0]).width;
+    ctx.fillStyle=t[1];roundRect(ctx,tagX,tagY,w+12,18,9);ctx.fill();
+    ctx.fillStyle=t[2];ctx.fillText(t[0],tagX+6,tagY+13);
+    tagX+=w+18;
+  });
+  // Divider
+  var dy=tagY+26;
+  ctx.strokeStyle=bord;ctx.lineWidth=0.5;
+  ctx.beginPath();ctx.moveTo(0,dy);ctx.lineTo(W,dy);ctx.stroke();
+  // Legs
+  [a.leg1,a.leg2].forEach(function(leg,i){
+    if(!leg)return;
+    var ly=dy+10+i*115;
+    ctx.fillStyle=tm;ctx.font='bold 9px -apple-system,sans-serif';
+    ctx.fillText((leg.book||leg.bk||'').toUpperCase(),20,ly+13);
+    ctx.fillStyle=tp;ctx.font='bold 14px -apple-system,sans-serif';
+    ctx.fillText(leg.name||'',20,ly+30);
+    [['ODDS',(leg.odds>=0?'+':'')+leg.odds,leg.odds>=0?gr:tp],['STAKE','$'+(leg.stake||0).toFixed(2),tp],['IMPLIED',(1/leg.dec*100).toFixed(1)+'%',tm]].forEach(function(col,ci){
+      var cx=20+ci*150;
+      ctx.fillStyle=tm;ctx.font='9px -apple-system,sans-serif';ctx.fillText(col[0],cx,ly+50);
+      ctx.fillStyle=col[2];ctx.font='bold 15px -apple-system,sans-serif';ctx.fillText(col[1],cx,ly+68);
+    });
+    if(i===0){ctx.strokeStyle=bord;ctx.lineWidth=0.5;ctx.beginPath();ctx.moveTo(20,ly+82);ctx.lineTo(W-20,ly+82);ctx.stroke();}
+  });
+  // Footer
+  var fy=H-56;
+  ctx.fillStyle=bg2;roundRectBottom(ctx,0,fy,W,56,14);ctx.fill();
+  ctx.strokeStyle=bord;ctx.lineWidth=0.5;ctx.beginPath();ctx.moveTo(0,fy);ctx.lineTo(W,fy);ctx.stroke();
+  var total=((a.leg1?a.leg1.stake:0)+(a.leg2?a.leg2.stake:0)).toFixed(2);
+  var ci=((1/(a.leg1?a.leg1.dec:1)+1/(a.leg2?a.leg2.dec:1))*100).toFixed(1);
+  var ret=((a.profit/a.unit)*100).toFixed(2);
+  [['TOTAL STAKED','$'+total,tp],['COMBINED IMPLIED',ci+'%',tp],['GUARANTEED PROFIT','+$'+a.profit.toFixed(2),gr],['RETURN ON UNIT',ret+'%',tp]].forEach(function(f,i){
+    var fx=20+i*145;
+    ctx.fillStyle=tm;ctx.font='8px -apple-system,sans-serif';ctx.fillText(f[0],fx,fy+13);
+    ctx.fillStyle=f[2];ctx.font='bold 13px -apple-system,sans-serif';ctx.fillText(f[1],fx,fy+29);
+  });
+  // Watermark row — separate from stats, centered at very bottom
+  ctx.strokeStyle=bord;ctx.lineWidth=0.5;ctx.beginPath();ctx.moveTo(20,fy+38);ctx.lineTo(W-20,fy+38);ctx.stroke();
+  ctx.fillStyle=tm;ctx.font='10px -apple-system,sans-serif';
+  var wm='@BothSidesWinn · Guaranteed profit. Every bet.';
+  var wmW=ctx.measureText(wm).width;
+  ctx.fillText(wm,(W-wmW)/2,fy+51);
+  var link=document.createElement('a');
+  link.download='arb_'+Date.now()+'.png';
+  link.href=canvas.toDataURL('image/png');
+  link.click();
+}
+
+function shareToX(arbId){
+  var a=arbStore[arbId];if(!a){alert('Could not find arb data.');return;}
+  var m=document.getElementById('menu-'+arbId);if(m)m.classList.remove('open');openMenuId=null;
+  // Auto-download the card first so it's ready to attach
+  downloadArbCard(arbId);
+  var ct=a.commenceTime?new Date(a.commenceTime):null;
+  var ts=ct?ct.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})+' · '+ct.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true}):'';
+  var l1=a.leg1||{},l2=a.leg2||{};
+  var o1=(l1.odds>=0?'+':'')+l1.odds,o2=(l2.odds>=0?'+':'')+l2.odds;
+  var lines=[
+    '\u{1F6A8} ARB ALERT \u2014 '+a.sport,
+    '',
+    a.event,
+    ts?'\uD83D\uDD50 '+ts:'',
+    '',
+    '\u2705 '+(l1.name||'')+': '+(l1.book||l1.bk||'')+' '+o1+' \u2192 Stake $'+(l1.stake||0).toFixed(2),
+    '\u2705 '+(l2.name||'')+': '+(l2.book||l2.bk||'')+' '+o2+' \u2192 Stake $'+(l2.stake||0).toFixed(2),
+    '',
+    '\uD83D\uDCB0 Guaranteed Profit: +$'+a.profit.toFixed(2),
+    '\uD83D\uDCC8 ROI: '+((a.profit/a.unit)*100).toFixed(2)+'% on $'+a.unit,
+    '',
+    'Both sides win. No matter what.',
+    '',
+    '#SportsBetting #ArbBetting'
+  ].filter(function(l){return l!==null;}).join('\n');
+  setTimeout(function(){ window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(lines),'_blank'); }, 800);
+}
+
+
+// ── Sync pre-fetch and post-fetch filters ──────────────────────────────────
+function syncFilters(type) {
+  if (type === 'status') {
+    const val = document.getElementById('status-filter-pre').value;
+    const post = document.getElementById('status-filter');
+    if (post) post.value = val;
+    renderAll();
+  }
+  if (type === 'date') {
+    const preset = document.getElementById('date-preset-pre').value;
+    const wrap = document.getElementById('custom-date-wrap-pre');
+    if (wrap) wrap.style.display = preset === 'custom' ? 'flex' : 'none';
+    // Sync to post-fetch filters
+    const postPreset = document.getElementById('date-preset');
+    if (postPreset) postPreset.value = preset;
+    if (preset === 'custom') {
+      const fromPre = document.getElementById('date-from-pre').value;
+      const toPre   = document.getElementById('date-to-pre').value;
+      const postFrom = document.getElementById('date-from');
+      const postTo   = document.getElementById('date-to');
+      if (postFrom && fromPre) postFrom.value = fromPre;
+      if (postTo   && toPre)   postTo.value   = toPre;
+      const postWrap = document.getElementById('custom-date-wrap');
+      if (postWrap) postWrap.style.display = 'flex';
+    } else {
+      const postWrap = document.getElementById('custom-date-wrap');
+      if (postWrap) postWrap.style.display = 'none';
+    }
+    renderAll();
+  }
+}
+
+// Helper: read active date preset from either pre or post filter
+function getActiveDatePreset() {
+  const pre = document.getElementById('date-preset-pre');
+  return pre ? pre.value : 'all';
+}
+function getActiveStatusFilter() {
+  const pre = document.getElementById('status-filter-pre');
+  return pre ? pre.value : 'all';
+}
+
+// Events that pass the pre-fetch date filter (used for prop fetching)
+function getFilteredEventsForProps(eventsArr) {
+  const preset = getActiveDatePreset();
+  const status = getActiveStatusFilter();
+  const today  = new Date(); today.setHours(0,0,0,0);
+  const tomorrow = new Date(today); tomorrow.setDate(today.getDate()+1);
+  const dayAfter = new Date(tomorrow); dayAfter.setDate(tomorrow.getDate()+1);
+  const weekOut  = new Date(today); weekOut.setDate(today.getDate()+7);
+
+  return eventsArr.filter(event => {
+    if (!event.commence_time) return true;
+    const d = new Date(event.commence_time);
+    const now = new Date();
+    const diffMs = d - now;
+    const isLive = diffMs < 0 && diffMs > -7200000;
+    const isUpcoming = diffMs >= 0;
+
+    // Status filter
+    if (status === 'live'     && !isLive)     return false;
+    if (status === 'upcoming' && !isUpcoming)  return false;
+
+    // Date filter
+    if (preset === 'today')    return d >= today && d < tomorrow;
+    if (preset === 'tomorrow') return d >= tomorrow && d < dayAfter;
+    if (preset === 'week')     return d >= today && d <= weekOut;
+    if (preset === 'custom') {
+      const fromEl = document.getElementById('date-from-pre');
+      const toEl   = document.getElementById('date-to-pre');
+      if (fromEl && fromEl.value) { const f=new Date(fromEl.value); f.setHours(0,0,0,0); if(d<f) return false; }
+      if (toEl   && toEl.value)   { const t=new Date(toEl.value);   t.setHours(23,59,59,999); if(d>t) return false; }
+    }
+    return true;
+  });
+}
+
+
+// ── Tier 2 prop markets ─────────────────────────────────────────────
+
+// All Tier 2 prop markets
+const TIER2_MARKETS = [
+  // Halves
+  'h2h_h1','h2h_h2','spreads_h1','spreads_h2','totals_h1','totals_h2',
+  'alternate_spreads_h1','alternate_spreads_h2','alternate_totals_h1','alternate_totals_h2',
+  'team_totals_h1','team_totals_h2',
+  // Quarters (NBA/NFL)
+  'h2h_q1','h2h_q2','h2h_q3','h2h_q4',
+  'spreads_q1','spreads_q2','spreads_q3','spreads_q4',
+  'totals_q1','totals_q2','totals_q3','totals_q4',
+  'alternate_spreads_q1','alternate_spreads_q2','alternate_spreads_q3','alternate_spreads_q4',
+  'alternate_totals_q1','alternate_totals_q2','alternate_totals_q3','alternate_totals_q4',
+  'team_totals_q1','team_totals_q2','team_totals_q3','team_totals_q4',
+  // Periods (NHL)
+  'h2h_p1','h2h_p2','h2h_p3','spreads_p1','spreads_p2','spreads_p3',
+  'totals_p1','totals_p2','totals_p3',
+  // Innings (MLB)
+  'h2h_1st_1_innings','h2h_1st_3_innings','h2h_1st_5_innings','h2h_1st_7_innings',
+  'spreads_1st_1_innings','spreads_1st_3_innings','spreads_1st_5_innings','spreads_1st_7_innings',
+  'totals_1st_1_innings','totals_1st_3_innings','totals_1st_5_innings','totals_1st_7_innings',
+  'alternate_spreads_1st_1_innings','alternate_spreads_1st_3_innings',
+  'alternate_totals_1st_1_innings','alternate_totals_1st_3_innings',
+  // Team totals
+  'team_totals','alternate_team_totals',
+];
+
+const TIER2_LABEL = {
+  h2h_h1:'H2H 1st Half', h2h_h2:'H2H 2nd Half',
+  spreads_h1:'Spread 1st Half', spreads_h2:'Spread 2nd Half',
+  totals_h1:'Total 1st Half', totals_h2:'Total 2nd Half',
+  alternate_spreads_h1:'Alt Spread 1st Half', alternate_spreads_h2:'Alt Spread 2nd Half',
+  alternate_totals_h1:'Alt Total 1st Half', alternate_totals_h2:'Alt Total 2nd Half',
+  team_totals_h1:'Team Total 1st Half', team_totals_h2:'Team Total 2nd Half',
+  h2h_q1:'H2H Q1', h2h_q2:'H2H Q2', h2h_q3:'H2H Q3', h2h_q4:'H2H Q4',
+  spreads_q1:'Spread Q1', spreads_q2:'Spread Q2', spreads_q3:'Spread Q3', spreads_q4:'Spread Q4',
+  totals_q1:'Total Q1', totals_q2:'Total Q2', totals_q3:'Total Q3', totals_q4:'Total Q4',
+  alternate_spreads_q1:'Alt Spread Q1', alternate_spreads_q2:'Alt Spread Q2',
+  alternate_spreads_q3:'Alt Spread Q3', alternate_spreads_q4:'Alt Spread Q4',
+  alternate_totals_q1:'Alt Total Q1', alternate_totals_q2:'Alt Total Q2',
+  alternate_totals_q3:'Alt Total Q3', alternate_totals_q4:'Alt Total Q4',
+  team_totals_q1:'Team Total Q1', team_totals_q2:'Team Total Q2',
+  team_totals_q3:'Team Total Q3', team_totals_q4:'Team Total Q4',
+  h2h_p1:'H2H P1', h2h_p2:'H2H P2', h2h_p3:'H2H P3',
+  spreads_p1:'Spread P1', spreads_p2:'Spread P2', spreads_p3:'Spread P3',
+  totals_p1:'Total P1', totals_p2:'Total P2', totals_p3:'Total P3',
+  h2h_1st_1_innings:'ML 1st Inn', h2h_1st_3_innings:'ML 1st 3 Inn',
+  h2h_1st_5_innings:'ML 1st 5 Inn', h2h_1st_7_innings:'ML 1st 7 Inn',
+  spreads_1st_1_innings:'Spread 1st Inn', spreads_1st_3_innings:'Spread 1st 3 Inn',
+  spreads_1st_5_innings:'Spread 1st 5 Inn', spreads_1st_7_innings:'Spread 1st 7 Inn',
+  totals_1st_1_innings:'Total 1st Inn', totals_1st_3_innings:'Total 1st 3 Inn',
+  totals_1st_5_innings:'Total 1st 5 Inn', totals_1st_7_innings:'Total 1st 7 Inn',
+  alternate_spreads_1st_1_innings:'Alt Spread 1st Inn',
+  alternate_spreads_1st_3_innings:'Alt Spread 1st 3 Inn',
+  alternate_totals_1st_1_innings:'Alt Total 1st Inn',
+  alternate_totals_1st_3_innings:'Alt Total 1st 3 Inn',
+  team_totals:'Team Total', alternate_team_totals:'Alt Team Total',
+};
+
+// Tier 2 toggle handler
+
+// Fetch Tier 2 data for a single event
+async function fetchT2ForEvent(key, eventId, sportKey, bookmakers) {
+  const mkts = TIER2_MARKETS.join(',');
+  const url = `https://api.the-odds-api.com/v4/sports/${sportKey}/events/${eventId}/odds/?apiKey=${key}&regions=us,us2,eu&markets=${mkts}&bookmakers=${bookmakers}&oddsFormat=american`;
+  const res = await tryFetch(url);
+  return res ? res.json : null;
+}
+
+// Scan Tier 2 event data for arbs and EV
+function calcT2Opps(eventData, unit, targetBks, pinnEnabled) {
+  if (!eventData || !eventData.bookmakers) return { arbs: [], evs: [] };
+  const arbs = [], evs = [];
+  const pinnData = eventData.bookmakers.find(b => b.key === 'pinnacle');
+
+  for (const mkt of TIER2_MARKETS) {
+    const label = TIER2_LABEL[mkt] || mkt;
+    const bkMkts = {};
+    for (const bk of eventData.bookmakers) {
+      if (bk.key === 'pinnacle') continue;
+      if (!targetBks.includes(bk.key)) continue;
+      const m = (bk.markets || []).find(m => m.key === mkt);
+      if (m) bkMkts[bk.key] = m;
+    }
+
+    const bkKeys = Object.keys(bkMkts);
+    if (bkKeys.length < 2) continue;
+
+    // Get all outcomes across all books for this market
+    const outcomeMap = {};
+    for (const bk of bkKeys) {
+      for (const oc of (bkMkts[bk].outcomes || [])) {
+        const key2 = oc.name + (oc.point !== undefined ? '_' + oc.point : '');
+        if (!outcomeMap[key2]) outcomeMap[key2] = [];
+        outcomeMap[key2].push({ bk, name: oc.name, odds: oc.price, point: oc.point, dec: oc.price > 0 ? oc.price/100+1 : 100/Math.abs(oc.price)+1 });
+      }
+    }
+
+    // Try h2h-style arbs (2 outcomes: pick best odds per side)
+    const sides = {};
+    for (const [key2, entries] of Object.entries(outcomeMap)) {
+      const best = entries.reduce((a, b) => b.dec > a.dec ? b : a);
+      sides[key2] = best;
+    }
+    const sideArr = Object.values(sides);
+    for (let i = 0; i < sideArr.length; i++) {
+      for (let j = i + 1; j < sideArr.length; j++) {
+        const b1 = sideArr[i], b2 = sideArr[j];
+        if (b1.bk === b2.bk) continue;
+        const ci = 1/b1.dec + 1/b2.dec;
+        if (ci >= 1) continue;
+        const pct = (1 - ci) * 100;
+        const s1 = unit * (1/b1.dec) / ci;
+        const s2 = unit * (1/b2.dec) / ci;
+        const profit = unit - unit * ci;
+        arbs.push({
+          event: eventData.home_team + ' vs ' + eventData.away_team,
+          sport: eventData.sport_title || '',
+          commenceTime: eventData.commence_time,
+          mkt: label,
+          leg1: { bk: b1.bk, book: b1.bk, name: b1.name, odds: b1.odds, dec: b1.dec, stake: s1 },
+          leg2: { bk: b2.bk, book: b2.bk, name: b2.name, odds: b2.odds, dec: b2.dec, stake: s2 },
+          pct, profit, unit,
+        });
+      }
+    }
+
+    // EV vs Pinnacle
+    if (pinnEnabled && pinnData) {
+      const pinnMkt = (pinnData.markets || []).find(m => m.key === mkt);
+      if (!pinnMkt) continue;
+      for (const bk of bkKeys) {
+        for (const oc of (bkMkts[bk].outcomes || [])) {
+          const pinnOc = (pinnMkt.outcomes || []).find(p => p.name === oc.name && (oc.point === undefined || p.point === oc.point));
+          if (!pinnOc) continue;
+          const dec = oc.price > 0 ? oc.price/100+1 : 100/Math.abs(oc.price)+1;
+          const pinnDec = pinnOc.price > 0 ? pinnOc.price/100+1 : 100/Math.abs(pinnOc.price)+1;
+          const pinnProb = 1 / pinnDec;
+          const ev = (dec * pinnProb - 1) * 100;
+          if (ev <= 0) continue;
+          const win = unit * (dec - 1);
+          evs.push({
+            event: eventData.home_team + ' vs ' + eventData.away_team,
+            sport: eventData.sport_title || '',
+            commenceTime: eventData.commence_time,
+            mkt: label,
+            bet: oc.name + (oc.point !== undefined ? ' ' + oc.point : ''),
+            book: bk, bk,
+            odds: oc.price,
+            ev, unit, win,
+          });
+        }
+      }
+    }
+  }
+  return { arbs, evs };
+}
+
+// Main Tier 2 fetch and render
+async function fetchAndRenderT2(key, sports) {
+  if (!t2Enabled) return;
+  if (!data.length) return;
+  const unit = parseFloat($('f-unit').value) || 50;
+  const t2Out = $('t2-out');
+  const t2Hd  = $('t2-hd');
+  if (!t2Out) return;
+  if (t2Hd) t2Hd.style.display = 'block';
+
+  const t2Sports = Array.isArray(sports) ? sports : getSelectedSports();
+  const filteredEvents = getFilteredEventsForProps(data).filter(e => !t2Sports.length || t2Sports.includes(e.sport_key));
+  if (!filteredEvents.length) {
+    t2Out.innerHTML = '<div class="ev-card"><div class="empty">No games match your current filter.</div></div>';
+    return;
+  }
+
+  t2Out.innerHTML = '<div class="ev-card"><div class="empty" id="t2-loading">Fetching game period markets… 1 API request per game.</div></div>';
+
+  const TARGET_BKS = [...selectedBooks].filter(k => k !== 'pinnacle');
+  // Respect user's Pinnacle selection. If Pinnacle is deselected, tier-2 fetch won't include it
+  // and the EV vs Pinnacle section for tier-2 will be empty.
+  const BOOKMAKERS = getSelectedBookmarks();
+  const pinnEnabled = selectedBooks.has('pinnacle');
+  const allArbs = [], allEvs = [];
+  let count = 0;
+
+  for (const event of filteredEvents) {
+    const loadEl = $('t2-loading');
+    if (loadEl) loadEl.textContent = `Fetching game periods: ${event.home_team} vs ${event.away_team} (${count+1}/${filteredEvents.length})…`;
+    const evData = await fetchT2ForEvent(key, event.id, event.sport_key, BOOKMAKERS);
+    if (evData) {
+      const { arbs, evs } = calcT2Opps(evData, unit, TARGET_BKS, pinnEnabled);
+      allArbs.push(...arbs);
+      allEvs.push(...evs);
+    }
+    count++;
+    await new Promise(r => setTimeout(r, 200));
+  }
+
+  // Render results using same card templates
+  const arbStore2 = {};
+  const evStore2  = {};
+
+  if (!allArbs.length && !allEvs.length) {
+    t2Out.innerHTML = '<div class="ev-card"><div class="empty">No Tier 2 prop arbs or EV bets found for these games.</div></div>';
+    return;
+  }
+
+  let html = '';
+  if (allArbs.length) {
+    html += `<div class="sec-hd" style="margin-top:.5rem;">Tier 2 prop arbs (${allArbs.length})</div>`;
+    html += allArbs.map((a, i) => {
+      const arbId = 't2arb_' + i;
+      arbStore[arbId] = a;
+      const total = ((a.leg1.stake||0)+(a.leg2.stake||0)).toFixed(2);
+      const ci = ((1/a.leg1.dec+1/a.leg2.dec)*100).toFixed(1);
+      const ret = ((a.profit/a.unit)*100).toFixed(2);
+      return `<div class="arb-card">
+        <div class="arb-hd">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap;">
+            <div>
+              <div class="arb-event">${a.event}</div>
+              ${(()=>{ const t=fmtEventTime(a.commenceTime); return t?`<span class="tag tag-${t.status}" style="flex-shrink:0;display:inline-block;margin-top:4px;">${t.status==='live'?'LIVE · ':''}${t.label}</span>`:''; })()}
+            </div>
+            <div class="arb-menu-wrap" onclick="event.stopPropagation()">
+              <button class="arb-menu-btn" onclick="toggleArbMenu('${arbId}',event)" title="Options"><span></span><span></span><span></span></button>
+              <div class="arb-menu-dropdown" id="menu-${arbId}">
+                <div class="arb-menu-item clr-green" onclick="logArbById('${arbId}','personal')"><span class="arb-menu-icon">↗</span>Log to personal tracker</div>
+              <div class="arb-menu-item clr-green" onclick="logArbById('${arbId}','public')"><span class="arb-menu-icon">↗</span>Log to public tracker</div>
+                <div class="arb-menu-item clr-blue" onclick="downloadArbCard('${arbId}')"><span class="arb-menu-icon">⬇</span>Download card</div>
+                <div class="arb-menu-item clr-x" onclick="shareToX('${arbId}')"><span class="arb-menu-icon">𝕏</span>Share to X</div>
+              </div>
+            </div>
+          </div>
+          <div class="arb-meta">
+            <span class="tag tag-sport">${a.sport}</span>
+            <span class="tag tag-mkt">${a.mkt}</span>
+            <span class="tag tag-arb">Arb ${a.pct.toFixed(2)}%</span>
+            <span class="tag tag-profit">+$${a.profit.toFixed(2)} guaranteed</span>
+          </div>
+        </div>
+        ${renderLeg(a.leg1)}${renderLeg(a.leg2)}
+        <div class="arb-footer">
+          <div class="foot-item"><span class="foot-lbl">Total staked</span><span class="foot-val">$${total}</span></div>
+          <div class="foot-item"><span class="foot-lbl">Combined implied</span><span class="foot-val">${ci}%</span></div>
+          <div class="foot-item"><span class="foot-lbl">Guaranteed profit</span><span class="foot-val" style="color:var(--green)">$${a.profit.toFixed(2)}</span></div>
+          <div class="foot-item"><span class="foot-lbl">Return on unit</span><span class="foot-val">${ret}%</span></div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  if (allEvs.length) {
+    html += `<div class="sec-hd" style="margin-top:.8rem;">Tier 2 prop +EV vs Pinnacle (${allEvs.length})</div>`;
+    html += allEvs.map((e, i) => {
+      const evId = 't2ev_' + i;
+      evStore[evId] = e;
+      const win = (e.unit * (( e.odds > 0 ? e.odds/100+1 : 100/Math.abs(e.odds)+1) - 1)).toFixed(2);
+      return `<div class="ev-card"><div class="ev-row">
+        <div class="ev-row-top">
+          <div>
+            <div class="ev-event">${e.event}</div>
+            ${(()=>{ const t=fmtEventTime(e.commenceTime); return t?`<span style="font-size:10px;color:var(--text3);">${t.status==='live'?'🔴 LIVE · ':''}${t.label}</span>`:''; })()}
+          </div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap;flex-shrink:0;">${bookBtn(e.bk)}</div>
+        </div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;">
+          <span class="tag tag-sport">${e.sport}</span>
+          <span class="tag tag-mkt">${e.mkt}</span>
+          <span class="tag" style="background:var(--blue-bg);color:var(--blue);">+${e.ev.toFixed(1)}% EV</span>
+        </div>
+        <div class="leg-grid">
+          <div class="leg-lbl-row"><span class="lbl">Bet</span><span class="val">${e.bet}</span></div>
+          <div class="leg-lbl-row"><span class="lbl">Odds</span><span class="val">${e.odds >= 0 ? '+' : ''}${e.odds}</span></div>
+          <div class="leg-lbl-row"><span class="lbl">Stake $${e.unit}</span><span class="val blue">+$${win}</span></div>
+        </div>
+      </div></div>`;
+    }).join('');
+  }
+
+  t2Out.innerHTML = html;
+}
+
+
+
+
+
+
+
+
+
+
+
+// Auto-check NBA on load and update label
+(function() {
+  var nba = document.querySelector('#sport-picker-dropdown input[value="basketball_nba"]');
+  if (nba && !document.querySelector('#sport-picker-dropdown input:checked')) {
+    nba.checked = true;
+    updateSportChips(); // Update the display after auto-selection
+  }
+  })();
+
+
+
+
+
+
+
+// ── EV card actions ────────────────────────────────────────────────────────
+function downloadEVCard(evId) {
+  var e = evStore[evId];
+  if (!e) { alert('Could not find EV data.'); return; }
+  var m = document.getElementById('menu-' + evId);
+  if (m) m.classList.remove('open');
+  openMenuId = null;
+
+  var canvas = document.createElement('canvas');
+  var sc=2, W=600, H=280;
+  canvas.width=W*sc; canvas.height=H*sc;
+  var ctx = canvas.getContext('2d'); ctx.scale(sc, sc);
+  var dark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  var bg   = dark ? '#111814' : '#ffffff';
+  var bg2  = dark ? '#182319' : '#f6f6f4';
+  var tp   = dark ? '#e8f5e9' : '#1a1a18';
+  var tm   = dark ? '#5A7A60' : '#888780';
+  var gr   = '#2d9e5f';
+  var bl   = '#185FA5';
+  var bord = dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
+
+  function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();}
+  function rrTop(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h);ctx.lineTo(x,y+h);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();}
+  function rrBot(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+w,y);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y);ctx.closePath();}
+
+  // Background
+  ctx.fillStyle=bg; rr(0,0,W,H,14); ctx.fill();
+  // Header band
+  ctx.fillStyle=bg2; rrTop(0,0,W,56,14); ctx.fill();
+  // Event name
+  ctx.fillStyle=tp; ctx.font='bold 16px -apple-system,sans-serif';
+  var ev=e.event||'';
+  if(ctx.measureText(ev).width>W-40) ev=ev.slice(0,Math.floor(ev.length*(W-40)/ctx.measureText(ev).width)-3)+'...';
+  ctx.fillText(ev,20,24);
+  // Time
+  var ct=e.commenceTime?new Date(e.commenceTime):null;
+  var ts=ct?ct.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})+' · '+ct.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true}):'';
+  if(ts){ctx.font='bold 11px -apple-system,sans-serif';ctx.fillStyle=dark?'#B5D4F4':'#0C447C';ctx.fillText(ts,20,42);}
+  // Tags
+  var tagX=20,tagY=64;
+  [[e.sport||'','#E6F1FB','#0C447C'],[e.mkt||'','#E6F1FB','#185FA5'],['+'+((e.ev||0).toFixed(1))+'% EV','#EAF3DE','#2d6a0f']].forEach(function(t){
+    if(!t[0])return;
+    ctx.font='bold 10px -apple-system,sans-serif';
+    var w=ctx.measureText(t[0]).width;
+    ctx.fillStyle=t[1]; rr(tagX,tagY,w+12,18,9); ctx.fill();
+    ctx.fillStyle=t[2]; ctx.fillText(t[0],tagX+6,tagY+13);
+    tagX+=w+18;
+  });
+  // Divider
+  ctx.strokeStyle=bord; ctx.lineWidth=0.5;
+  ctx.beginPath(); ctx.moveTo(0,90); ctx.lineTo(W,90); ctx.stroke();
+  // Stats row
+  var unit=e.unit||50;
+  var dec2=e.odds>0?e.odds/100+1:100/Math.abs(e.odds)+1;
+  var win2=((dec2-1)*unit).toFixed(2);
+  [['BET',e.bet||'',tp],['BOOK',(BOOK_NAMES&&BOOK_NAMES[e.bk])||e.bk||'',tp],['BOOK ODDS',(e.odds>=0?'+':'')+e.odds,gr],['PINNACLE',(e.pinnOdds>=0?'+':'')+e.pinnOdds,tm],['EV EDGE','+'+((e.ev||0).toFixed(1))+'%',gr],['WIN $'+unit,'$'+win2,bl]].forEach(function(f,i){
+    var fx=20+i*95;
+    ctx.fillStyle=tm; ctx.font='8px -apple-system,sans-serif'; ctx.fillText(f[0],fx,110);
+    ctx.fillStyle=f[2]; ctx.font='bold 13px -apple-system,sans-serif'; ctx.fillText(f[1],fx,128);
+  });
+  // Footer
+  var fy=H-44;
+  ctx.fillStyle=bg2; rrBot(0,fy,W,44,14); ctx.fill();
+  ctx.strokeStyle=bord; ctx.lineWidth=0.5; ctx.beginPath(); ctx.moveTo(0,fy); ctx.lineTo(W,fy); ctx.stroke();
+  ctx.fillStyle=tm; ctx.font='10px -apple-system,sans-serif';
+  var wm='@BothSidesWinn · +EV betting. Every edge counts.';
+  var wmW=ctx.measureText(wm).width;
+  ctx.fillText(wm,(W-wmW)/2,fy+27);
+
+  var link=document.createElement('a');
+  link.download='ev_'+Date.now()+'.png';
+  link.href=canvas.toDataURL('image/png');
+  link.click();
+}
+
+function shareEVToX(evId) {
+  var e = evStore[evId];
+  if (!e) { alert('Could not find EV data.'); return; }
+  var m = document.getElementById('menu-' + evId);
+  if (m) m.classList.remove('open');
+  openMenuId = null;
+  downloadEVCard(evId);
+  var ct=e.commenceTime?new Date(e.commenceTime):null;
+  var ts=ct?ct.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'})+' · '+ct.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true}):'';
+  var unit=e.unit||50;
+  var dec2=e.odds>0?e.odds/100+1:100/Math.abs(e.odds)+1;
+  var win2=((dec2-1)*unit).toFixed(2);
+  var bkName=(typeof BOOK_NAMES!=='undefined'&&BOOK_NAMES[e.bk])||e.bk||'';
+  var lines=[
+    '📊 +EV BET ALERT — '+(e.sport||''),
+    '',
+    e.event||'',
+    ts?'🕐 '+ts:'',
+    '',
+    '✅ Bet: '+(e.bet||''),
+    '📖 Book: '+bkName+' '+(e.odds>=0?'+':'')+e.odds,
+    '📌 Pinnacle (fair): '+(e.pinnOdds>=0?'+':'')+e.pinnOdds,
+    '📈 EV Edge: +'+(e.ev||0).toFixed(1)+'%',
+    '💰 Win on $'+unit+': $'+win2,
+    '',
+    'Edge is edge. Bet accordingly.',
+    '',
+    '#SportsBetting #EVBetting #BothSidesWinn'
+  ].filter(function(l){return l!==null;}).join('\n');
+  setTimeout(function(){ window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(lines),'_blank'); }, 800);
+}
+// ──────────────────────────────────────────────────────────────────────────
+// ═══ INTERACTION LAYER ═══════════════════════════════════════════════════
+const arbStore = {};
+const evStore  = {};
+let selectedBooks   = new Set(['fanduel','draftkings','betmgm','williamhill_us','bovada','betonlineag','hardrockbet','pinnacle']);
+let pfSelectedBooks = new Set(['fanduel','draftkings','betmgm','williamhill_us','bovada','betonlineag','hardrockbet','pinnacle']);
+let propsEnabled    = false;
+let t2Enabled       = false;
+var openMenuId      = null;
+
+function toggleBook(key) {
+  var chip = document.getElementById('bchip-' + key);
+  if (selectedBooks.has(key)) {
+    if (selectedBooks.size <= 1) return;
+    selectedBooks.delete(key);
+    if (chip) chip.classList.remove('active');
+  } else {
+    selectedBooks.add(key);
+    if (chip) chip.classList.add('active');
+  }
+}
+function selectAllBooks() {
+  document.querySelectorAll('[id^="bchip-"]').forEach(function(ch) {
+    var k = ch.dataset.key; if (!k) return;
+    selectedBooks.add(k); ch.classList.add('active');
+  });
+}
+function deselectAllBooks() {
+  document.querySelectorAll('[id^="bchip-"]').forEach(function(ch) {
+    var k = ch.dataset.key; if (!k) return;
+    selectedBooks.delete(k); ch.classList.remove('active');
+  });
+}
+function getSelectedBookmarks() {
+  return Array.from(selectedBooks).join(',');
+}
+function pfToggleBook(key) {
+  var chip = document.getElementById('pf-bchip-' + key);
+  if (pfSelectedBooks.has(key)) {
+    if (pfSelectedBooks.size <= 1) return;
+    pfSelectedBooks.delete(key);
+    if (chip) chip.classList.remove('active');
+  } else {
+    pfSelectedBooks.add(key);
+    if (chip) chip.classList.add('active');
+  }
+  renderAll();
+}
+function pfSelectAll() {
+  document.querySelectorAll('[id^="pf-bchip-"]').forEach(function(ch) {
+    var k = ch.dataset.key; if (!k) return;
+    pfSelectedBooks.add(k); ch.classList.add('active');
+  });
+  renderAll();
+}
+function pfDeselectAll() {
+  document.querySelectorAll('[id^="pf-bchip-"]').forEach(function(ch) {
+    var k = ch.dataset.key; if (!k) return;
+    pfSelectedBooks.delete(k); ch.classList.remove('active');
+  });
+  renderAll();
+}
+function toggleProps(e) {
+  if (e) e.stopPropagation();
+  propsEnabled = !propsEnabled;
+  var tr=document.getElementById('props-track'),th=document.getElementById('props-thumb'),nt=document.getElementById('props-cost-note');
+  if (tr) tr.style.background = propsEnabled ? 'var(--green)' : 'var(--border2)';
+  if (th) th.style.left = propsEnabled ? '18px' : '2px';
+  if (nt) nt.style.display = propsEnabled ? 'inline' : 'none';
+}
+function toggleT2(e) {
+  if (e) e.stopPropagation();
+  t2Enabled = !t2Enabled;
+  var tr=document.getElementById('t2-track'),th=document.getElementById('t2-thumb'),nt=document.getElementById('t2-cost-note');
+  if (tr) tr.style.background = t2Enabled ? 'var(--blue)' : 'var(--border2)';
+  if (th) th.style.left = t2Enabled ? '18px' : '2px';
+  if (nt) nt.style.display = t2Enabled ? 'inline' : 'none';
+}
+
+// Init
+updateSportChips();
+// ═════════════════════════════════════════════════════════════════════════
+</script>
+</body>
+</html>
