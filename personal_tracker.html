@@ -3027,8 +3027,6 @@ function renderOthBookCards(pool) {
       </div>
     </div>`;
   }).join('');
-    </div>`;
-  }).join('');
 }
 
 function renderOthWlChart(pool) {
@@ -3967,25 +3965,6 @@ function renderBalances() {
 }
 // ── END BOOK BALANCE TAB ──────────────────────────────────────────────────────
 
-</script
-  // Book
-  const bSel = document.getElementById('oth-f-book-select');
-  if (bSel && b.book) {
-    const bOpt = [...bSel.options].find(o => o.value === b.book);
-    if (bOpt) { bSel.value = b.book; const bi=document.getElementById('oth-f-book'); if(bi){bi.style.display='none';bi.value=b.book;} }
-    else { bSel.value = '__other__'; const bi=document.getElementById('oth-f-book'); if(bi){bi.style.display='';bi.value=b.book;} }
-  }
-  // Bet type
-  const btSel = document.getElementById('oth-f-bettype');
-  if (btSel && b.bettype) {
-    const btOpt = [...btSel.options].find(o => o.value === b.bettype);
-    if (btOpt) { btSel.value = b.bettype; }
-    else { btSel.value = 'Other'; const btc=document.getElementById('oth-f-bettype-custom'); if(btc){btc.style.display='';btc.value=b.bettype;} }
-  }
-  calcOthFields();
-  const ft = document.getElementById('oth-form-title'); if(ft) ft.textContent='Edit bet';
-  document.getElementById('oth-form-msg').innerHTML = '<span style="color:var(--blue)">Editing — click Save bet to update.</span>';
-  document.getElementById('oth-f-game').scrollIntoView({behavior:'smooth', block:'center'});
-}
-
->
+</script>
+</body>
+</html>
