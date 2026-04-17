@@ -1514,6 +1514,56 @@ function getLeagueValue() {
   }
   return sel.value;
 }
+
+// ── Other bets form functions ─────────────────────────────────────────────────
+function updateOthLeagueDropdown() {
+  const sport = document.getElementById('oth-f-sport').value;
+  const sel   = document.getElementById('oth-f-league-select');
+  if (!sel) return;
+  const leagues = SPORT_LEAGUES[sport] || ['Other'];
+  sel.innerHTML = '<option value="">Select league...</option>';
+  leagues.forEach(l => {
+    const o = document.createElement('option');
+    o.value = l; o.textContent = l;
+    sel.appendChild(o);
+  });
+  const otherOpt = document.createElement('option');
+  otherOpt.value = '__other__'; otherOpt.textContent = 'Other (type below)';
+  sel.appendChild(otherOpt);
+  // Hide custom input
+  const custom = document.getElementById('oth-f-league');
+  if (custom) custom.style.display = 'none';
+}
+
+function calcOthFields() {
+  const odds = document.getElementById('oth-f-odds').value;
+  const stake = parseFloat(document.getElementById('oth-f-stake').value);
+  const unitSize = parseFloat(document.getElementById('oth-f-unitsize').value);
+  
+  // Calculate profit from odds and stake
+  const decimal = toDecimal(odds);
+  if (decimal && !isNaN(stake) && stake > 0) {
+    const profit = (decimal - 1) * stake;
+    document.getElementById('oth-f-profit').value = profit.toFixed(2);
+    document.getElementById('oth-f-payout').value = (stake + profit).toFixed(2);
+  }
+  
+  // Calculate units staked
+  if (!isNaN(stake) && !isNaN(unitSize) && unitSize > 0) {
+    const units = stake / unitSize;
+    document.getElementById('oth-f-units').value = units.toFixed(2);
+  }
+}
+
+function calcOthPayout() {
+  const profit = parseFloat(document.getElementById('oth-f-profit').value);
+  const stake = parseFloat(document.getElementById('oth-f-stake').value);
+  
+  if (!isNaN(profit) && !isNaN(stake)) {
+    document.getElementById('oth-f-payout').value = (stake + profit).toFixed(2);
+  }
+}
+
 // ──────────────────────────────────────────────────────────────────────────────
 
 // ── Auto-calculators ──────────────────────────────────────────────────────
