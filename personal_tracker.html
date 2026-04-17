@@ -2887,6 +2887,87 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
+// ── SIMPLE TAB SWITCHING (BULLETPROOF) ──
+function setView(mode) {
+  console.log('Switching to view:', mode);
+  
+  // Hide all sections first
+  const balSection = document.getElementById('balances-section');
+  const othSection = document.getElementById('other-section');
+  const mainEls = [
+    document.querySelector('.stats-strip'),
+    document.querySelector('.middle'), 
+    document.querySelector('.log-wrap')
+  ];
+  const weekNav = document.querySelector('.week-nav');
+  const subTabs = document.getElementById('overview-subtabs');
+  
+  // Reset all button styles
+  const btns = ['btn-balances', 'btn-other', 'btn-arb'];
+  btns.forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) {
+      btn.style.borderColor = '';
+      btn.style.color = '';
+    }
+  });
+  
+  if (mode === 'balances') {
+    // Show balances section only
+    if (balSection) balSection.style.display = 'block';
+    if (othSection) othSection.style.display = 'none';
+    mainEls.forEach(el => { if(el) el.style.display = 'none'; });
+    if (weekNav) weekNav.style.display = 'none';
+    if (subTabs) subTabs.style.display = 'none';
+    
+    // Highlight balances button
+    const btn = document.getElementById('btn-balances');
+    if (btn) {
+      btn.style.borderColor = 'var(--green)';
+      btn.style.color = 'var(--green)';
+    }
+    
+    // Render balances
+    if (typeof renderBalances === 'function') renderBalances();
+    
+  } else if (mode === 'other') {
+    // Show other section only
+    if (balSection) balSection.style.display = 'none';
+    if (othSection) othSection.style.display = 'block';
+    mainEls.forEach(el => { if(el) el.style.display = 'none'; });
+    if (weekNav) weekNav.style.display = 'none';
+    if (subTabs) subTabs.style.display = 'none';
+    
+    // Highlight other button  
+    const btn = document.getElementById('btn-other');
+    if (btn) {
+      btn.style.borderColor = 'var(--green)';
+      btn.style.color = 'var(--green)';
+    }
+    
+    // Render other section
+    if (typeof renderOther === 'function') renderOther();
+    
+  } else {
+    // Show main arb/ev section (default)
+    if (balSection) balSection.style.display = 'none';
+    if (othSection) othSection.style.display = 'none';
+    mainEls.forEach(el => { if(el) el.style.display = 'block'; });
+    if (weekNav) weekNav.style.display = 'block';
+    if (subTabs) subTabs.style.display = 'flex';
+    
+    // Highlight arb button
+    const btn = document.getElementById('btn-arb');
+    if (btn) {
+      btn.style.borderColor = 'var(--green)';
+      btn.style.color = 'var(--green)';
+    }
+    
+    // Render main section
+    if (typeof render === 'function') render();
+  }
+}
+
 function renderOthBookCards(pool) {
   const books = {};
   pool.forEach(b => {
