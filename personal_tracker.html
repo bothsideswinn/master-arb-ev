@@ -1634,11 +1634,13 @@ function cycleOthStatus(id) {
   if (!b) return;
   const cycle = {pending:'win', win:'loss', loss:'push', push:'pending'};
   b.result = cycle[b.result] || 'pending';
-  const dec = toDecimalOth(b.odds);
-  b.pnl = b.result==='win'  ? (dec ? +((dec-1)*b.stake).toFixed(2) : 0)
-        : b.result==='loss' ? -parseFloat(b.stake||0)
+  const o = parseFloat(b.odds||0);
+  const dec = isNaN(o)||o===0 ? null : o>0?(o/100)+1:(100/Math.abs(o))+1;
+  const stake = parseFloat(b.stake||0);
+  b.pnl = b.result==='win'  ? (dec ? +((dec-1)*stake).toFixed(2) : 0)
+        : b.result==='loss' ? -stake
         : b.result==='push' ? 0
-        : (dec ? +((dec-1)*b.stake).toFixed(2) : 0);
+        : (dec ? +((dec-1)*stake).toFixed(2) : 0);
   saveOther();
   renderOther();
   if (typeof renderBalances === 'function' && viewMode === 'balances') renderBalances();
