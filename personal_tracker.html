@@ -541,17 +541,23 @@ h1{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
     </div>
   </div>
 
-  <!-- Enhanced Heatmap Calendar -->
+  <!-- Enhanced Layout: Heatmap + Book Breakdown -->
   <div style="margin-bottom:1.5rem">
-    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:10px">Daily P&L Heatmap (Last 90 Days)</div>
-    <div class="panel" style="padding:20px;overflow-x:auto">
-      <div id="oth-heatmap" style="min-width:700px;height:180px"></div>
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:10px">Daily P&L Heatmap & Book Performance</div>
+    <div style="display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start">
+      
+      <!-- Left: Enhanced Heatmap -->
+      <div class="panel" style="padding:24px">
+        <div style="font-size:13px;font-weight:700;margin-bottom:16px;color:var(--text)">📅 Last 90 Days Performance</div>
+        <div id="oth-heatmap" style="min-width:100%;height:220px"></div>
+      </div>
+
+      <!-- Right: Vertical Book Breakdown -->
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div id="oth-book-cards" style="display:flex;flex-direction:column;gap:12px"></div>
+      </div>
     </div>
   </div>
-
-  <!-- Per-book breakdown -->
-  <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:10px">Per book breakdown</div>
-  <div id="oth-book-cards" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:1.5rem"></div>
 
   <!-- Wins/Losses chart -->
   <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:8px">Wins &amp; losses by book</div>
@@ -2487,26 +2493,26 @@ function renderOtherHeatmap(bets) {
   // Find max absolute P&L for color scaling
   const maxAbsPnl = Math.max(...Object.values(dailyPnl).map(Math.abs), 1);
   
-  // Generate heatmap HTML with bigger cells
-  let heatmapHTML = '<div style="display:flex;flex-wrap:wrap;gap:3px;align-items:flex-start">';
+  // Generate heatmap HTML with bigger cells for larger layout
+  let heatmapHTML = '<div style="display:flex;flex-wrap:wrap;gap:4px;align-items:flex-start">';
   
   // Day labels
-  heatmapHTML += '<div style="display:flex;flex-direction:column;gap:3px;margin-right:8px;font-size:10px;color:var(--text-muted)">';
+  heatmapHTML += '<div style="display:flex;flex-direction:column;gap:4px;margin-right:12px;font-size:12px;color:var(--text-muted);font-weight:600">';
   ['Mon', '', 'Wed', '', 'Fri', '', 'Sun'].forEach(day => {
-    heatmapHTML += `<div style="height:18px;display:flex;align-items:center;font-weight:600">${day}</div>`;
+    heatmapHTML += `<div style="height:24px;display:flex;align-items:center">${day}</div>`;
   });
   heatmapHTML += '</div>';
   
   // Generate weeks with bigger cells
   for (let weekStart = new Date(startDate); weekStart <= now; weekStart.setDate(weekStart.getDate() + 7)) {
-    heatmapHTML += '<div style="display:flex;flex-direction:column;gap:3px">';
+    heatmapHTML += '<div style="display:flex;flex-direction:column;gap:4px">';
     
     for (let dayOffset = 0; dayOffset < 7; dayOffset++) {
       const currentDay = new Date(weekStart);
       currentDay.setDate(weekStart.getDate() + dayOffset);
       
       if (currentDay > now) {
-        heatmapHTML += '<div style="width:18px;height:18px"></div>';
+        heatmapHTML += '<div style="width:24px;height:24px"></div>';
         continue;
       }
       
@@ -2527,8 +2533,8 @@ function renderOtherHeatmap(bets) {
         if (abs >= 1000) return (n >= 0 ? '+' : '-') + (abs/1000).toFixed(1) + 'k';
         if (abs >= 100) return (n >= 0 ? '+' : '-') + abs.toFixed(0);
         if (abs >= 10) return (n >= 0 ? '+' : '-') + abs.toFixed(0);
-        if (abs >= 1) return (n >= 0 ? '+' : '-') + abs.toFixed(1);
-        return abs === 0 ? '0' : (n >= 0 ? '+' : '-') + abs.toFixed(1);
+        if (abs >= 1) return (n >= 0 ? '+' : '-') + abs.toFixed(0);
+        return abs === 0 ? '' : (n >= 0 ? '+' : '-') + abs.toFixed(0);
       };
       
       const fmtUnits = (n) => {
@@ -2538,33 +2544,32 @@ function renderOtherHeatmap(bets) {
         return abs === 0 ? '' : (n >= 0 ? '+' : '-') + abs.toFixed(1) + 'u';
       };
       
-      // Show both money and units
+      // Show money amount primarily, units as secondary
       const displayText = pnl !== 0 ? fmtMoney(pnl) : '';
-      const unitsText = units !== 0 ? fmtUnits(units) : '';
+      const unitsText = units !== 0 && Math.abs(units) >= 1 ? fmtUnits(units) : '';
       
-      const tooltipText = `${dateStr}\nP&L: ${fmtMoney(pnl)}\nUnits: ${fmtUnits(units)}`;
+      const tooltipText = `${dateStr}\nP&L: $${pnl.toFixed(2)}\nUnits: ${units.toFixed(1)}u\nBets: ${betsByDate[dateStr] ? betsByDate[dateStr].length : 0}`;
       
       heatmapHTML += `
         <div style="
-          width:18px;
-          height:18px;
+          width:24px;
+          height:24px;
           background:${color};
-          border-radius:3px;
+          border-radius:4px;
           cursor:pointer;
           display:flex;
+          flex-direction:column;
           align-items:center;
           justify-content:center;
-          font-size:6px;
+          font-size:7px;
           font-weight:700;
-          color:${Math.abs(pnl) > maxAbsPnl * 0.5 ? '#fff' : 'var(--text)'};
-          text-shadow:${Math.abs(pnl) > maxAbsPnl * 0.5 ? '0 0 2px rgba(0,0,0,0.5)' : 'none'};
+          color:${Math.abs(pnl) > maxAbsPnl * 0.4 ? '#fff' : 'var(--text)'};
+          text-shadow:${Math.abs(pnl) > maxAbsPnl * 0.4 ? '0 0 2px rgba(0,0,0,0.7)' : 'none'};
           line-height:1;
-          position:relative;
+          border:1px solid rgba(255,255,255,0.1);
         " title="${tooltipText}">
-          <div style="text-align:center;white-space:nowrap;overflow:hidden">
-            ${displayText ? `<div>${displayText}</div>` : ''}
-            ${unitsText && displayText !== unitsText ? `<div style="font-size:5px">${unitsText}</div>` : ''}
-          </div>
+          ${displayText ? `<div style="font-size:7px">${displayText}</div>` : ''}
+          ${unitsText && displayText ? `<div style="font-size:6px;opacity:0.8">${unitsText}</div>` : unitsText ? `<div style="font-size:7px">${unitsText}</div>` : ''}
         </div>`;
     }
     heatmapHTML += '</div>';
@@ -2572,17 +2577,29 @@ function renderOtherHeatmap(bets) {
   
   heatmapHTML += '</div>';
   
-  // Enhanced legend
-  heatmapHTML += '<div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;font-size:10px;color:var(--text-muted)">';
-  heatmapHTML += '<div style="display:flex;align-items:center;gap:8px">';
-  heatmapHTML += '<span>Less</span>';
-  heatmapHTML += '<div style="width:12px;height:12px;background:#f1f5f9;border-radius:2px"></div>';
-  heatmapHTML += '<div style="width:12px;height:12px;background:rgba(34, 197, 94, 0.5);border-radius:2px"></div>';
-  heatmapHTML += '<div style="width:12px;height:12px;background:rgba(34, 197, 94, 1);border-radius:2px"></div>';
-  heatmapHTML += '<div style="width:12px;height:12px;background:rgba(239, 68, 68, 1);border-radius:2px"></div>';
-  heatmapHTML += '<span>More</span>';
+  // Enhanced legend with stats
+  const totalDays = Object.keys(dailyPnl).length;
+  const profitableDays = Object.values(dailyPnl).filter(p => p > 0).length;
+  const bestDay = Math.max(...Object.values(dailyPnl), 0);
+  const worstDay = Math.min(...Object.values(dailyPnl), 0);
+  
+  heatmapHTML += '<div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">';
+  heatmapHTML += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">';
+  heatmapHTML += '<div style="display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-muted)">';
+  heatmapHTML += '<span style="color:var(--text-muted)">Less</span>';
+  heatmapHTML += '<div style="width:14px;height:14px;background:#f1f5f9;border-radius:3px;border:1px solid var(--border)"></div>';
+  heatmapHTML += '<div style="width:14px;height:14px;background:rgba(34, 197, 94, 0.5);border-radius:3px"></div>';
+  heatmapHTML += '<div style="width:14px;height:14px;background:rgba(34, 197, 94, 1);border-radius:3px"></div>';
+  heatmapHTML += '<div style="width:14px;height:14px;background:rgba(239, 68, 68, 1);border-radius:3px"></div>';
+  heatmapHTML += '<span style="color:var(--text-muted)">More</span>';
   heatmapHTML += '</div>';
-  heatmapHTML += `<div>💰 Hover cells for details • Best: ${fmtMoney(Math.max(...Object.values(dailyPnl), 0))} • Worst: ${fmtMoney(Math.min(...Object.values(dailyPnl), 0))}</div>`;
+  heatmapHTML += `<div style="font-size:11px;color:var(--text-muted)">${profitableDays}/${totalDays} profitable days (${((profitableDays/totalDays)*100).toFixed(1)}%)</div>`;
+  heatmapHTML += '</div>';
+  heatmapHTML += `<div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted)">`;
+  heatmapHTML += `<span>💚 Best: <strong style="color:var(--green)">+$${bestDay.toFixed(0)}</strong></span>`;
+  heatmapHTML += `<span>🔥 Hover for details</span>`;
+  heatmapHTML += `<span>💔 Worst: <strong style="color:var(--red)">-$${Math.abs(worstDay).toFixed(0)}</strong></span>`;
+  heatmapHTML += '</div>';
   heatmapHTML += '</div>';
   
   el.innerHTML = heatmapHTML;
@@ -2884,23 +2901,49 @@ function renderOthBookCards(pool) {
   });
   const el = document.getElementById('oth-book-cards');
   if (!el) return;
-  if (!Object.keys(books).length) { el.innerHTML='<div style="color:var(--text-muted);font-size:13px">No data yet — log some bets above</div>'; return; }
+  
+  if (!Object.keys(books).length) { 
+    el.innerHTML='<div class="panel" style="padding:20px;text-align:center;color:var(--text-muted);font-size:13px">No bet data yet<br>Log some bets to see stats</div>'; 
+    return; 
+  }
+  
+  // Create vertical compact cards for the right side
   el.innerHTML = Object.entries(books).sort((a,b)=>b[1].pnl-a[1].pnl).map(([book,d]) => {
     const wr  = (d.wins+d.losses) ? Math.round(d.wins/(d.wins+d.losses)*100) : 0;
     const roi = d.staked ? (d.pnl/d.staked*100).toFixed(1) : '0.0';
-    return `<div class="panel">
+    const pnlColor = d.pnl >= 0 ? 'var(--green)' : 'var(--red)';
+    const roiColor = parseFloat(roi) >= 0 ? 'var(--green)' : 'var(--red)';
+    
+    return `<div class="panel" style="padding:16px;width:300px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <span style="font-size:13px;font-weight:600">${book}</span>
-        <span style="font-size:13px;font-weight:600;color:${d.pnl>=0?'var(--green)':'var(--red)'}">${fmtMoney(d.pnl, true)}</span>
+        <span style="font-size:15px;font-weight:700;color:var(--text)">${book}</span>
+        <span style="font-size:18px;font-weight:800;color:${pnlColor}">${d.pnl>=0?'+':''}$${Math.abs(d.pnl).toFixed(0)}</span>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px">
-        <div><div style="font-size:10px;color:var(--text-muted)">Bets</div><div style="font-size:14px;font-weight:500">${d.bets}</div></div>
-        <div><div style="font-size:10px;color:var(--text-muted)">Win rate</div><div style="font-size:14px;font-weight:500">${wr}%</div></div>
-        <div><div style="font-size:10px;color:var(--text-muted)">Net P&L</div><div style="font-size:14px;font-weight:500;color:${d.pnl>=0?'var(--green)':'var(--red)'}">${fmtMoney(d.pnl, true)}</div></div>
-        <div><div style="font-size:10px;color:var(--text-muted)">ROI</div><div style="font-size:14px;font-weight:500">${roi}%</div></div>
-        <div><div style="font-size:10px;color:var(--text-muted)">Best win</div><div style="font-size:14px;font-weight:500;color:var(--green)">${fmtMoney(d.bigWin, true)}</div></div>
-        <div><div style="font-size:10px;color:var(--text-muted)">Total staked</div><div style="font-size:14px;font-weight:500">${fmtMoney(d.staked)}</div></div>
+      
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;font-size:12px">
+        <div>
+          <div style="color:var(--text-muted);font-weight:600;text-transform:uppercase;font-size:10px;letter-spacing:0.05em">Bets</div>
+          <div style="font-weight:700;color:var(--text);font-size:16px">${d.bets}</div>
+        </div>
+        <div>
+          <div style="color:var(--text-muted);font-weight:600;text-transform:uppercase;font-size:10px;letter-spacing:0.05em">Win Rate</div>
+          <div style="font-weight:700;color:var(--text);font-size:16px">${wr}%</div>
+        </div>
+        <div>
+          <div style="color:var(--text-muted);font-weight:600;text-transform:uppercase;font-size:10px;letter-spacing:0.05em">ROI</div>
+          <div style="font-weight:700;color:${roiColor};font-size:16px">${roi}%</div>
+        </div>
+        <div>
+          <div style="color:var(--text-muted);font-weight:600;text-transform:uppercase;font-size:10px;letter-spacing:0.05em">Best Win</div>
+          <div style="font-weight:700;color:var(--green);font-size:16px">+$${d.bigWin.toFixed(0)}</div>
+        </div>
       </div>
+      
+      <div style="background:var(--bg);border-radius:6px;padding:8px 10px;font-size:11px;color:var(--text-muted);text-align:center">
+        ${d.wins}W • ${d.losses}L • $${d.staked.toFixed(0)} staked
+      </div>
+    </div>`;
+  }).join('');
     </div>`;
   }).join('');
 }
@@ -3642,15 +3685,47 @@ function getBookStats(book) {
     const withNew = (typeof withdrawals !== 'undefined' ? withdrawals : []).filter(w => w.book === book && (w.date||'') > cutoff).reduce((s,w) => s + w.amount, 0);
     balance = mb.amount + postOthPnl + postArbEvPnl + depNew - withNew;
     
-    // Debug logging for balance calculations (can be removed later)
+    // ENHANCED debug logging for balance calculations (especially Bovada)
     if (typeof console !== 'undefined' && console.log) {
-      console.log(`📊 Balance calculation for ${book}:`);
-      console.log(`  💰 Baseline: $${mb.amount.toFixed(2)} (${mb.date})`);
+      console.log(`\n📊 DETAILED Balance calculation for ${book}:`);
+      console.log(`  💰 Manual Baseline: $${mb.amount.toFixed(2)} (set on ${mb.date})`);
       console.log(`  📈 Other bets P&L: $${postOthPnl.toFixed(2)}`);
+      
+      // Debug other bets in detail - SPECIAL FOCUS ON BOVADA
+      const relevantOthBets = othAfter;
+      console.log(`  📋 Other bets affecting balance (${relevantOthBets.length} total):`);
+      relevantOthBets.forEach(bet => {
+        const stake = parseFloat(bet.stake||0);
+        const isPending = bet.result === 'pending';
+        const isAfterBaseline = (bet.date||'') > cutoff;
+        let impact = 0;
+        
+        if (isPending) {
+          if (isAfterBaseline) {
+            impact = -stake;
+          } else {
+            impact = 0; // Pending bet from before baseline - already in baseline
+          }
+        } else if (bet.result === 'win') {
+          impact = (bet.pnl||0);
+        } else if (bet.result === 'push') {
+          impact = stake;
+        } else {
+          impact = 0; // loss
+        }
+        
+        if (book.toLowerCase().includes('bovada') || bet.book?.toLowerCase().includes('bovada')) {
+          console.log(`    🐂 BOVADA: ${bet.date} ${bet.result} $${stake} → impact: $${impact.toFixed(2)} (${isAfterBaseline ? 'AFTER baseline' : 'BEFORE baseline'}) ${isPending ? '[PENDING]' : '[SETTLED]'}`);
+        } else {
+          console.log(`    • ${bet.date} ${bet.result} $${stake} → impact: $${impact.toFixed(2)} (${isAfterBaseline ? 'AFTER baseline' : 'BEFORE baseline'})`);
+        }
+      });
+      
       console.log(`  🎯 Arb/EV bets P&L: $${postArbEvPnl.toFixed(2)}`);
       console.log(`  ➕ New deposits: $${depNew.toFixed(2)}`);
       console.log(`  ➖ New withdrawals: $${withNew.toFixed(2)}`);
-      console.log(`  🏆 Final balance: $${balance.toFixed(2)}`);
+      console.log(`  🏆 FINAL BALANCE: $${balance.toFixed(2)}`);
+      console.log(`  ` + '='.repeat(50));
     }
   } else {
     balance = totalDep - totalWithdraw + totalPnl;
