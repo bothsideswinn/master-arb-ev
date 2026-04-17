@@ -158,6 +158,61 @@ h1{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
   .log-header{display:none}
   .log-row{grid-template-columns:1fr 1fr;gap:6px}
 }
+  /* Enhanced stat cards */
+  .stat-card.enhanced {
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .stat-card.enhanced:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  
+  .stat-card.enhanced.positive {
+    border-left: 3px solid var(--green);
+  }
+  
+  .stat-card.enhanced.negative {
+    border-left: 3px solid var(--red);
+  }
+  
+  .stat-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: rgba(0,0,0,0.1);
+    overflow: hidden;
+  }
+  
+  .progress-bar {
+    height: 100%;
+    transition: width 0.8s ease;
+  }
+  
+  .progress-bar.green {
+    background: linear-gradient(90deg, var(--green), #10b981);
+  }
+  
+  .progress-bar.red {
+    background: linear-gradient(90deg, var(--red), #ef4444);
+  }
+  
+  /* Panel enhancements */
+  .panel {
+    background: var(--bg-card);
+    border: 0.5px solid var(--border);
+    border-radius: var(--r);
+    transition: box-shadow 0.2s ease;
+  }
+  
+  .panel:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js">
 
@@ -295,16 +350,40 @@ h1{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
     <span id="oth-count" style="font-size:11px;color:var(--text-muted);margin-left:auto"></span>
   </div>
 
-  <!-- Metrics grid -->
-  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-bottom:1.25rem">
-    <div class="stat-card"><div class="stat-lbl">Total bets</div><div class="stat-val" id="oth-total-bets">—</div></div>
-    <div class="stat-card"><div class="stat-lbl">Net P&amp;L</div><div class="stat-val" id="oth-pnl">—</div></div>
-    <div class="stat-card"><div class="stat-lbl">Win rate</div><div class="stat-val" id="oth-winrate">—</div></div>
-    <div class="stat-card"><div class="stat-lbl">ROI</div><div class="stat-val" id="oth-roi">—</div></div>
-    <div class="stat-card"><div class="stat-lbl">Total staked</div><div class="stat-val" id="oth-staked">—</div></div>
-    <div class="stat-card"><div class="stat-lbl">Biggest win</div><div class="stat-val green" id="oth-big-win">—</div></div>
-    <div class="stat-card"><div class="stat-lbl">Biggest loss</div><div class="stat-val red" id="oth-big-loss">—</div></div>
-    <div class="stat-card"><div class="stat-lbl">Pending</div><div class="stat-val blue" id="oth-pending">—</div></div>
+  <!-- Enhanced Metrics grid with trends -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:1.5rem" id="oth-metrics-grid">
+    <!-- Metrics will be populated by renderOtherMetrics() -->
+  </div>
+
+  <!-- Performance Trends Section -->
+  <div style="margin-bottom:1.5rem">
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:10px">Performance Trends</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+      <div class="panel" style="padding:16px">
+        <div style="font-size:13px;font-weight:700;margin-bottom:8px;color:var(--text-muted)">Last 7 Days vs Overall</div>
+        <div id="oth-7d-comparison">--</div>
+      </div>
+      <div class="panel" style="padding:16px">
+        <div style="font-size:13px;font-weight:700;margin-bottom:8px;color:var(--text-muted)">Last 30 Days vs Overall</div>
+        <div id="oth-30d-comparison">--</div>
+      </div>
+      <div class="panel" style="padding:16px">
+        <div style="font-size:13px;font-weight:700;margin-bottom:8px;color:var(--text-muted)">Current Streak</div>
+        <div id="oth-streak" style="font-size:24px;font-weight:800">--</div>
+      </div>
+      <div class="panel" style="padding:16px">
+        <div style="font-size:13px;font-weight:700;margin-bottom:8px;color:var(--text-muted)">Risk Metrics</div>
+        <div id="oth-risk-metrics">--</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Heatmap Calendar -->
+  <div style="margin-bottom:1.5rem">
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:10px">Daily P&L Heatmap (Last 90 Days)</div>
+    <div class="panel" style="padding:16px;overflow-x:auto">
+      <div id="oth-heatmap" style="min-width:600px;height:120px"></div>
+    </div>
   </div>
 
   <!-- Per-book breakdown -->
@@ -1869,36 +1948,333 @@ function clearOthDates() {
 }
 
 function renderOther() {
-  const pool    = getOthFiltered();
-  const wins    = pool.filter(b => b.result === 'win');
-  const losses  = pool.filter(b => b.result === 'loss');
+  const pool = getOthFiltered();
+  const wins = pool.filter(b => b.result === 'win');
+  const losses = pool.filter(b => b.result === 'loss');
   const pending = pool.filter(b => b.result === 'pending');
+  const pushes = pool.filter(b => b.result === 'push');
   const settled = pool.filter(b => b.result === 'win' || b.result === 'loss' || b.result === 'push');
 
-  const totalPnl    = settled.reduce((s,b) => s + (b.pnl||0), 0);
+  // Enhanced calculations
+  const totalPnl = settled.reduce((s,b) => s + (b.pnl||0), 0);
   const totalStaked = pool.reduce((s,b) => s + parseFloat(b.stake||0), 0);
-  const winrate     = settled.length ? (wins.length/settled.length*100).toFixed(1) : '—';
-  const roi         = totalStaked ? (totalPnl/totalStaked*100).toFixed(1) : '—';
-  const pnls        = settled.map(b => b.pnl||0);
-  const bigWin      = pnls.length ? Math.max(...pnls) : 0;
-  const bigLoss     = pnls.length ? Math.min(...pnls) : 0;
+  const winrate = settled.length ? (wins.length/settled.length*100) : 0;
+  const roi = totalStaked ? (totalPnl/totalStaked*100) : 0;
+  const pnls = settled.map(b => b.pnl||0);
+  const bigWin = pnls.length ? Math.max(...pnls) : 0;
+  const bigLoss = pnls.length ? Math.min(...pnls) : 0;
+  
+  // Units calculations
+  const totalUnits = pool.reduce((s,b) => s + (b.units||0), 0);
+  const unitsWon = wins.reduce((s,b) => s + (b.units||0), 0);
+  const unitsLost = losses.reduce((s,b) => s + (b.units||0), 0);
+  const netUnits = unitsWon - unitsLost;
+  
+  // Average bet size
+  const avgBetSize = pool.length ? totalStaked / pool.length : 0;
+  
+  // Current streak calculation
+  const sortedBets = settled.sort((a,b) => new Date(b.date) - new Date(a.date));
+  let currentStreak = { type: '', count: 0 };
+  if (sortedBets.length > 0) {
+    const lastResult = sortedBets[0].result;
+    currentStreak.type = lastResult;
+    for (const bet of sortedBets) {
+      if (bet.result === lastResult && bet.result !== 'push') {
+        currentStreak.count++;
+      } else if (bet.result !== 'push') {
+        break;
+      }
+    }
+  }
 
-  if (document.getElementById('oth-count'))      document.getElementById('oth-count').textContent = pool.length + ' bet' + (pool.length!==1?'s':'') + ' in range';
-  if (document.getElementById('oth-total-bets')) document.getElementById('oth-total-bets').textContent = pool.length;
-  const pnlEl = document.getElementById('oth-pnl');
-  if (pnlEl) { pnlEl.textContent = fmtMoney(totalPnl, true); pnlEl.className='stat-val '+(totalPnl>=0?'green':'red'); }
-  if (document.getElementById('oth-winrate'))  document.getElementById('oth-winrate').textContent  = winrate!=='—' ? winrate+'%' : '—';
-  if (document.getElementById('oth-roi'))      document.getElementById('oth-roi').textContent      = roi!=='—' ? roi+'%' : '—';
-  if (document.getElementById('oth-staked'))   document.getElementById('oth-staked').textContent   = fmtMoney(totalStaked);
-  if (document.getElementById('oth-big-win'))  document.getElementById('oth-big-win').textContent  = pnls.length ? fmtMoney(bigWin, true) : '—';
-  if (document.getElementById('oth-big-loss')) document.getElementById('oth-big-loss').textContent = pnls.length ? fmtMoney(bigLoss) : '—';
-  if (document.getElementById('oth-pending'))  document.getElementById('oth-pending').textContent  = pending.length;
+  // Time-based comparisons
+  const now = new Date();
+  const day7Ago = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const day30Ago = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+  
+  const last7Days = pool.filter(b => new Date(b.date) >= day7Ago);
+  const last30Days = pool.filter(b => new Date(b.date) >= day30Ago);
+  
+  const last7DaysPnl = last7Days.reduce((s,b) => s + (b.pnl||0), 0);
+  const last7DaysWins = last7Days.filter(b => b.result === 'win').length;
+  const last7DaysSettled = last7Days.filter(b => b.result !== 'pending').length;
+  const last7DaysWinRate = last7DaysSettled ? (last7DaysWins / last7DaysSettled * 100) : 0;
+  
+  const last30DaysPnl = last30Days.reduce((s,b) => s + (b.pnl||0), 0);
+  const last30DaysWins = last30Days.filter(b => b.result === 'win').length;
+  const last30DaysSettled = last30Days.filter(b => b.result !== 'pending').length;
+  const last30DaysWinRate = last30DaysSettled ? (last30DaysWins / last30DaysSettled * 100) : 0;
 
+  // Risk metrics
+  const maxBetSize = pool.length ? Math.max(...pool.map(b => parseFloat(b.stake||0))) : 0;
+  const variance = pnls.length > 1 ? pnls.reduce((acc, val) => acc + Math.pow(val - (totalPnl/pnls.length), 2), 0) / (pnls.length - 1) : 0;
+  const stdDev = Math.sqrt(variance);
+
+  // Update basic count
+  if (document.getElementById('oth-count')) {
+    document.getElementById('oth-count').textContent = pool.length + ' bet' + (pool.length!==1?'s':'') + ' in range';
+  }
+
+  // Render enhanced metrics
+  renderOtherMetrics({
+    totalBets: pool.length,
+    totalPnl, winrate, roi, totalStaked, bigWin, bigLoss, 
+    pending: pending.length,
+    netUnits, avgBetSize, currentStreak,
+    last7DaysPnl, last7DaysWinRate,
+    last30DaysPnl, last30DaysWinRate,
+    maxBetSize, stdDev
+  });
+
+  // Render enhanced sections
+  renderOtherComparisons({ last7DaysPnl, last7DaysWinRate, last30DaysPnl, last30DaysWinRate, totalPnl, winrate });
+  renderOtherStreak(currentStreak);
+  renderOtherRiskMetrics({ maxBetSize, stdDev, totalStaked, avgBetSize });
+  renderOtherHeatmap(pool);
   renderOthBookCards(pool);
+  
+  // Render charts
   try { renderOthWlChart(pool); } catch(e) { console.warn('WL chart:', e); }
   try { renderOthPnlChart(settled); } catch(e) { console.warn('PnL chart:', e); }
   try { renderOthSportChart(settled); } catch(e) { console.warn('Sport chart:', e); }
+  
   renderOthTable();
+}
+
+function renderOtherMetrics(metrics) {
+  const grid = document.getElementById('oth-metrics-grid');
+  if (!grid) return;
+  
+  const fmtMoney = (n, signed=false) => {
+    const abs = Math.abs(n);
+    const formatted = abs.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+    if (signed) return n >= 0 ? '+$' + formatted : '-$' + formatted;
+    return (n < 0 ? '-$' : '$') + formatted;
+  };
+  
+  const getTrendArrow = (current, previous) => {
+    if (previous === 0) return '';
+    const change = ((current - previous) / Math.abs(previous)) * 100;
+    if (Math.abs(change) < 5) return '→';
+    return change > 0 ? '↗️' : '↘️';
+  };
+
+  grid.innerHTML = `
+    <div class="stat-card enhanced">
+      <div class="stat-lbl">Total bets</div>
+      <div class="stat-val">${metrics.totalBets}</div>
+      <div class="stat-sub">${metrics.pending} pending</div>
+    </div>
+    
+    <div class="stat-card enhanced ${metrics.totalPnl >= 0 ? 'positive' : 'negative'}">
+      <div class="stat-lbl">Net P&L</div>
+      <div class="stat-val">${fmtMoney(metrics.totalPnl, true)}</div>
+      <div class="stat-progress">
+        <div class="progress-bar ${metrics.totalPnl >= 0 ? 'green' : 'red'}" style="width: ${Math.min(100, Math.abs(metrics.totalPnl) / 1000 * 100)}%"></div>
+      </div>
+    </div>
+    
+    <div class="stat-card enhanced">
+      <div class="stat-lbl">Win rate</div>
+      <div class="stat-val">${metrics.winrate.toFixed(1)}%</div>
+      <div class="stat-progress">
+        <div class="progress-bar green" style="width: ${metrics.winrate}%"></div>
+      </div>
+    </div>
+    
+    <div class="stat-card enhanced ${metrics.roi >= 0 ? 'positive' : 'negative'}">
+      <div class="stat-lbl">ROI</div>
+      <div class="stat-val">${metrics.roi.toFixed(1)}%</div>
+      <div class="stat-sub">${metrics.roi >= 0 ? 'Profitable' : 'Losing'}</div>
+    </div>
+    
+    <div class="stat-card enhanced">
+      <div class="stat-lbl">Total staked</div>
+      <div class="stat-val">${fmtMoney(metrics.totalStaked)}</div>
+      <div class="stat-sub">Avg: ${fmtMoney(metrics.avgBetSize)}</div>
+    </div>
+    
+    <div class="stat-card enhanced positive">
+      <div class="stat-lbl">Biggest win</div>
+      <div class="stat-val green">${fmtMoney(metrics.bigWin, true)}</div>
+    </div>
+    
+    <div class="stat-card enhanced negative">
+      <div class="stat-lbl">Biggest loss</div>
+      <div class="stat-val red">${fmtMoney(metrics.bigLoss)}</div>
+    </div>
+    
+    <div class="stat-card enhanced">
+      <div class="stat-lbl">Net units</div>
+      <div class="stat-val ${metrics.netUnits >= 0 ? 'green' : 'red'}">${metrics.netUnits.toFixed(2)}u</div>
+      <div class="stat-sub">${metrics.netUnits >= 0 ? 'Profit' : 'Loss'}</div>
+    </div>
+  `;
+}
+
+function renderOtherComparisons(data) {
+  const el7d = document.getElementById('oth-7d-comparison');
+  const el30d = document.getElementById('oth-30d-comparison');
+  if (!el7d || !el30d) return;
+  
+  const fmtMoney = (n, signed=true) => {
+    const abs = Math.abs(n);
+    const formatted = abs.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+    if (signed) return n >= 0 ? '+$' + formatted : '-$' + formatted;
+    return '$' + formatted;
+  };
+  
+  const pnlTrend7d = data.last7DaysPnl >= 0 ? '↗️' : '↘️';
+  const winRateTrend7d = data.last7DaysWinRate > data.winrate ? '↗️' : data.last7DaysWinRate < data.winrate ? '↘️' : '→';
+  
+  const pnlTrend30d = data.last30DaysPnl >= 0 ? '↗️' : '↘️';
+  const winRateTrend30d = data.last30DaysWinRate > data.winrate ? '↗️' : data.last30DaysWinRate < data.winrate ? '↘️' : '→';
+  
+  el7d.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span style="font-size:12px;color:var(--text-muted)">P&L</span>
+      <span style="font-size:14px;font-weight:700;color:${data.last7DaysPnl >= 0 ? 'var(--green)' : 'var(--red)'}">${fmtMoney(data.last7DaysPnl)} ${pnlTrend7d}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:12px;color:var(--text-muted)">Win Rate</span>
+      <span style="font-size:14px;font-weight:700">${data.last7DaysWinRate.toFixed(1)}% ${winRateTrend7d}</span>
+    </div>
+  `;
+  
+  el30d.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span style="font-size:12px;color:var(--text-muted)">P&L</span>
+      <span style="font-size:14px;font-weight:700;color:${data.last30DaysPnl >= 0 ? 'var(--green)' : 'var(--red)'}">${fmtMoney(data.last30DaysPnl)} ${pnlTrend30d}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:12px;color:var(--text-muted)">Win Rate</span>
+      <span style="font-size:14px;font-weight:700">${data.last30DaysWinRate.toFixed(1)}% ${winRateTrend30d}</span>
+    </div>
+  `;
+}
+
+function renderOtherStreak(streak) {
+  const el = document.getElementById('oth-streak');
+  if (!el) return;
+  
+  if (streak.count === 0) {
+    el.innerHTML = '<span style="color:var(--text-muted)">No streak</span>';
+    return;
+  }
+  
+  const color = streak.type === 'win' ? 'var(--green)' : streak.type === 'loss' ? 'var(--red)' : 'var(--blue)';
+  const icon = streak.type === 'win' ? '🔥' : streak.type === 'loss' ? '❄️' : '🟡';
+  
+  el.innerHTML = `
+    <span style="color:${color}">${streak.count} ${streak.type}${streak.count !== 1 ? 's' : ''} ${icon}</span>
+  `;
+}
+
+function renderOtherRiskMetrics(data) {
+  const el = document.getElementById('oth-risk-metrics');
+  if (!el) return;
+  
+  const fmtMoney = (n) => '$' + Math.abs(n).toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:0});
+  const maxBetPct = data.totalStaked ? (data.maxBetSize / data.totalStaked * 100) : 0;
+  
+  el.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <span style="font-size:12px;color:var(--text-muted)">Max bet</span>
+      <span style="font-size:13px;font-weight:600">${fmtMoney(data.maxBetSize)}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <span style="font-size:12px;color:var(--text-muted)">Volatility</span>
+      <span style="font-size:13px;font-weight:600">${fmtMoney(data.stdDev)}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:12px;color:var(--text-muted)">Max bet %</span>
+      <span style="font-size:13px;font-weight:600;color:${maxBetPct > 10 ? 'var(--red)' : maxBetPct > 5 ? 'var(--yellow)' : 'var(--green)'}">${maxBetPct.toFixed(1)}%</span>
+    </div>
+  `;
+}
+
+function renderOtherHeatmap(bets) {
+  const el = document.getElementById('oth-heatmap');
+  if (!el) return;
+  
+  // Create 90-day heatmap
+  const now = new Date();
+  const startDate = new Date(now.getTime() - 89 * 24 * 60 * 60 * 1000);
+  
+  // Group bets by date
+  const betsByDate = {};
+  bets.forEach(bet => {
+    const date = bet.date;
+    if (!betsByDate[date]) betsByDate[date] = [];
+    betsByDate[date].push(bet);
+  });
+  
+  // Calculate daily P&L
+  const dailyPnl = {};
+  Object.keys(betsByDate).forEach(date => {
+    dailyPnl[date] = betsByDate[date].reduce((sum, bet) => sum + (bet.pnl || 0), 0);
+  });
+  
+  // Find max absolute P&L for color scaling
+  const maxAbsPnl = Math.max(...Object.values(dailyPnl).map(Math.abs), 1);
+  
+  // Generate heatmap HTML
+  let heatmapHTML = '<div style="display:flex;flex-wrap:wrap;gap:2px;align-items:flex-start">';
+  
+  // Day labels
+  heatmapHTML += '<div style="display:flex;flex-direction:column;gap:2px;margin-right:4px;font-size:9px;color:var(--text-muted)">';
+  ['Mon', '', 'Wed', '', 'Fri', '', 'Sun'].forEach(day => {
+    heatmapHTML += `<div style="height:12px;display:flex;align-items:center">${day}</div>`;
+  });
+  heatmapHTML += '</div>';
+  
+  // Generate weeks
+  for (let weekStart = new Date(startDate); weekStart <= now; weekStart.setDate(weekStart.getDate() + 7)) {
+    heatmapHTML += '<div style="display:flex;flex-direction:column;gap:2px">';
+    
+    for (let dayOffset = 0; dayOffset < 7; dayOffset++) {
+      const currentDay = new Date(weekStart);
+      currentDay.setDate(weekStart.getDate() + dayOffset);
+      
+      if (currentDay > now) {
+        heatmapHTML += '<div style="width:12px;height:12px"></div>';
+        continue;
+      }
+      
+      const dateStr = currentDay.toISOString().split('T')[0];
+      const pnl = dailyPnl[dateStr] || 0;
+      const intensity = Math.abs(pnl) / maxAbsPnl;
+      
+      let color = '#f1f5f9'; // default light gray
+      if (pnl > 0) {
+        color = `rgba(34, 197, 94, ${0.2 + intensity * 0.8})`; // green
+      } else if (pnl < 0) {
+        color = `rgba(239, 68, 68, ${0.2 + intensity * 0.8})`; // red
+      }
+      
+      const fmtMoney = (n, signed=true) => {
+        const abs = Math.abs(n);
+        if (signed) return n >= 0 ? '+$' + abs.toFixed(0) : '-$' + abs.toFixed(0);
+        return '$' + abs.toFixed(0);
+      };
+      
+      heatmapHTML += `<div style="width:12px;height:12px;background:${color};border-radius:2px;cursor:pointer" title="${dateStr}: ${fmtMoney(pnl)}"></div>`;
+    }
+    heatmapHTML += '</div>';
+  }
+  
+  heatmapHTML += '</div>';
+  heatmapHTML += '<div style="display:flex;align-items:center;gap:8px;margin-top:8px;font-size:10px;color:var(--text-muted)">';
+  heatmapHTML += '<span>Less</span>';
+  heatmapHTML += '<div style="width:10px;height:10px;background:#f1f5f9;border-radius:2px"></div>';
+  heatmapHTML += '<div style="width:10px;height:10px;background:rgba(34, 197, 94, 0.4);border-radius:2px"></div>';
+  heatmapHTML += '<div style="width:10px;height:10px;background:rgba(34, 197, 94, 0.8);border-radius:2px"></div>';
+  heatmapHTML += '<div style="width:10px;height:10px;background:rgba(239, 68, 68, 0.8);border-radius:2px"></div>';
+  heatmapHTML += '<span>More</span>';
+  heatmapHTML += '</div>';
+  
+  el.innerHTML = heatmapHTML;
 }
 
 function renderOthBookCards(pool) {
@@ -1939,62 +2315,224 @@ function renderOthBookCards(pool) {
 }
 
 function renderOthWlChart(pool) {
-  const ctx = document.getElementById('oth-wl-chart');
-  if (!ctx) return;
-  if (othWlChart) { othWlChart.destroy(); othWlChart=null; }
-  const books={};
-  pool.forEach(b => {
-    const bk=b.book||'Unknown';
-    if(!books[bk]) books[bk]={wins:0,losses:0,other:0};
-    if(b.result==='win') books[bk].wins++;
-    else if(b.result==='loss') books[bk].losses++;
-    else books[bk].other++;
+  const canvas = document.getElementById('oth-wl-chart');
+  if (!canvas || typeof Chart === 'undefined') return;
+  
+  // Destroy existing chart
+  if (window.othWlChart) {
+    window.othWlChart.destroy();
+    window.othWlChart = null;
+  }
+  
+  // Group by book
+  const bookStats = {};
+  BOOKS.forEach(book => {
+    const bookBets = pool.filter(b => b.book && b.book.toLowerCase().includes(book.toLowerCase()));
+    bookStats[book] = {
+      wins: bookBets.filter(b => b.result === 'win').length,
+      losses: bookBets.filter(b => b.result === 'loss').length,
+      pushes: bookBets.filter(b => b.result === 'push').length,
+      pending: bookBets.filter(b => b.result === 'pending').length
+    };
   });
-  const labels=Object.keys(books);
-  if(!labels.length) return;
-  othWlChart = new Chart(ctx, {
-    type:'bar',
-    data:{ labels, datasets:[
-      {label:'Wins',         data:labels.map(l=>books[l].wins),   backgroundColor:'#16a34a'},
-      {label:'Losses',       data:labels.map(l=>books[l].losses), backgroundColor:'#dc2626'},
-      {label:'Push/Pending', data:labels.map(l=>books[l].other),  backgroundColor:'#9ca3af'},
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,grid:{color:'rgba(0,0,0,0.05)'}}}}
+  
+  const ctx = canvas.getContext('2d');
+  window.othWlChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: BOOKS,
+      datasets: [
+        {
+          label: 'Wins',
+          data: BOOKS.map(book => bookStats[book].wins),
+          backgroundColor: 'rgba(34, 197, 94, 0.8)',
+          borderColor: 'rgb(34, 197, 94)',
+          borderWidth: 1
+        },
+        {
+          label: 'Losses',
+          data: BOOKS.map(book => bookStats[book].losses),
+          backgroundColor: 'rgba(239, 68, 68, 0.8)',
+          borderColor: 'rgb(239, 68, 68)',
+          borderWidth: 1
+        },
+        {
+          label: 'Push/Pending',
+          data: BOOKS.map(book => bookStats[book].pushes + bookStats[book].pending),
+          backgroundColor: 'rgba(156, 163, 175, 0.8)',
+          borderColor: 'rgb(156, 163, 175)',
+          borderWidth: 1
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        x: {
+          stacked: false,
+          grid: { display: false }
+        },
+        y: {
+          beginAtZero: true,
+          grid: { color: 'rgba(0,0,0,0.1)' }
+        }
+      }
+    }
   });
 }
 
 function renderOthPnlChart(settled) {
-  const ctx=document.getElementById('oth-pnl-chart');
-  if(!ctx) return;
-  if(othPnlChart){othPnlChart.destroy();othPnlChart=null;}
-  if(!settled.length) return;
-  const sorted=[...settled].sort((a,b)=>a.date.localeCompare(b.date));
-  const days={}; let cum=0;
-  sorted.forEach(b=>{cum+=(b.pnl||0);days[b.date]=cum;});
-  othPnlChart=new Chart(ctx,{
-    type:'line',
-    data:{labels:Object.keys(days),datasets:[{label:'P&L',data:Object.values(days),borderColor:'#1d4ed8',backgroundColor:'rgba(29,78,216,0.08)',fill:true,tension:0.3,pointRadius:3}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(0,0,0,0.05)'}}}}
+  const canvas = document.getElementById('oth-pnl-chart');
+  if (!canvas || typeof Chart === 'undefined') return;
+  
+  // Destroy existing chart
+  if (window.othPnlChart) {
+    window.othPnlChart.destroy();
+    window.othPnlChart = null;
+  }
+  
+  if (!settled.length) return;
+  
+  // Sort by date and calculate cumulative P&L
+  const sortedBets = [...settled].sort((a, b) => new Date(a.date) - new Date(b.date));
+  const cumulativeData = [];
+  let runningTotal = 0;
+  
+  sortedBets.forEach(bet => {
+    runningTotal += bet.pnl || 0;
+    cumulativeData.push({
+      x: bet.date,
+      y: runningTotal
+    });
+  });
+  
+  const ctx = canvas.getContext('2d');
+  window.othPnlChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      datasets: [{
+        label: 'Cumulative P&L',
+        data: cumulativeData,
+        borderColor: 'rgb(59, 130, 246)',
+        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+        fill: true,
+        tension: 0.1,
+        pointRadius: 3,
+        pointHoverRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        x: {
+          type: 'time',
+          time: { unit: 'day' },
+          grid: { display: false }
+        },
+        y: {
+          grid: { color: 'rgba(0,0,0,0.1)' },
+          ticks: {
+            callback: function(value) {
+              return '$' + value.toFixed(0);
+            }
+          }
+        }
+      },
+      interaction: {
+        intersect: false,
+        mode: 'index'
+      }
+    }
   });
 }
 
 function renderOthSportChart(settled) {
-  const ctx=document.getElementById('oth-sport-chart');
-  if(!ctx) return;
-  if(othSportChart){othSportChart.destroy();othSportChart=null;}
-  if(!settled.length) return;
-  const sports={};
-  settled.forEach(b=>{
-    const s=(b.sport||'Other').replace(/^[^ ]+ /,'');
-    if(!sports[s]) sports[s]={pnl:0,staked:0};
-    sports[s].pnl+=b.pnl||0; sports[s].staked+=parseFloat(b.stake||0);
+  const canvas = document.getElementById('oth-sport-chart');
+  if (!canvas || typeof Chart === 'undefined') return;
+  
+  // Destroy existing chart
+  if (window.othSportChart) {
+    window.othSportChart.destroy();
+    window.othSportChart = null;
+  }
+  
+  if (!settled.length) return;
+  
+  // Calculate ROI by sport
+  const sportStats = {};
+  settled.forEach(bet => {
+    const sport = bet.sport || 'Other';
+    if (!sportStats[sport]) {
+      sportStats[sport] = { pnl: 0, staked: 0 };
+    }
+    sportStats[sport].pnl += bet.pnl || 0;
+    sportStats[sport].staked += parseFloat(bet.stake) || 0;
   });
-  const labels=Object.keys(sports).sort((a,b)=>sports[b].pnl-sports[a].pnl);
-  const rois=labels.map(l=>sports[l].staked?+(sports[l].pnl/sports[l].staked*100).toFixed(1):0);
-  othSportChart=new Chart(ctx,{
-    type:'bar',
-    data:{labels,datasets:[{label:'ROI%',data:rois,backgroundColor:rois.map(v=>v>=0?'#16a34a':'#dc2626')}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{callback:v=>v+'%'}}}}
+  
+  // Calculate ROI and filter out sports with no stakes
+  const sportROI = Object.keys(sportStats)
+    .map(sport => ({
+      sport,
+      roi: sportStats[sport].staked > 0 ? (sportStats[sport].pnl / sportStats[sport].staked) * 100 : 0,
+      pnl: sportStats[sport].pnl,
+      staked: sportStats[sport].staked
+    }))
+    .filter(item => item.staked > 0)
+    .sort((a, b) => b.roi - a.roi);
+  
+  if (sportROI.length === 0) {
+    canvas.style.display = 'none';
+    return;
+  }
+  
+  canvas.style.display = 'block';
+  
+  const ctx = canvas.getContext('2d');
+  window.othSportChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: sportROI.map(item => item.sport),
+      datasets: [{
+        label: 'ROI %',
+        data: sportROI.map(item => item.roi),
+        backgroundColor: sportROI.map(item => 
+          item.roi >= 0 ? 'rgba(34, 197, 94, 0.8)' : 'rgba(239, 68, 68, 0.8)'
+        ),
+        borderColor: sportROI.map(item => 
+          item.roi >= 0 ? 'rgb(34, 197, 94)' : 'rgb(239, 68, 68)'
+        ),
+        borderWidth: 1
+      }]
+    },
+    options: {
+      indexAxis: 'y', // Horizontal bars
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        x: {
+          grid: { color: 'rgba(0,0,0,0.1)' },
+          ticks: {
+            callback: function(value) {
+              return value.toFixed(1) + '%';
+            }
+          }
+        },
+        y: {
+          grid: { display: false }
+        }
+      }
+    }
   });
 }
 
