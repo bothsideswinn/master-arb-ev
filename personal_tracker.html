@@ -1621,160 +1621,7 @@ function fmtMoney(n, forceSign=false) {
   if (forceSign) return (n >= 0 ? '+$' : '-$') + abs;
   return (n < 0 ? '-$' : '$') + abs;
 }
-let otherBets = JSON.parse(localStorage.getItem('other_bets_v1') || 'null');
-if (!otherBets || otherBets.length === 0) {
-  otherBets = [{"id": "1776284333373", "date": "2026-04-15", "sport": "Baseball", "league": "MLB", "book": "Hard Rock Bet", "game": "Diamondbacks @ Orioles", "betdesc": "Diamondbacks +.05-First 5 Innings Spread", "bettype": "Spread", "odds": "-125", "stake": 15, "pnl": -15, "result": "loss", "notes": "", "gamedate": "2026-04-15", "gametime": "12:35 PM", "unitsize": 15, "units": 1}, {"id": "1776286489089", "date": "2026-04-15", "sport": "Baseball", "league": "MLB", "book": "Hard Rock Bet", "game": "Diamondbacks @ Orioles", "betdesc": "Ketel Marte - Over 1.5 Total Bases", "bettype": "Prop", "odds": "+100", "stake": 15, "pnl": -15, "result": "loss", "notes": "", "gamedate": "2026-04-15", "gametime": "12:35 PM", "unitsize": 15, "units": 1}, {"id": "1776286658220", "date": "2026-04-15", "sport": "Baseball", "league": "MLB", "book": "Hard Rock Bet", "game": "Rockies @ Astros", "betdesc": "Over 8.5 Total Runs", "bettype": "Over/Under", "odds": "-120", "stake": 15, "pnl": -15, "result": "loss", "notes": "", "gamedate": "2026-04-15", "gametime": "8:10 PM", "unitsize": 15, "units": 1}, {"id": "1776286876645", "date": "2026-04-15", "sport": "Baseball", "league": "MLB", "book": "Hard Rock Bet", "game": "Rockies @ Astros", "betdesc": "Christian Walker - Over 1.5 Total Bases", "bettype": "Prop", "odds": "+130", "stake": 15, "pnl": -15, "result": "loss", "notes": "", "gamedate": "2026-04-15", "gametime": "8:10 PM", "unitsize": 15, "units": 1}, {"id": "1776286979561", "date": "2026-04-15", "sport": "Baseball", "league": "MLB", "book": "Hard Rock Bet", "game": "Mets @ Dodgers", "betdesc": "Mets ML", "bettype": "Moneyline", "odds": "+170", "stake": 15, "pnl": 25.5, "result": "pending", "notes": "", "gamedate": "2026-04-15", "gametime": "10:10 PM", "unitsize": 15, "units": 1}, {"id": "1776287024047", "date": "2026-04-15", "sport": "Baseball", "league": "MLB", "book": "Hard Rock Bet", "game": "Giants @ Reds", "betdesc": "Reds ML", "bettype": "Moneyline", "odds": "-110", "stake": 15, "pnl": 13.64, "result": "win", "notes": "", "gamedate": "", "gametime": "6:40 PM", "unitsize": 15, "units": 1}, {"id": "1776287126855", "date": "2026-04-15", "sport": "Baseball", "league": "MLB", "book": "Hard Rock Bet", "game": "Cubs @ Phillies", "betdesc": "Nico Hoerner - Over 1.5 Total Bases", "bettype": "Prop", "odds": "-110", "stake": 15, "pnl": 13.64, "result": "win", "notes": "", "gamedate": "2026-04-15", "gametime": "6:40 PM", "unitsize": 15, "units": 1}, {"id": "1776287195905", "date": "2026-04-15", "sport": "Baseball", "league": "MLB", "book": "Hard Rock Bet", "game": "Angels @ Yankees", "betdesc": "Mike Trout - Over 1.5 Total Bases", "bettype": "Prop", "odds": "+100", "stake": 15, "pnl": 15, "result": "win", "notes": "", "gamedate": "2026-04-15", "gametime": "7:05 PM", "unitsize": 15, "units": 1}, {"id": "1776287261173", "date": "2026-04-15", "sport": "Baseball", "league": "MLB", "book": "Hard Rock Bet", "game": "Giants @ Reds", "betdesc": "Sal Stewart - Over 1.5 Total Bases", "bettype": "Prop", "odds": "-105", "stake": 15, "pnl": 14.29, "result": "win", "notes": "", "gamedate": "2026-04-15", "gametime": "6:40 PM", "unitsize": 15, "units": 1}, {"id": "1776306414849", "date": "2026-04-16", "sport": "Baseball", "league": "MLB", "book": "Hard Rock Bet", "game": "Nationals @ Pirates", "betdesc": "CJ Abrams - Over 1.5 Total Bases", "bettype": "Prop", "odds": "+130", "stake": 15, "pnl": 19.5, "result": "win", "notes": "", "gamedate": "2026-04-15", "gametime": "6:40 PM", "unitsize": 15, "units": 1}, {"id": "1776306530490", "date": "2026-04-16", "sport": "Soccer", "league": "Champions League", "book": "Hard Rock Bet", "game": "Bayern vs Real Madrid", "betdesc": "Kylian Mbappe - 2+ Goals Scored", "bettype": "Prop", "odds": "+240", "stake": 10, "pnl": -10, "result": "loss", "notes": "", "gamedate": "2026-04-15", "gametime": "3:00 PM", "unitsize": 15, "units": 0.67}, {"id": "1776306621410", "date": "2026-04-16", "sport": "Soccer", "league": "Champions League", "book": "Hard Rock Bet", "game": "Bayern vs Real Madrid", "betdesc": "Harry Kane - 2+ Goals Scored", "bettype": "Prop", "odds": "+115", "stake": 10, "pnl": -10, "result": "loss", "notes": "", "gamedate": "2026-04-15", "gametime": "3:00 PM", "unitsize": 15, "units": 0.67}, {"id": "1776306982693", "date": "2026-04-16", "sport": "Soccer", "league": "Champions League", "book": "BetOnline", "game": "Arsenal vs Sporting Lisboa", "betdesc": "Arsenal ML", "bettype": "Moneyline", "odds": "-185", "stake": 79.57, "pnl": -79.57, "result": "loss", "notes": "", "gamedate": "2026-04-15", "gametime": "3:00 PM", "unitsize": 15, "units": 5.3}, {"id": "1776307103044", "date": "2026-04-16", "sport": "Soccer", "league": "Champions League", "book": "Bovada", "game": "Arsenal vs Sporting Lisboa", "betdesc": "Sporting Lisboa ML", "bettype": "Moneyline", "odds": "+500", "stake": 20.43, "pnl": -20.43, "result": "loss", "notes": "", "gamedate": "2026-04-15", "gametime": "3:00 PM", "unitsize": 15, "units": 1.36}, {"id": "1776400000000", "date": "2026-04-15", "sport": "Golf", "league": "PGA", "book": "Hard Rock Bet", "game": "RBC Heritage", "betdesc": "Patrick Cantlay - Top 20 Finish", "bettype": "Prop", "odds": "-110", "stake": 100.0, "result": "pending", "pnl": 90.91, "gamedate": "2026-04-16", "gametime": "", "unitsize": 20.0, "units": 5.0, "notes": ""}, {"id": "1776400000001", "date": "2026-04-15", "sport": "Golf", "league": "PGA", "book": "Hard Rock Bet", "game": "RBC Heritage", "betdesc": "Brian Harman - Top 20 Finish", "bettype": "Prop", "odds": "200", "stake": 40.0, "result": "pending", "pnl": 80.0, "gamedate": "2026-04-16", "gametime": "", "unitsize": 20.0, "units": 2.0, "notes": ""}, {"id": "1776400000002", "date": "2026-04-15", "sport": "Golf", "league": "PGA", "book": "BetOnline", "game": "RBC Heritage", "betdesc": "Jordan Spieth - Top 20 Finish", "bettype": "Prop", "odds": "135", "stake": 40.0, "result": "pending", "pnl": 54.0, "gamedate": "2026-04-16", "gametime": "", "unitsize": 20.0, "units": 2.0, "notes": ""}, {"id": "1776400000003", "date": "2026-04-15", "sport": "Golf", "league": "PGA", "book": "Hard Rock Bet", "game": "RBC Heritage", "betdesc": "Sepp Straka - Top 20 Finish", "bettype": "Prop", "odds": "150", "stake": 20.0, "result": "pending", "pnl": 30.0, "gamedate": "2026-04-16", "gametime": "", "unitsize": 20.0, "units": 1.0, "notes": ""}, {"id": "1776400000004", "date": "2026-04-15", "sport": "Golf", "league": "PGA", "book": "Hard Rock Bet", "game": "RBC Heritage", "betdesc": "Scottie Scheffler - Tournament Winner", "bettype": "Prop", "odds": "200", "stake": 60.0, "result": "pending", "pnl": 120.0, "gamedate": "2026-04-16", "gametime": "", "unitsize": 20.0, "units": 3.0, "notes": ""}, {"id": "1776400000005", "date": "2026-04-15", "sport": "Golf", "league": "PGA", "book": "BetOnline", "game": "RBC Heritage", "betdesc": "Patrick Cantlay - Tournament Winner", "bettype": "Prop", "odds": "400", "stake": 20.0, "result": "pending", "pnl": 80.0, "gamedate": "2026-04-16", "gametime": "", "unitsize": 20.0, "units": 1.0, "notes": ""}, {"id": "1776400000006", "date": "2026-04-15", "sport": "Golf", "league": "PGA", "book": "Hard Rock Bet", "game": "RBC Heritage", "betdesc": "Jordan Spieth - Tournament Winner", "bettype": "Prop", "odds": "2800", "stake": 10.0, "result": "pending", "pnl": 280.0, "gamedate": "2026-04-16", "gametime": "", "unitsize": 20.0, "units": 0.5, "notes": ""}, {"id": "1776400000007", "date": "2026-04-15", "sport": "Golf", "league": "PGA", "book": "Hard Rock Bet", "game": "RBC Heritage", "betdesc": "Brian Harman - Tournament Winner", "bettype": "Prop", "odds": "3000", "stake": 10.0, "result": "pending", "pnl": 300.0, "gamedate": "2026-04-16", "gametime": "", "unitsize": 20.0, "units": 0.5, "notes": ""}, {"id": "1776400000008", "date": "2026-04-15", "sport": "Golf", "league": "PGA", "book": "Hard Rock Bet", "game": "RBC Heritage", "betdesc": "Patrick Cantlay - Round 1 Leader", "bettype": "Prop", "odds": "6000", "stake": 10.0, "result": "pending", "pnl": 600.0, "gamedate": "2026-04-16", "gametime": "", "unitsize": 20.0, "units": 0.5, "notes": ""}, {"id": "1776400000009", "date": "2026-04-15", "sport": "Golf", "league": "PGA", "book": "Bovada", "game": "RBC Heritage", "betdesc": "Si Woo Kim - Round 1 Leader", "bettype": "Prop", "odds": "3000", "stake": 10.0, "result": "pending", "pnl": 300.0, "gamedate": "2026-04-16", "gametime": "", "unitsize": 20.0, "units": 0.5, "notes": ""}, {"id": "1776400000010", "date": "2026-04-15", "sport": "Golf", "league": "PGA", "book": "BetOnline", "game": "RBC Heritage", "betdesc": "Russell Henley - Round 1 Leader", "bettype": "Prop", "odds": "3500", "stake": 10.0, "result": "pending", "pnl": 350.0, "gamedate": "2026-04-16", "gametime": "", "unitsize": 20.0, "units": 0.5, "notes": ""}, {"id": "1776400000011", "date": "2026-04-15", "sport": "Golf", "league": "PGA", "book": "BetOnline", "game": "RBC Heritage", "betdesc": "Jordan Spieth - Round 1 Leader", "bettype": "Prop", "odds": "4500", "stake": 10.0, "result": "pending", "pnl": 450.0, "gamedate": "2026-04-16", "gametime": "", "unitsize": 20.0, "units": 0.5, "notes": ""}, {"id": "1776400000012", "date": "2026-04-15", "sport": "Golf", "league": "PGA", "book": "Hard Rock Bet", "game": "RBC Heritage", "betdesc": "Brian Harman - Round 1 Leader", "bettype": "Prop", "odds": "5500", "stake": 10.0, "result": "pending", "pnl": 550.0, "gamedate": "2026-04-16", "gametime": "", "unitsize": 20.0, "units": 0.5, "notes": ""}, {"id": "1776400000013", "date": "2026-04-15", "sport": "Golf", "league": "PGA", "book": "Bovada", "game": "RBC Heritage", "betdesc": "Brian Harman ML", "bettype": "Moneyline", "odds": "-115", "stake": 20.0, "result": "pending", "pnl": 17.39, "gamedate": "2026-04-16", "gametime": "", "unitsize": 20.0, "units": 1.0, "notes": ""}, {"id": "1776400000014", "date": "2026-04-15", "sport": "Golf", "league": "PGA", "book": "Bovada", "game": "RBC Heritage", "betdesc": "Sam Stevens ML", "bettype": "Moneyline", "odds": "-140", "stake": 20.0, "result": "pending", "pnl": 14.29, "gamedate": "2026-04-16", "gametime": "", "unitsize": 20.0, "units": 1.0, "notes": ""}, {"id": "1776400000015", "date": "2026-04-15", "sport": "Golf", "league": "PGA", "book": "Bovada", "game": "RBC Heritage", "betdesc": "Si Woo Kim ML", "bettype": "Moneyline", "odds": "-140", "stake": 20.0, "result": "pending", "pnl": 14.29, "gamedate": "2026-04-16", "gametime": "", "unitsize": 20.0, "units": 1.0, "notes": ""}, {"id": "1776400000016", "date": "2026-04-15", "sport": "Golf", "league": "PGA", "book": "Bovada", "game": "RBC Heritage", "betdesc": "Patrick Cantlay ML", "bettype": "Moneyline", "odds": "-160", "stake": 40.0, "result": "pending", "pnl": 25.0, "gamedate": "2026-04-16", "gametime": "", "unitsize": 20.0, "units": 2.0, "notes": ""}, {"id": "1776500000000", "date": "2026-04-16", "sport": "Hockey", "league": "NHL", "book": "Bovada", "game": "St. Louis Blues @ Utah Mammoth", "betdesc": "Jimmy Snuggerud - 2+ Points", "bettype": "Prop", "odds": "325", "stake": 5.0, "result": "pending", "pnl": 16.25, "gamedate": "2026-04-16", "gametime": "7:30 PM", "unitsize": 20.0, "units": 0.25, "notes": ""}, {"id": "1776500000001", "date": "2026-04-16", "sport": "Baseball", "league": "MLB", "book": "Hard Rock Bet", "game": "Royals @ Tigers", "betdesc": "Royals ML", "bettype": "Moneyline", "odds": "-120", "stake": 15.0, "result": "loss", "pnl": -15.0, "gamedate": "2026-04-16", "gametime": "3:06 PM", "unitsize": 20.0, "units": 0.75, "notes": ""}, {"id": "1776500000002", "date": "2026-04-16", "sport": "Baseball", "league": "MLB", "book": "Hard Rock Bet", "game": "Giants @ Reds", "betdesc": "Sal Stewart - Over 1.5 Total Bases", "bettype": "Prop", "odds": "110", "stake": 15.0, "result": "loss", "pnl": -15.0, "gamedate": "2026-04-16", "gametime": "2:26 PM", "unitsize": 20.0, "units": 0.75, "notes": ""}, {"id": "1776500000003", "date": "2026-04-16", "sport": "Baseball", "league": "MLB", "book": "Hard Rock Bet", "game": "Nationals @ Pirates", "betdesc": "Over 8.5 Total Runs", "bettype": "Over/Under", "odds": "-120", "stake": 15.0, "result": "win", "pnl": 12.5, "gamedate": "2026-04-16", "gametime": "3:30 PM", "unitsize": 20.0, "units": 0.75, "notes": ""}, {"id": "1776500000004", "date": "2026-04-16", "sport": "Baseball", "league": "MLB", "book": "Hard Rock Bet", "game": "Blue Jays @ Brewers", "betdesc": "William Contreras - Over 1.5 Total Bases", "bettype": "Prop", "odds": "125", "stake": 15.0, "result": "win", "pnl": 18.75, "gamedate": "2026-04-16", "gametime": "2:15 PM", "unitsize": 20.0, "units": 0.75, "notes": ""}, {"id": "1776500000005", "date": "2026-04-16", "sport": "Baseball", "league": "MLB", "book": "Hard Rock Bet", "game": "Giants @ Reds", "betdesc": "Under 8.5 Total Runs", "bettype": "Over/Under", "odds": "-120", "stake": 15.0, "result": "win", "pnl": 12.5, "gamedate": "2026-04-16", "gametime": "2:26 PM", "unitsize": 20.0, "units": 0.75, "notes": ""}, {"id": "1776500000006", "date": "2026-04-16", "sport": "Baseball", "league": "MLB", "book": "Hard Rock Bet", "game": "Orioles @ Guardians", "betdesc": "Guardians ML", "bettype": "Moneyline", "odds": "-130", "stake": 15.0, "result": "pending", "pnl": 11.54, "gamedate": "2026-04-16", "gametime": "6:10 PM", "unitsize": 20.0, "units": 0.75, "notes": ""}, {"id": "1776500000007", "date": "2026-04-16", "sport": "Baseball", "league": "MLB", "book": "Hard Rock Bet", "game": "Rockies @ Astros", "betdesc": "Over 8.5 Total Runs", "bettype": "Over/Under", "odds": "-115", "stake": 15.0, "result": "pending", "pnl": 13.04, "gamedate": "2026-04-16", "gametime": "8:10 PM", "unitsize": 20.0, "units": 0.75, "notes": ""}, {"id": "1776500000008", "date": "2026-04-16", "sport": "Golf", "league": "PGA", "book": "Bovada", "game": "RBC Heritage", "betdesc": "Scottie Scheffler - Round 1 Leader", "bettype": "Prop", "odds": "2500", "stake": 10.0, "result": "loss", "pnl": -10.0, "gamedate": "2026-04-16", "gametime": "", "unitsize": 20.0, "units": 0.5, "notes": ""}, {"id": "1776500000009", "date": "2026-04-16", "sport": "Golf", "league": "PGA", "book": "Bovada", "game": "RBC Heritage", "betdesc": "Scottie Scheffler - Round 1 Bogey Free", "bettype": "Prop", "odds": "350", "stake": 20.0, "result": "loss", "pnl": -20.0, "gamedate": "2026-04-16", "gametime": "", "unitsize": 20.0, "units": 1.0, "notes": ""}];
-  localStorage.setItem('other_bets_v1', JSON.stringify(otherBets));
-}
-function calcOthPayout() {
-  // Called when profit is manually edited
-  var stake  = parseFloat(document.getElementById('oth-f-stake').value) || 0;
-  var profit = parseFloat(document.getElementById('oth-f-profit').value) || 0;
-  var payEl  = document.getElementById('oth-f-payout');
-  if (payEl) payEl.value = (stake + profit).toFixed(2);
-}
-// Keep backward compat
-function calcOthProfit() { calcOthFields(); }
-
-function getOthBookValue() {
-  const sel = document.getElementById('oth-f-book-select');
-  const inp = document.getElementById('oth-f-book');
-  if (!sel) return inp ? inp.value.trim() : '';
-  return sel.value === '__other__' || sel.value === '' ? (inp ? inp.value.trim() : '') : sel.value;
-}
-function getOthLeagueValue() {
-  const sel = document.getElementById('oth-f-league-select');
-  const inp = document.getElementById('oth-f-league');
-  if (!sel) return inp ? inp.value.trim() : '';
-  return sel.value === '__other__' || sel.value === '' ? (inp ? inp.value.trim() : '') : sel.value;
-}
-function getOthSportValue() {
-  const sel = document.getElementById('oth-f-sport');
-  if (!sel) return '';
-  return sel.value === 'Other' ? (document.getElementById('oth-f-sport-custom') ? document.getElementById('oth-f-sport-custom').value.trim() : '') : sel.value;
-}
-function getOthBetTypeValue() {
-  const sel = document.getElementById('oth-f-bettype');
-  if (!sel) return 'Moneyline';
-  return sel.value === 'Other' ? (document.getElementById('oth-f-bettype-custom') ? document.getElementById('oth-f-bettype-custom').value.trim() : 'Other') : sel.value;
-}
-function updateOthLeagueDropdown() {
-  const sport = document.getElementById('oth-f-sport').value;
-  const sel   = document.getElementById('oth-f-league-select');
-  if (!sel) return;
-  const leagues = (typeof SPORT_LEAGUES !== 'undefined' && SPORT_LEAGUES[sport]) ? SPORT_LEAGUES[sport] : ['Other'];
-  sel.innerHTML = '<option value="">Select league...</option>';
-  leagues.forEach(l => { const o=document.createElement('option'); o.value=l; o.textContent=l; sel.appendChild(o); });
-  const oo=document.createElement('option'); oo.value='__other__'; oo.textContent='Other (type below)'; sel.appendChild(oo);
-  const li = document.getElementById('oth-f-league'); if(li) li.style.display='none';
-  // Show/hide sport custom
-  const sc = document.getElementById('oth-f-sport-custom');
-  if (sc) sc.style.display = sport==='Other' ? '' : 'none';
-}
-function saveOthBet() {
-  const date    = document.getElementById('oth-f-date').value;
-  const sport   = getOthSportValue();
-  const book    = getOthBookValue();
-  const league  = getOthLeagueValue();
-  const game    = document.getElementById('oth-f-game').value.trim();
-  const betdesc = document.getElementById('oth-f-betdesc') ? document.getElementById('oth-f-betdesc').value.trim() : '';
-  const bettype = getOthBetTypeValue();
-  const odds    = document.getElementById('oth-f-odds').value.trim();
-  const stake   = parseFloat(document.getElementById('oth-f-stake').value) || 0;
-  const result  = document.getElementById('oth-f-result').value;
-  const notes   = document.getElementById('oth-f-notes').value.trim();
-  const gamedate  = document.getElementById('oth-f-gamedate') ? document.getElementById('oth-f-gamedate').value : '';
-  const gametime  = document.getElementById('oth-f-gametime') ? document.getElementById('oth-f-gametime').value.trim() : '';
-  const unitsize  = parseFloat(document.getElementById('oth-f-unitsize') ? document.getElementById('oth-f-unitsize').value : 0) || 0;
-  const msgEl   = document.getElementById('oth-form-msg');
-
-  if (!game || !stake) {
-    msgEl.innerHTML = '<span style="color:var(--red)">Please fill in matchup and stake.</span>';
-    return;
-  }
-
-  const dec = toDecimalOth(odds);
-  const profitIfWin = dec && stake ? +((dec-1)*stake).toFixed(2) : parseFloat(document.getElementById('oth-f-profit').value) || 0;
-  const pnl = result==='win' ? profitIfWin : result==='loss' ? -stake : result==='push' ? 0 : profitIfWin;
-
-  const bet = {
-    id: othEditingId || String(Date.now()),
-    date: date || new Date().toISOString().split('T')[0],
-    sport, league, book, game, betdesc, bettype, odds, stake, pnl, result, notes,
-    gamedate, gametime,
-    unitsize: unitsize || null,
-    units: unitsize > 0 ? +(stake/unitsize).toFixed(2) : null,
-  };
-
-  if (othEditingId) {
-    const idx = otherBets.findIndex(b => b.id === othEditingId);
-    if (idx > -1) otherBets[idx] = bet; else otherBets.push(bet);
-    othEditingId = null;
-  } else {
-    otherBets.push(bet);
-  }
-
-  saveOther();
-  // Reset form
-  ['oth-f-game','oth-f-betdesc','oth-f-odds','oth-f-stake','oth-f-profit','oth-f-payout','oth-f-notes','oth-f-unitsize','oth-f-units','oth-f-gamedate','oth-f-gametime'].forEach(id => {
-    const el = document.getElementById(id); if (el) el.value = '';
-  });
-  document.getElementById('oth-f-result').value = 'pending';
-  const bs = document.getElementById('oth-f-book-select'); if(bs) bs.value='';
-  const bi = document.getElementById('oth-f-book'); if(bi) { bi.value=''; bi.style.display='none'; }
-  const ls = document.getElementById('oth-f-league-select'); if(ls) ls.innerHTML='<option value="">Select league...</option>';
-  const li = document.getElementById('oth-f-league'); if(li) { li.value=''; li.style.display='none'; }
-  document.getElementById('oth-f-sport').value = '';
-  const ft = document.getElementById('oth-form-title'); if(ft) ft.textContent='Log a bet';
-  msgEl.innerHTML = '<span style="color:var(--green)">Bet saved!</span>';
-  setTimeout(() => { msgEl.innerHTML = ''; }, 2000);
-  renderOther();
-}
-
-function editOthBet(id) {
-  const b = otherBets.find(b => b.id === id);
-  if (!b) return;
-  othEditingId = id;
-  document.getElementById('oth-f-date').value   = b.date   || '';
-  document.getElementById('oth-f-game').value   = b.game   || '';
-  document.getElementById('oth-f-odds').value   = b.odds   || '';
-  document.getElementById('oth-f-stake').value  = b.stake  || '';
-  document.getElementById('oth-f-profit').value = b.pnl > 0 ? b.pnl : '';
-  document.getElementById('oth-f-result').value = b.result || 'pending';
-  document.getElementById('oth-f-notes').value  = b.notes  || '';
-  if (document.getElementById('oth-f-betdesc'))  document.getElementById('oth-f-betdesc').value  = b.betdesc || '';
-  if (document.getElementById('oth-f-gamedate')) document.getElementById('oth-f-gamedate').value = b.gamedate || '';
-  if (document.getElementById('oth-f-gametime')) document.getElementById('oth-f-gametime').value = b.gametime || '';
-  if (document.getElementById('oth-f-unitsize')) document.getElementById('oth-f-unitsize').value = b.unitsize || '';
-  // Sport
-  const sportSel = document.getElementById('oth-f-sport');
-  if (sportSel) { sportSel.value = b.sport || ''; updateOthLeagueDropdown(); }
-  // League
-  const lSel = document.getElementById('oth-f-league-select');
-  if (lSel && b.league) {
-    const lOpt = [...lSel.options].find(o => o.value === b.league);
-    if (lOpt) { lSel.value = b.league; }
-    else { lSel.value = '__other__'; const li=document.getElementById('oth-f-league'); if(li){li.style.display='';li.value=b.league;} }
-  }
-  // Book
-  const bSel = document.getElementById('oth-f-book-select');
-  if (bSel && b.book) {
-    const bOpt = [...bSel.options].find(o => o.value === b.book);
-    if (bOpt) { bSel.value = b.book; const bi=document.getElementById('oth-f-book'); if(bi){bi.style.display='none';bi.value=b.book;} }
-    else { bSel.value = '__other__'; const bi=document.getElementById('oth-f-book'); if(bi){bi.style.display='';bi.value=b.book;} }
-  }
-  // Bet type
-  const btSel = document.getElementById('oth-f-bettype');
-  if (btSel && b.bettype) {
-    const btOpt = [...btSel.options].find(o => o.value === b.bettype);
-    if (btOpt) { btSel.value = b.bettype; }
-    else { btSel.value = 'Other'; const btc=document.getElementById('oth-f-bettype-custom'); if(btc){btc.style.display='';btc.value=b.bettype;} }
-  }
-  calcOthFields();
-  const ft = document.getElementById('oth-form-title'); if(ft) ft.textContent='Edit bet';
-  document.getElementById('oth-form-msg').innerHTML = '<span style="color:var(--blue)">Editing — click Save bet to update.</span>';
-  document.getElementById('oth-f-game').scrollIntoView({behavior:'smooth', block:'center'});
-}
+let otherBets = JSON.parse(localStorage.getItem('other_bets_v1') || '[]');
 
 function deleteOthBet(id) {
   if (!confirm('Delete this bet?')) return;
@@ -1788,10 +1635,13 @@ function cycleOthStatus(id) {
   const cycle = {pending:'win', win:'loss', loss:'push', push:'pending'};
   b.result = cycle[b.result] || 'pending';
   const dec = toDecimalOth(b.odds);
-  b.pnl = b.result==='win' ? (dec ? +((dec-1)*b.stake).toFixed(2) : 0)
-        : b.result==='loss' ? -b.stake
-        : 0;
-  saveOther(); renderOther();
+  b.pnl = b.result==='win'  ? (dec ? +((dec-1)*b.stake).toFixed(2) : 0)
+        : b.result==='loss' ? -parseFloat(b.stake||0)
+        : b.result==='push' ? 0
+        : (dec ? +((dec-1)*b.stake).toFixed(2) : 0);
+  saveOther();
+  renderOther();
+  if (typeof renderBalances === 'function' && viewMode === 'balances') renderBalances();
 }
 
 function getOthFiltered() {
@@ -2390,40 +2240,54 @@ function getBookStats(book) {
   let balance;
   if (mb) {
     // Per-book P&L for post-baseline arb bets using winningLeg + leg odds
-    const postArbPnl = arbSettled.filter(b => {
-      const d = b.gamedate || b.date || '';
-      return d > mb.date && b.date > mb.date;
-    }).reduce((s, b) => {
-      const profit  = parseFloat(b.profit||0);
-      const stake   = parseFloat(b.stake||0);
-      const l1s     = b.leg1Stake != null ? parseFloat(b.leg1Stake) : stake / 2;
-      const l2s     = b.leg2Stake != null ? parseFloat(b.leg2Stake) : stake / 2;
-      const d1      = amer2dec(b.leg1Odds);
-      const d2      = amer2dec(b.leg2Odds);
+    // Balance formula:
+    // Pending bet placed → deduct stake immediately
+    // Bet wins → add profit (stake was already out)
+    // Bet loses → no change (stake was already out)
+    // Bet pushes → no change (net 0)
+
+    // Other tab bets after baseline
+    const othAfter = othBets.filter(b => (b.date||'') > cutoff);
+    const postOthPnl = othAfter.reduce((s, b) => {
+      const stake = parseFloat(b.stake||0);
+      if (b.result === 'pending') return s - stake;
+      if (b.result === 'win')     return s + (b.pnl||0);
+      return s; // loss or push
+    }, 0);
+
+    // Arb/EV bets after baseline
+    const arbEvAfter = [...arbBets, ...evBets].filter(b => (b.date||'') > cutoff);
+    const postArbEvPnl = arbEvAfter.reduce((s, b) => {
+      const profit = parseFloat(b.profit||0);
+      const stake  = parseFloat(b.stake||0);
+      const l1s    = b.leg1Stake != null ? parseFloat(b.leg1Stake) : stake / 2;
+      const l2s    = b.leg2Stake != null ? parseFloat(b.leg2Stake) : stake / 2;
+      const d1     = amer2dec(b.leg1Odds);
+      const d2     = amer2dec(b.leg2Odds);
       const isBook1 = bookMatch(b.book1);
       const isBook2 = bookMatch(b.book2);
-      if (!b.winningLeg) return s + profit * 0.5;
-      if (b.winningLeg === '1') {
-        const book1Profit = d1 ? +(l1s * (d1 - 1)).toFixed(2) : profit;
-        if (isBook1) return s + book1Profit;
+      if (b.status === 'pending') {
+        if (isBook1) return s - l1s;
         if (isBook2) return s - l2s;
+        if (bookMatch(b.bookEv)) return s - stake;
+        return s;
+      }
+      if (b.type === 'ev') return s + profit;
+      if (!b.winningLeg)   return s + profit * 0.5;
+      if (b.winningLeg === '1') {
+        if (isBook1) return s + (d1 ? +(l1s*(d1-1)).toFixed(2) : profit);
+        if (isBook2) return s;
       }
       if (b.winningLeg === '2') {
-        const book2Profit = d2 ? +(l2s * (d2 - 1)).toFixed(2) : profit;
-        if (isBook2) return s + book2Profit;
-        if (isBook1) return s - l1s;
+        if (isBook2) return s + (d2 ? +(l2s*(d2-1)).toFixed(2) : profit);
+        if (isBook1) return s;
       }
       return s;
     }, 0);
-    const postEvPnl  = evSettled.filter(b => b.date > mb.date && (b.gamedate||b.date) > mb.date).reduce((s,b) => s + parseFloat(b.profit||0), 0);
-    const postOthPnl = othSettled.filter(b => {
-      const d = b.gamedate || b.date || '';
-      return d > mb.date && b.date > mb.date;
-    }).reduce((s,b) => s + (b.pnl||0), 0);
-    const pnlNew = postArbPnl + postEvPnl + postOthPnl;
-    const depNew  = deposits.filter(d => d.book === book && d.date > mb.date).reduce((s,d) => s + d.amount, 0);
-    const withNew = (typeof withdrawals !== 'undefined' ? withdrawals : []).filter(w => w.book === book && w.date > mb.date).reduce((s,w) => s + w.amount, 0);
-    balance = mb.amount + pnlNew + depNew - withNew;
+
+    const depNew  = deposits.filter(d => d.book === book && (d.date||'') > cutoff).reduce((s,d) => s + d.amount, 0);
+    const withNew = (typeof withdrawals !== 'undefined' ? withdrawals : []).filter(w => w.book === book && (w.date||'') > cutoff).reduce((s,w) => s + w.amount, 0);
+    balance = mb.amount + postOthPnl + postArbEvPnl + depNew - withNew;
   } else {
     balance = totalDep - totalWithdraw + totalPnl;
   }
@@ -2581,4 +2445,25 @@ function renderBalances() {
 }
 // ── END BOOK BALANCE TAB ──────────────────────────────────────────────────────
 
-</script>
+</script
+  // Book
+  const bSel = document.getElementById('oth-f-book-select');
+  if (bSel && b.book) {
+    const bOpt = [...bSel.options].find(o => o.value === b.book);
+    if (bOpt) { bSel.value = b.book; const bi=document.getElementById('oth-f-book'); if(bi){bi.style.display='none';bi.value=b.book;} }
+    else { bSel.value = '__other__'; const bi=document.getElementById('oth-f-book'); if(bi){bi.style.display='';bi.value=b.book;} }
+  }
+  // Bet type
+  const btSel = document.getElementById('oth-f-bettype');
+  if (btSel && b.bettype) {
+    const btOpt = [...btSel.options].find(o => o.value === b.bettype);
+    if (btOpt) { btSel.value = b.bettype; }
+    else { btSel.value = 'Other'; const btc=document.getElementById('oth-f-bettype-custom'); if(btc){btc.style.display='';btc.value=b.bettype;} }
+  }
+  calcOthFields();
+  const ft = document.getElementById('oth-form-title'); if(ft) ft.textContent='Edit bet';
+  document.getElementById('oth-form-msg').innerHTML = '<span style="color:var(--blue)">Editing — click Save bet to update.</span>';
+  document.getElementById('oth-f-game').scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+>
