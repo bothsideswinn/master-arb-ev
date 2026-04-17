@@ -541,11 +541,11 @@ h1{font-size:18px;font-weight:800;letter-spacing:-.3px;color:var(--text)}
     </div>
   </div>
 
-  <!-- Heatmap Calendar -->
+  <!-- Enhanced Heatmap Calendar -->
   <div style="margin-bottom:1.5rem">
     <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:10px">Daily P&L Heatmap (Last 90 Days)</div>
-    <div class="panel" style="padding:16px;overflow-x:auto">
-      <div id="oth-heatmap" style="min-width:600px;height:120px"></div>
+    <div class="panel" style="padding:20px;overflow-x:auto">
+      <div id="oth-heatmap" style="min-width:700px;height:180px"></div>
     </div>
   </div>
 
@@ -2476,68 +2476,113 @@ function renderOtherHeatmap(bets) {
     betsByDate[date].push(bet);
   });
   
-  // Calculate daily P&L
+  // Calculate daily P&L and units
   const dailyPnl = {};
+  const dailyUnits = {};
   Object.keys(betsByDate).forEach(date => {
     dailyPnl[date] = betsByDate[date].reduce((sum, bet) => sum + (bet.pnl || 0), 0);
+    dailyUnits[date] = betsByDate[date].reduce((sum, bet) => sum + (bet.units || 0), 0);
   });
   
   // Find max absolute P&L for color scaling
   const maxAbsPnl = Math.max(...Object.values(dailyPnl).map(Math.abs), 1);
   
-  // Generate heatmap HTML
-  let heatmapHTML = '<div style="display:flex;flex-wrap:wrap;gap:2px;align-items:flex-start">';
+  // Generate heatmap HTML with bigger cells
+  let heatmapHTML = '<div style="display:flex;flex-wrap:wrap;gap:3px;align-items:flex-start">';
   
   // Day labels
-  heatmapHTML += '<div style="display:flex;flex-direction:column;gap:2px;margin-right:4px;font-size:9px;color:var(--text-muted)">';
+  heatmapHTML += '<div style="display:flex;flex-direction:column;gap:3px;margin-right:8px;font-size:10px;color:var(--text-muted)">';
   ['Mon', '', 'Wed', '', 'Fri', '', 'Sun'].forEach(day => {
-    heatmapHTML += `<div style="height:12px;display:flex;align-items:center">${day}</div>`;
+    heatmapHTML += `<div style="height:18px;display:flex;align-items:center;font-weight:600">${day}</div>`;
   });
   heatmapHTML += '</div>';
   
-  // Generate weeks
+  // Generate weeks with bigger cells
   for (let weekStart = new Date(startDate); weekStart <= now; weekStart.setDate(weekStart.getDate() + 7)) {
-    heatmapHTML += '<div style="display:flex;flex-direction:column;gap:2px">';
+    heatmapHTML += '<div style="display:flex;flex-direction:column;gap:3px">';
     
     for (let dayOffset = 0; dayOffset < 7; dayOffset++) {
       const currentDay = new Date(weekStart);
       currentDay.setDate(weekStart.getDate() + dayOffset);
       
       if (currentDay > now) {
-        heatmapHTML += '<div style="width:12px;height:12px"></div>';
+        heatmapHTML += '<div style="width:18px;height:18px"></div>';
         continue;
       }
       
       const dateStr = currentDay.toISOString().split('T')[0];
       const pnl = dailyPnl[dateStr] || 0;
+      const units = dailyUnits[dateStr] || 0;
       const intensity = Math.abs(pnl) / maxAbsPnl;
       
       let color = '#f1f5f9'; // default light gray
       if (pnl > 0) {
-        color = `rgba(34, 197, 94, ${0.2 + intensity * 0.8})`; // green
+        color = `rgba(34, 197, 94, ${0.3 + intensity * 0.7})`; // green
       } else if (pnl < 0) {
-        color = `rgba(239, 68, 68, ${0.2 + intensity * 0.8})`; // red
+        color = `rgba(239, 68, 68, ${0.3 + intensity * 0.7})`; // red
       }
       
-      const fmtMoney = (n, signed=true) => {
+      const fmtMoney = (n) => {
         const abs = Math.abs(n);
-        if (signed) return n >= 0 ? '+$' + abs.toFixed(0) : '-$' + abs.toFixed(0);
-        return '$' + abs.toFixed(0);
+        if (abs >= 1000) return (n >= 0 ? '+' : '-') + (abs/1000).toFixed(1) + 'k';
+        if (abs >= 100) return (n >= 0 ? '+' : '-') + abs.toFixed(0);
+        if (abs >= 10) return (n >= 0 ? '+' : '-') + abs.toFixed(0);
+        if (abs >= 1) return (n >= 0 ? '+' : '-') + abs.toFixed(1);
+        return abs === 0 ? '0' : (n >= 0 ? '+' : '-') + abs.toFixed(1);
       };
       
-      heatmapHTML += `<div style="width:12px;height:12px;background:${color};border-radius:2px;cursor:pointer" title="${dateStr}: ${fmtMoney(pnl)}"></div>`;
+      const fmtUnits = (n) => {
+        const abs = Math.abs(n);
+        if (abs >= 10) return (n >= 0 ? '+' : '-') + abs.toFixed(0) + 'u';
+        if (abs >= 1) return (n >= 0 ? '+' : '-') + abs.toFixed(1) + 'u';
+        return abs === 0 ? '' : (n >= 0 ? '+' : '-') + abs.toFixed(1) + 'u';
+      };
+      
+      // Show both money and units
+      const displayText = pnl !== 0 ? fmtMoney(pnl) : '';
+      const unitsText = units !== 0 ? fmtUnits(units) : '';
+      
+      const tooltipText = `${dateStr}\nP&L: ${fmtMoney(pnl)}\nUnits: ${fmtUnits(units)}`;
+      
+      heatmapHTML += `
+        <div style="
+          width:18px;
+          height:18px;
+          background:${color};
+          border-radius:3px;
+          cursor:pointer;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          font-size:6px;
+          font-weight:700;
+          color:${Math.abs(pnl) > maxAbsPnl * 0.5 ? '#fff' : 'var(--text)'};
+          text-shadow:${Math.abs(pnl) > maxAbsPnl * 0.5 ? '0 0 2px rgba(0,0,0,0.5)' : 'none'};
+          line-height:1;
+          position:relative;
+        " title="${tooltipText}">
+          <div style="text-align:center;white-space:nowrap;overflow:hidden">
+            ${displayText ? `<div>${displayText}</div>` : ''}
+            ${unitsText && displayText !== unitsText ? `<div style="font-size:5px">${unitsText}</div>` : ''}
+          </div>
+        </div>`;
     }
     heatmapHTML += '</div>';
   }
   
   heatmapHTML += '</div>';
-  heatmapHTML += '<div style="display:flex;align-items:center;gap:8px;margin-top:8px;font-size:10px;color:var(--text-muted)">';
+  
+  // Enhanced legend
+  heatmapHTML += '<div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;font-size:10px;color:var(--text-muted)">';
+  heatmapHTML += '<div style="display:flex;align-items:center;gap:8px">';
   heatmapHTML += '<span>Less</span>';
-  heatmapHTML += '<div style="width:10px;height:10px;background:#f1f5f9;border-radius:2px"></div>';
-  heatmapHTML += '<div style="width:10px;height:10px;background:rgba(34, 197, 94, 0.4);border-radius:2px"></div>';
-  heatmapHTML += '<div style="width:10px;height:10px;background:rgba(34, 197, 94, 0.8);border-radius:2px"></div>';
-  heatmapHTML += '<div style="width:10px;height:10px;background:rgba(239, 68, 68, 0.8);border-radius:2px"></div>';
+  heatmapHTML += '<div style="width:12px;height:12px;background:#f1f5f9;border-radius:2px"></div>';
+  heatmapHTML += '<div style="width:12px;height:12px;background:rgba(34, 197, 94, 0.5);border-radius:2px"></div>';
+  heatmapHTML += '<div style="width:12px;height:12px;background:rgba(34, 197, 94, 1);border-radius:2px"></div>';
+  heatmapHTML += '<div style="width:12px;height:12px;background:rgba(239, 68, 68, 1);border-radius:2px"></div>';
   heatmapHTML += '<span>More</span>';
+  heatmapHTML += '</div>';
+  heatmapHTML += `<div>💰 Hover cells for details • Best: ${fmtMoney(Math.max(...Object.values(dailyPnl), 0))} • Worst: ${fmtMoney(Math.min(...Object.values(dailyPnl), 0))}</div>`;
   heatmapHTML += '</div>';
   
   el.innerHTML = heatmapHTML;
@@ -3549,7 +3594,11 @@ function getBookStats(book) {
     const othAfter = othBets.filter(b => (b.date||'') > cutoff || b.result === 'pending');
     const postOthPnl = othAfter.reduce((s, b) => {
       const stake = parseFloat(b.stake||0);
-      if (b.result === 'pending') return s - stake;
+      // Only deduct stake if bet was placed AFTER the baseline date
+      // Pending bets placed before baseline are already reflected in baseline amount
+      if (b.result === 'pending') {
+        return (b.date||'') > cutoff ? s - stake : s;
+      }
       if (b.result === 'win')     return s + (b.pnl||0);
       if (b.result === 'push')    return s + stake;  // Return stake
       return s; // loss only
@@ -3566,10 +3615,14 @@ function getBookStats(book) {
       const d2     = amer2dec(b.leg2Odds);
       const isBook1 = bookMatch(b.book1);
       const isBook2 = bookMatch(b.book2);
+      
       if (b.status === 'pending') {
-        if (isBook1) return s - l1s;
-        if (isBook2) return s - l2s;
-        if (bookMatch(b.bookEv)) return s - stake;
+        // Only deduct stake if bet was placed AFTER the baseline date
+        if ((b.date||'') > cutoff) {
+          if (isBook1) return s - l1s;
+          if (isBook2) return s - l2s;
+          if (bookMatch(b.bookEv)) return s - stake;
+        }
         return s;
       }
       if (b.type === 'ev') return s + profit;
