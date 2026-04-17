@@ -1259,6 +1259,7 @@ function setView(mode) {
   const weekNav    = document.querySelector('.week-nav');
   const subTabs = document.getElementById('overview-subtabs');
   if (balSection) balSection.style.display = 'none';
+  
   if (mode === 'balances') {
     const mainEls2 = [document.querySelector('.stats-strip'), document.querySelector('.middle'), document.querySelector('.log-wrap')];
     mainEls2.forEach(el => { if(el) el.style.display = 'none'; });
@@ -1280,6 +1281,7 @@ function setView(mode) {
     const bb = document.getElementById('btn-balances');
     if (bb) { bb.style.borderColor = ''; bb.style.color = ''; }
   }
+  
   if (mode === 'other') {
     mainEls.forEach(el => { if(el) el.style.display = 'none'; });
     if (othSection) othSection.style.display = 'block';
@@ -1289,8 +1291,8 @@ function setView(mode) {
     const ab = document.getElementById('btn-arb');
     if (ab) { ab.style.borderColor=''; ab.style.color=''; }
     renderOther();
-  } else {
-    // Restore everything
+  } else if (mode === 'arb' || mode === 'week' || mode === 'alltime') {
+    // Show main arb/ev section (default view)
     mainEls.forEach(el => { if(el) el.style.display = ''; });
     if (othSection) othSection.style.display = 'none';
     if (weekNav)    weekNav.style.display    = '';
