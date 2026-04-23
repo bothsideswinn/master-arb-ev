@@ -291,7 +291,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <button class="bk-chip active" id="bchip-bovada"         data-key="bovada"         style="border-color:#c8960a;color:#c8960a;" onclick="toggleBook('bovada')"><span class="bk-dot" style="background:#c8960a"></span>Bovada</button>
       <button class="bk-chip active" id="bchip-betonlineag"    data-key="betonlineag"    style="border-color:#0a6b9e;color:#0a6b9e;" onclick="toggleBook('betonlineag')"><span class="bk-dot" style="background:#0a6b9e"></span>BetOnline</button>
       <button class="bk-chip active" id="bchip-hardrockbet"    data-key="hardrockbet"    style="border-color:#b0174e;color:#b0174e;" onclick="toggleBook('hardrockbet')"><span class="bk-dot" style="background:#b0174e"></span>Hard Rock</button>
-      <button class="bk-chip active" id="bchip-pinnacle"       data-key="pinnacle"       style="border-color:#8b5cf6;color:#8b5cf6;" onclick="toggleBook('pinnacle')"><span class="bk-dot" style="background:#8b5cf6"></span>Pinnacle (EV ref)</button>
+      <button class="bk-chip active" id="bchip-pinnacle"       data-key="pinnacle"       style="border-color:#8b5cf6;color:#8b5cf6;" onclick="toggleBook('pinnacle')" title="Pinnacle is the sharpest book and is used as the fair-odds benchmark for every +EV calculation. Deselect only if you don't want EV data — the +EV column will be empty without it. To hide Pinnacle as an arb leg while keeping it for EV, use the checkbox in the arb column below (after fetching)."><span class="bk-dot" style="background:#8b5cf6"></span>Pinnacle (EV ref)</button>
       <div class="bk-divider"></div>
       <button class="bk-btn" onclick="selectAllBooks()">Select all</button>
       <button class="bk-btn" onclick="deselectAllBooks()">Deselect all</button>
@@ -755,6 +755,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <input type="range" id="arb-min" min="0" max="10" step="0.1" value="0.5" oninput="document.getElementById('arb-min-v').textContent=parseFloat(this.value).toFixed(1)+'%';renderAll()">
         <span class="fval" id="arb-min-v">0.5%</span>
       </div>
+    </div>
+    <div class="col-filter-row" title="US users largely cannot access Pinnacle. Off by default — Pinnacle is still used for EV benchmarking regardless.">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;font-size:12px;color:var(--text2);">
+        <input type="checkbox" id="pinn-arb-leg" onchange="pinnacleAsArbLeg=this.checked;renderAll()" style="width:14px;height:14px;cursor:pointer;accent-color:var(--blue);">
+        <span>Show arbs that require betting <strong>Pinnacle</strong></span>
+      </label>
+      <span style="font-size:10px;color:var(--text3);margin-left:auto;">Pinnacle is always used for EV reference</span>
     </div>
     <div class="col-stats">
       <div class="stat"><div class="stat-lbl">Arb opps</div><div class="stat-val" id="s-arb">&mdash;</div><div class="stat-sub">21 combinations</div></div>
@@ -1285,6 +1292,11 @@ function renderAll() {
   const fa=arbs.filter(a=>{
     if(a.pct<at) return false;
     if(!eventPassesFilters(a.commenceTime)) return false;
+    // Pinnacle-as-arb-leg filter: by default, hide arbs that require betting Pinnacle
+    // (US users largely cannot access it). Pinnacle is still used for EV benchmarking.
+    if (!pinnacleAsArbLeg) {
+      if (a.leg1.bk === 'pinnacle' || a.leg2.bk === 'pinnacle' || (a.leg3 && a.leg3.bk === 'pinnacle')) return false;
+    }
     const bookMatch = pfSelectedBooks.has(a.leg1.bk) || pfSelectedBooks.has(a.leg2.bk) || (a.leg3 && pfSelectedBooks.has(a.leg3.bk));
     if(!bookMatch) return false;
     if(pfSport!=='all' && a.sport_key!==pfSport) return false;
@@ -2660,6 +2672,11 @@ let selectedBooks   = new Set(['fanduel','draftkings','betmgm','williamhill_us',
 let pfSelectedBooks = new Set(['fanduel','draftkings','betmgm','williamhill_us','bovada','betonlineag','hardrockbet','pinnacle']);
 let propsEnabled    = false;
 let t2Enabled       = false;
+// Pinnacle serves two distinct purposes: (1) EV reference benchmark, (2) an arb leg.
+// US users typically can't access Pinnacle, so by default it's used for EV only —
+// arbs containing a Pinnacle leg are hidden from the display (they still exist in
+// `data`, so re-enabling this toggle shows them instantly without re-fetching).
+let pinnacleAsArbLeg = false;
 var openMenuId      = null;
 
 function toggleBook(key) {
