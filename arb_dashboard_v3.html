@@ -267,7 +267,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </div>
 
 <!-- banners -->
-<div class="banner blue" id="help">Get your free API key at <a href="https://the-odds-api.com" target="_blank">the-odds-api.com</a> and paste it below. Scans <strong>21 book-pair combinations</strong> across main lines <strong>and alternate spreads/totals</strong> for arb opportunities, using Pinnacle as the sharp EV benchmark. <span style="font-size:11px;opacity:.8;">Note: alt-line markets are a paid add-on on the-odds-api.com; if your plan doesn't include them, only main lines are returned (no errors, just less coverage).</span></div>
+<div class="banner blue" id="help">Get your free API key at <a href="https://the-odds-api.com" target="_blank">the-odds-api.com</a> and paste it below. Scans <strong>21 book-pair combinations</strong> across main moneyline, spread, and total markets for arb opportunities using Pinnacle as the sharp EV benchmark. <span style="font-size:11px;opacity:.8;">For alternate spreads/totals and period markets, enable the <strong>Tier 2 markets</strong> toggle below — these must be fetched per-event and use 1 extra API request per game.</span></div>
 <div class="banner red" id="err" style="display:none;"></div>
 <div class="all-sport-log" id="all-sport-log"></div>
 
@@ -573,7 +573,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <div class="tgl-track" id="t2-track"><div class="tgl-thumb" id="t2-thumb"></div></div>
         <div class="tgl-text">
           <span class="tgl-lbl">Tier 2 markets <span class="tgl-note" id="t2-cost-note">enabled</span></span>
-          <span class="tgl-desc">1st half / 2nd half, quarter, period &amp; inning lines + team totals — rich source of live-bet arbs</span>
+          <span class="tgl-desc">Alt spreads/totals, 1st half, quarter, period &amp; inning lines + team totals — rich source of live-bet arbs</span>
         </div>
       </div>
     </div>
@@ -981,7 +981,7 @@ async function go() {
   for(let si=0; si<selectedSports.length; si++){
     const sport = selectedSports[si];
     log(`Fetching ${sport} (${si+1}/${selectedSports.length})…`);
-    const api = `https://api.the-odds-api.com/v4/sports/${sport}/odds/?apiKey=${key}&regions=us,us2,eu&markets=h2h,spreads,totals,alternate_spreads,alternate_totals&bookmakers=${bookList}&oddsFormat=american`;
+    const api = `https://api.the-odds-api.com/v4/sports/${sport}/odds/?apiKey=${key}&regions=us,us2,eu&markets=h2h,spreads,totals&bookmakers=${bookList}&oddsFormat=american`;
     const res = await tryFetch(api);
     if(res.json && Array.isArray(res.json)) {
       allEvents.push(...res.json);
@@ -1594,7 +1594,7 @@ async function goAll() {
   let fetched = 0;
   for (const sport of activeSports) {
     $('all-sport-log').textContent = `Fetching ${sport.title} (${fetched + 1} / ${activeSports.length})…`;
-    const apiUrl = `https://api.the-odds-api.com/v4/sports/${sport.key}/odds/?apiKey=${key}&regions=us,us2,eu&markets=h2h,spreads,totals,alternate_spreads,alternate_totals&bookmakers=${getSelectedBookmarks()}&oddsFormat=american`;
+    const apiUrl = `https://api.the-odds-api.com/v4/sports/${sport.key}/odds/?apiKey=${key}&regions=us,us2,eu&markets=h2h,spreads,totals&bookmakers=${getSelectedBookmarks()}&oddsFormat=american`;
     const res = await tryFetch(apiUrl);
     if (res.json && Array.isArray(res.json)) {
       allEvents.push(...res.json);
@@ -2472,6 +2472,8 @@ const TIER2_MARKETS = [
   'alternate_totals_1st_5_innings','alternate_totals_1st_7_innings',
   // Team totals (full game)
   'team_totals','alternate_team_totals',
+  // Full-game alternate spreads/totals — must be fetched via event endpoint (not /odds/)
+  'alternate_spreads','alternate_totals',
 ];
 
 const TIER2_LABEL = {
