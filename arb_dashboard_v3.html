@@ -763,6 +763,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       </label>
       <span style="font-size:10px;color:var(--text3);margin-left:auto;">Pinnacle is always used for EV reference</span>
     </div>
+    <div class="col-filter-row" title="Soccer 3-way moneyline arbs require placing bets on home, away, AND draw outcomes across 3 different books. They're mathematically valid but logistically difficult. Enable this to hide them.">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none;font-size:12px;color:var(--text2);">
+        <input type="checkbox" id="hide-soccer-ml" checked onchange="hideSoccerMoneylines=this.checked;renderAll()" style="width:14px;height:14px;cursor:pointer;accent-color:var(--blue);">
+        <span>Hide soccer / cricket 3-way moneyline arbs</span>
+      </label>
+      <span style="font-size:10px;color:var(--text3);margin-left:auto;">Requires 3 books simultaneously</span>
+    </div>
     <div class="col-stats">
       <div class="stat"><div class="stat-lbl">Arb opps</div><div class="stat-val" id="s-arb">&mdash;</div><div class="stat-sub">21 combinations</div></div>
       <div class="stat"><div class="stat-lbl">Best arb %</div><div class="stat-val" id="s-arb-pct">&mdash;</div><div class="stat-sub">highest edge</div></div>
@@ -1070,11 +1077,6 @@ function buildOpps() {
                          sportKey === 'cricket_icc_world_cup');
         const drawPossible = isSoccer || isDrawPossibleCricket;
 
-        // Debug logging (remove in production)
-        if (drawPossible) {
-          console.log(`DRAW-POSSIBLE: ${event.sport_title} (${sportKey}) - sides: ${sk.length}`);
-        }
-
         if (drawPossible) {
           // MANDATORY 3-WAY COVERAGE: require three legs (home, away, third = draw/tie).
           if (sk.length >= 3) {
@@ -1111,7 +1113,6 @@ function buildOpps() {
           }
           // CRITICAL: NEVER run 2-way pairing on draw-possible sports — always skip if no 3-way coverage found
           // This prevents the false arbs where draws / ties would cause both legs to lose
-          console.log(`DRAW-POSSIBLE SKIPPED: ${event.sport_title} - no 3-way coverage available`);
         } else {
           // NON-DRAW-POSSIBLE: Safe to run traditional 2-way arbitrage (NBA, NFL, tennis, etc.)
           const hk=sk.find(k=>k===event.home_team)||sk[0], ak=sk.find(k=>k!==hk)||sk[1];
@@ -1234,8 +1235,13 @@ function buildOpps() {
     });
   });
 
-  // Deduplicate arbs (same event+mkt+legs, keep best pct).
-  // For 3-way arbs, sort legs by book key so order-insensitive keys match.
+  // Deduplicate arbs. Two-pass strategy:
+  //  1) First collapse exact duplicates (same event, market, and set of book:outcome legs) → keep best pct.
+  //     This handles the case where a book quotes an outcome twice (rare but possible).
+  //  2) Then collapse same (event, market) down to the single best-pct arb. For a soccer 3-way
+  //     with 8 books, there are dozens of valid winning triples; showing all of them is noise.
+  //     Users want to see "the one best 3-way arb on this event", not every permutation.
+  //     The best-pct winner is mathematically the one with the tightest combined implied prob.
   const seen=new Map();
   arbs.forEach(a=>{
     const legs = a.leg3 ? [a.leg1,a.leg2,a.leg3] : [a.leg1,a.leg2];
@@ -1244,13 +1250,28 @@ function buildOpps() {
     const ex = seen.get(key);
     if(!ex || a.pct>ex.pct) seen.set(key,a);
   });
+  // Pass 2: collapse to best-per-(event, market).
+  const bestPerMkt = new Map();
+  for (const a of seen.values()) {
+    const key = a.event + '||' + a.mkt;
+    const ex = bestPerMkt.get(key);
+    if (!ex || a.pct > ex.pct) bestPerMkt.set(key, a);
+  }
 
   // Deduplicate EVs
   const evSeen=new Map();
   evs.forEach(e=>{const k=e.event+'|'+e.mkt+'|'+e.bet+'|'+e.bk;if(!evSeen.has(k)||e.ev>evSeen.get(k).ev)evSeen.set(k,e);});
 
-  // Combine Tier 1 and Tier 2 arbitrages
-  const allArbs = [...seen.values(), ...tier2ArbData];
+  // Dedup Tier 2 arbs the same way (best per event+market).
+  const t2Best = new Map();
+  for (const a of tier2ArbData) {
+    const key = a.event + '||' + a.mkt;
+    const ex = t2Best.get(key);
+    if (!ex || a.pct > ex.pct) t2Best.set(key, a);
+  }
+
+  // Combine Tier 1 (best per mkt) and Tier 2 (best per mkt) arbitrages
+  const allArbs = [...bestPerMkt.values(), ...t2Best.values()];
   const allEvs = [...evSeen.values(), ...tier2EvData];
   
   return {arbs: allArbs, evs: allEvs};
@@ -1296,6 +1317,19 @@ function renderAll() {
     // (US users largely cannot access it). Pinnacle is still used for EV benchmarking.
     if (!pinnacleAsArbLeg) {
       if (a.leg1.bk === 'pinnacle' || a.leg2.bk === 'pinnacle' || (a.leg3 && a.leg3.bk === 'pinnacle')) return false;
+    }
+    // Hide 3-way arbs that require placing bets on three books for home/away/draw (or tie).
+    // We detect these structurally — any arb with a leg3 whose outcome name matches
+    // draw/tie is a 3-way ML arb regardless of how the market is labeled (Moneyline,
+    // 1st Half 3-Way, Q1 3-Way, etc). This is the bulletproof check.
+    if (hideSoccerMoneylines && a.leg3) {
+      const isDrawArb =
+        /^(draw|tie)$/i.test((a.leg1.name||'').trim()) ||
+        /^(draw|tie)$/i.test((a.leg2.name||'').trim()) ||
+        /^(draw|tie)$/i.test((a.leg3.name||'').trim()) ||
+        /Moneyline|H2H|3-[Ww]ay/.test(a.mkt||'') ||
+        a.threeWay === true;
+      if (isDrawArb) return false;
     }
     const bookMatch = pfSelectedBooks.has(a.leg1.bk) || pfSelectedBooks.has(a.leg2.bk) || (a.leg3 && pfSelectedBooks.has(a.leg3.bk));
     if(!bookMatch) return false;
@@ -1583,57 +1617,212 @@ async function goAll() {
   $('all-sport-log').textContent = `Loaded ${allEvents.length} events across ${activeSports.length} sports. Used ${fetched} API requests.`;
   updateDots(data);
   renderAll();
-  if(propsEnabled){ if($('props-hd')) $('props-hd').style.display='block'; fetchAndRenderProps(key, getSelectedSports()[0]||'basketball_nba'); }
+  // Build list of sport keys that were actually fetched so props/T2 use the full set
+  // rather than only the user's pre-fetch selection.
+  const fetchedSportKeys = activeSports.map(s => s.key);
+  if (propsEnabled) {
+    if ($('props-hd')) $('props-hd').style.display = 'block';
+    fetchAndRenderProps(key, fetchedSportKeys);
+  }
+  if (t2Enabled) {
+    fetchAndRenderT2(key, fetchedSportKeys);
+  }
 }
 
 
 
+// All player-prop markets documented by the-odds-api.com. Markets that don't
+// exist for a given sport are simply not returned (no error, no quota cost).
+// Keys match the-odds-api.com spec exactly as of April 2026. See:
+// https://the-odds-api.com/sports-odds-data/betting-markets.html
 const PROP_MARKETS = [
-  // Basketball (NBA/WNBA/College)
-  'player_points','player_rebounds','player_assists','player_threes',
-  'player_blocks','player_steals','player_turnovers',
-  'player_double_double','player_triple_double',
-  'player_fgm','player_fga','player_fg_pct',
-  'player_ftm','player_fta','player_ft_pct',
-  'player_first_basket','player_pra',
-  // Baseball (MLB)
-  'player_hits','player_total_bases','player_pitcher_strikeouts',
-  'player_home_runs','player_rbi','player_runs_scored','player_stolen_bases',
-  'player_pitcher_walks','player_pitcher_hits_allowed','player_pitcher_earned_runs','player_pitcher_wins',
-  // Football (NFL/NCAAF)
-  'player_pass_tds','player_pass_yds','player_rush_yds','player_receptions','player_reception_yds',
-  // Soccer
-  'player_shots_on_target','player_goals','player_anytime_goal_scorer'
+  // ── NFL / NCAAF / CFL (passing, rushing, receiving, kicking, defense, TDs) ──
+  'player_assists','player_defensive_interceptions','player_field_goals','player_kicking_points',
+  'player_pass_attempts','player_pass_completions','player_pass_interceptions',
+  'player_pass_longest_completion','player_pass_rush_yds','player_pass_rush_reception_tds',
+  'player_pass_rush_reception_yds','player_pass_tds','player_pass_yds','player_pass_yds_q1',
+  'player_pats','player_receptions','player_reception_longest','player_reception_tds',
+  'player_reception_yds','player_rush_attempts','player_rush_longest',
+  'player_rush_reception_tds','player_rush_reception_yds','player_rush_tds','player_rush_yds',
+  'player_sacks','player_solo_tackles','player_tackles_assists','player_tds_over',
+  'player_1st_td','player_anytime_td','player_last_td',
+  // Alternate NFL
+  'player_assists_alternate','player_field_goals_alternate','player_kicking_points_alternate',
+  'player_pass_attempts_alternate','player_pass_completions_alternate','player_pass_interceptions_alternate',
+  'player_pass_longest_completion_alternate','player_pass_rush_yds_alternate',
+  'player_pass_rush_reception_tds_alternate','player_pass_rush_reception_yds_alternate',
+  'player_pass_tds_alternate','player_pass_yds_alternate','player_pats_alternate',
+  'player_receptions_alternate','player_reception_longest_alternate','player_reception_tds_alternate',
+  'player_reception_yds_alternate','player_rush_attempts_alternate','player_rush_longest_alternate',
+  'player_rush_reception_tds_alternate','player_rush_reception_yds_alternate',
+  'player_rush_tds_alternate','player_rush_yds_alternate','player_sacks_alternate',
+  'player_solo_tackles_alternate','player_tackles_assists_alternate',
+  // ── NBA / NCAAB / WNBA ──
+  'player_points','player_points_q1','player_rebounds','player_rebounds_q1',
+  'player_assists_q1','player_threes','player_blocks','player_steals','player_blocks_steals',
+  'player_turnovers','player_points_rebounds_assists','player_points_rebounds','player_points_assists',
+  'player_rebounds_assists','player_frees_made','player_frees_attempts',
+  'player_first_basket','player_first_team_basket','player_double_double','player_triple_double',
+  'player_method_of_first_basket','player_fantasy_points',
+  // Alternate NBA
+  'player_points_alternate','player_rebounds_alternate',
+  'player_blocks_alternate','player_steals_alternate','player_turnovers_alternate',
+  'player_threes_alternate','player_points_assists_alternate','player_points_rebounds_alternate',
+  'player_rebounds_assists_alternate','player_points_rebounds_assists_alternate',
+  'player_fantasy_points_alternate',
+  // ── MLB (batters + pitchers) ──
+  'batter_home_runs','batter_first_home_run','batter_hits','batter_total_bases',
+  'batter_rbis','batter_runs_scored','batter_hits_runs_rbis','batter_singles','batter_doubles',
+  'batter_triples','batter_walks','batter_strikeouts','batter_stolen_bases','batter_fantasy_score',
+  'pitcher_strikeouts','pitcher_record_a_win','pitcher_hits_allowed','pitcher_walks',
+  'pitcher_earned_runs','pitcher_outs',
+  // Alternate MLB
+  'batter_total_bases_alternate','batter_home_runs_alternate','batter_hits_alternate',
+  'batter_rbis_alternate','batter_walks_alternate','batter_strikeouts_alternate',
+  'batter_runs_scored_alternate','batter_singles_alternate','batter_doubles_alternate',
+  'batter_triples_alternate','batter_fantasy_score_alternate',
+  'pitcher_hits_allowed_alternate','pitcher_walks_alternate','pitcher_earned_runs_alternate',
+  'pitcher_strikeouts_alternate','pitcher_outs_alternate',
+  // ── NHL ──
+  'player_power_play_points','player_blocked_shots','player_shots_on_goal','player_goals',
+  'player_total_saves','player_goal_scorer_first','player_goal_scorer_last','player_goal_scorer_anytime',
+  // Alternate NHL (player_points_alternate and player_assists_alternate already listed above for NBA)
+  'player_power_play_points_alternate','player_goals_alternate',
+  'player_shots_on_goal_alternate','player_blocked_shots_alternate','player_total_saves_alternate',
+  // ── Soccer (US books) ──
+  'player_shots_on_target','player_shots','player_first_goal_scorer','player_last_goal_scorer',
+  'player_to_receive_card','player_to_receive_red_card',
 ];
+
 const PROP_LABEL = {
-  // Basketball
-  player_points:'Points',player_rebounds:'Rebounds',player_assists:'Assists',
-  player_threes:'3-Pointers',player_blocks:'Blocks',player_steals:'Steals',
-  player_turnovers:'Turnovers',player_double_double:'Double-Double',player_triple_double:'Triple-Double',
-  player_fgm:'Field Goals Made',player_fga:'Field Goals Attempted',player_fg_pct:'Field Goal %',
-  player_ftm:'Free Throws Made',player_fta:'Free Throws Attempted',player_ft_pct:'Free Throw %',
-  player_first_basket:'First Basket',player_pra:'Pts+Reb+Ast',
-  // Baseball
-  player_hits:'Hits',player_total_bases:'Total Bases',player_pitcher_strikeouts:'Strikeouts',
-  player_home_runs:'Home Runs',player_rbi:'RBIs',player_runs_scored:'Runs Scored',
-  player_stolen_bases:'Stolen Bases',player_pitcher_walks:'Walks Allowed',
-  player_pitcher_hits_allowed:'Hits Allowed',player_pitcher_earned_runs:'Earned Runs',
-  player_pitcher_wins:'Pitcher Wins',
-  // Football
-  player_pass_tds:'Pass TDs',player_pass_yds:'Pass Yards',
-  player_rush_yds:'Rush Yards',player_receptions:'Receptions',player_reception_yds:'Rec Yards',
+  // NFL / NCAAF / CFL
+  player_assists:'Assists',player_defensive_interceptions:'Defensive INTs',
+  player_field_goals:'Field Goals',player_kicking_points:'Kicking Points',
+  player_pass_attempts:'Pass Attempts',player_pass_completions:'Pass Completions',
+  player_pass_interceptions:'Pass INTs',player_pass_longest_completion:'Longest Pass Completion',
+  player_pass_rush_yds:'Pass+Rush Yards',player_pass_rush_reception_tds:'Pass+Rush+Rec TDs',
+  player_pass_rush_reception_yds:'Pass+Rush+Rec Yards',player_pass_tds:'Pass TDs',
+  player_pass_yds:'Pass Yards',player_pass_yds_q1:'Q1 Pass Yards',
+  player_pats:'PATs',player_receptions:'Receptions',player_reception_longest:'Longest Reception',
+  player_reception_tds:'Reception TDs',player_reception_yds:'Reception Yards',
+  player_rush_attempts:'Rush Attempts',player_rush_longest:'Longest Rush',
+  player_rush_reception_tds:'Rush+Rec TDs',player_rush_reception_yds:'Rush+Rec Yards',
+  player_rush_tds:'Rush TDs',player_rush_yds:'Rush Yards',
+  player_sacks:'Sacks',player_solo_tackles:'Solo Tackles',player_tackles_assists:'Tackles+Assists',
+  player_tds_over:'TDs',player_1st_td:'1st TD Scorer',player_anytime_td:'Anytime TD Scorer',
+  player_last_td:'Last TD Scorer',
+  // Alternate NFL
+  player_assists_alternate:'Alt Assists',player_field_goals_alternate:'Alt Field Goals',
+  player_kicking_points_alternate:'Alt Kicking Points',player_pass_attempts_alternate:'Alt Pass Attempts',
+  player_pass_completions_alternate:'Alt Pass Completions',player_pass_interceptions_alternate:'Alt Pass INTs',
+  player_pass_longest_completion_alternate:'Alt Longest Pass',player_pass_rush_yds_alternate:'Alt Pass+Rush Yds',
+  player_pass_rush_reception_tds_alternate:'Alt Pass+Rush+Rec TDs',
+  player_pass_rush_reception_yds_alternate:'Alt Pass+Rush+Rec Yds',
+  player_pass_tds_alternate:'Alt Pass TDs',player_pass_yds_alternate:'Alt Pass Yards',
+  player_pats_alternate:'Alt PATs',player_receptions_alternate:'Alt Receptions',
+  player_reception_longest_alternate:'Alt Longest Rec',player_reception_tds_alternate:'Alt Rec TDs',
+  player_reception_yds_alternate:'Alt Reception Yards',player_rush_attempts_alternate:'Alt Rush Attempts',
+  player_rush_longest_alternate:'Alt Longest Rush',player_rush_reception_tds_alternate:'Alt Rush+Rec TDs',
+  player_rush_reception_yds_alternate:'Alt Rush+Rec Yards',player_rush_tds_alternate:'Alt Rush TDs',
+  player_rush_yds_alternate:'Alt Rush Yards',player_sacks_alternate:'Alt Sacks',
+  player_solo_tackles_alternate:'Alt Solo Tackles',player_tackles_assists_alternate:'Alt Tackles+Assists',
+  // NBA / NCAAB / WNBA
+  player_points:'Points',player_points_q1:'Q1 Points',player_rebounds:'Rebounds',
+  player_rebounds_q1:'Q1 Rebounds',player_assists_q1:'Q1 Assists',player_threes:'3-Pointers',
+  player_blocks:'Blocks',player_steals:'Steals',player_blocks_steals:'Blocks+Steals',
+  player_turnovers:'Turnovers',player_points_rebounds_assists:'Points+Reb+Ast',
+  player_points_rebounds:'Points+Rebounds',player_points_assists:'Points+Assists',
+  player_rebounds_assists:'Rebounds+Assists',player_frees_made:'Free Throws Made',
+  player_frees_attempts:'Free Throws Attempted',player_first_basket:'First Basket',
+  player_first_team_basket:'First Team Basket',player_double_double:'Double-Double',
+  player_triple_double:'Triple-Double',player_method_of_first_basket:'Method of 1st Basket',
+  player_fantasy_points:'Fantasy Points',
+  // Alternate NBA
+  player_points_alternate:'Alt Points',player_rebounds_alternate:'Alt Rebounds',
+  player_blocks_alternate:'Alt Blocks',player_steals_alternate:'Alt Steals',
+  player_turnovers_alternate:'Alt Turnovers',player_threes_alternate:'Alt 3-Pointers',
+  player_points_assists_alternate:'Alt Points+Assists',player_points_rebounds_alternate:'Alt Points+Rebounds',
+  player_rebounds_assists_alternate:'Alt Reb+Ast',
+  player_points_rebounds_assists_alternate:'Alt Pts+Reb+Ast',
+  player_fantasy_points_alternate:'Alt Fantasy Points',
+  // MLB
+  batter_home_runs:'Batter Home Runs',batter_first_home_run:'Batter 1st HR',
+  batter_hits:'Batter Hits',batter_total_bases:'Batter Total Bases',batter_rbis:'Batter RBIs',
+  batter_runs_scored:'Batter Runs',batter_hits_runs_rbis:'Batter Hits+Runs+RBIs',
+  batter_singles:'Batter Singles',batter_doubles:'Batter Doubles',batter_triples:'Batter Triples',
+  batter_walks:'Batter Walks',batter_strikeouts:'Batter Ks',batter_stolen_bases:'Batter SBs',
+  batter_fantasy_score:'Batter Fantasy',
+  pitcher_strikeouts:'Pitcher Ks',pitcher_record_a_win:'Pitcher Win',
+  pitcher_hits_allowed:'Pitcher Hits Allowed',pitcher_walks:'Pitcher Walks',
+  pitcher_earned_runs:'Pitcher ER',pitcher_outs:'Pitcher Outs',
+  // Alternate MLB
+  batter_total_bases_alternate:'Alt Batter TB',batter_home_runs_alternate:'Alt Batter HR',
+  batter_hits_alternate:'Alt Batter Hits',batter_rbis_alternate:'Alt Batter RBIs',
+  batter_walks_alternate:'Alt Batter Walks',batter_strikeouts_alternate:'Alt Batter Ks',
+  batter_runs_scored_alternate:'Alt Batter Runs',batter_singles_alternate:'Alt Batter Singles',
+  batter_doubles_alternate:'Alt Batter Doubles',batter_triples_alternate:'Alt Batter Triples',
+  batter_fantasy_score_alternate:'Alt Batter Fantasy',
+  pitcher_hits_allowed_alternate:'Alt Pitcher Hits Allowed',
+  pitcher_walks_alternate:'Alt Pitcher Walks',pitcher_earned_runs_alternate:'Alt Pitcher ER',
+  pitcher_strikeouts_alternate:'Alt Pitcher Ks',pitcher_outs_alternate:'Alt Pitcher Outs',
+  // NHL
+  player_power_play_points:'Power Play Points',player_blocked_shots:'Blocked Shots',
+  player_shots_on_goal:'Shots on Goal',player_goals:'Goals',player_total_saves:'Total Saves',
+  player_goal_scorer_first:'1st Goal Scorer',player_goal_scorer_last:'Last Goal Scorer',
+  player_goal_scorer_anytime:'Anytime Goal Scorer',
+  player_power_play_points_alternate:'Alt Power Play Points',player_goals_alternate:'Alt Goals',
+  player_shots_on_goal_alternate:'Alt Shots on Goal',player_blocked_shots_alternate:'Alt Blocked Shots',
+  player_total_saves_alternate:'Alt Total Saves',
   // Soccer
-  player_shots_on_target:'Shots on Target',player_goals:'Goals',
-  player_anytime_goal_scorer:'Anytime Goalscorer'
+  player_shots_on_target:'Shots on Target',player_shots:'Shots',
+  player_first_goal_scorer:'First Goal Scorer',player_last_goal_scorer:'Last Goal Scorer',
+  player_to_receive_card:'To Receive Card',player_to_receive_red_card:'To Receive Red Card',
 };
 
+// Chunk an array into pieces of `size`.
+function chunk(arr, size) {
+  const out = [];
+  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+  return out;
+}
+// Merge multiple event-odds responses (same event, different market subsets)
+// into one combined response with all markets per bookmaker.
+function mergeEventResponses(responses) {
+  const valid = responses.filter(r => r && r.bookmakers);
+  if (!valid.length) return null;
+  const base = { ...valid[0], bookmakers: [] };
+  const bkMap = {};
+  for (const resp of valid) {
+    for (const bk of (resp.bookmakers || [])) {
+      if (!bkMap[bk.key]) bkMap[bk.key] = { ...bk, markets: [] };
+      // Append markets (API won't return duplicate keys in one response, but
+      // across chunks there's no overlap since we partition the markets list).
+      bkMap[bk.key].markets.push(...(bk.markets || []));
+    }
+  }
+  base.bookmakers = Object.values(bkMap);
+  return base;
+}
+
 async function fetchPropsForEvent(key, eventId, sportKey) {
-  const markets = PROP_MARKETS.join(',');
-  // Respect user's bookmaker selection. If user deselected Pinnacle, props will be fetched
-  // without it (EV column for props will be empty until Pinnacle is re-enabled).
-  const apiUrl = `https://api.the-odds-api.com/v4/sports/${sportKey}/events/${eventId}/odds/?apiKey=${key}&regions=us,us2,eu&markets=${markets}&bookmakers=${getSelectedBookmarks()}&oddsFormat=american`;
-  const res = await tryFetch(apiUrl);
-  return res.json || null;
+  // The-odds-api.com has no hard documented cap on markets per request but
+  // URLs with 150+ markets can approach URL-length limits through CORS proxies.
+  // Batching into groups of 25 is conservative and reliable.
+  const batches = chunk(PROP_MARKETS, 25);
+  const bookmakers = getSelectedBookmarks();
+  const responses = [];
+  for (const batch of batches) {
+    const markets = batch.join(',');
+    const apiUrl = `https://api.the-odds-api.com/v4/sports/${sportKey}/events/${eventId}/odds/?apiKey=${key}&regions=us,us2,eu&markets=${markets}&bookmakers=${bookmakers}&oddsFormat=american`;
+    const res = await tryFetch(apiUrl);
+    if (res.err === 429 || res.err === 401) {
+      return { json: null, err: res.err };  // propagate so caller can stop
+    }
+    if (res.json) responses.push(res.json);
+    // Tiny delay between batches to stay well under 30 req/sec rate limit.
+    await new Promise(r => setTimeout(r, 80));
+  }
+  return { json: mergeEventResponses(responses), err: null };
 }
 
 function calcPropsEV(eventData, unit) {
@@ -1691,14 +1880,16 @@ async function fetchAndRenderProps(key, sports) {
   const propsOut = $('props-out');
   if (!propsOut) return;
 
-  // Only fetch props for sports that support them according to the API documentation
+  // Only fetch props for sports that support them per the-odds-api.com documentation.
   const propSports = [
-    'basketball_nba','basketball_wnba','basketball_ncaab','basketball_wncaab',
-    'americanfootball_nfl','americanfootball_ncaaf',
-    'baseball_mlb','icehockey_nhl',
+    'basketball_nba','basketball_wnba','basketball_ncaab','basketball_wncaab','basketball_euroleague',
+    'americanfootball_nfl','americanfootball_ncaaf','americanfootball_cfl','americanfootball_ufl',
+    'baseball_mlb','baseball_ncaa','icehockey_nhl',
     'soccer_epl','soccer_usa_mls','soccer_spain_la_liga','soccer_germany_bundesliga',
-    'soccer_italy_serie_a','soccer_france_ligue_one',
-    'aussierules_afl','rugbyleague_nrl'
+    'soccer_italy_serie_a','soccer_france_ligue_one','soccer_uefa_champs_league',
+    'soccer_uefa_europa_league','soccer_efl_champ',
+    'aussierules_afl','rugbyleague_nrl',
+    'mma_mixed_martial_arts','boxing_boxing'
   ];
   const sportsArr = Array.isArray(sports) ? sports : [sports];
   const validSports = sportsArr.filter(s => propSports.includes(s));
@@ -1719,17 +1910,34 @@ async function fetchAndRenderProps(key, sports) {
 
   const allPropEvs = [];
   let count = 0;
+  let propsSucceeded = 0;
+  let quotaHit = false;
   for (const event of filteredEvents) {
     if ($('props-loading')) {
-      $('props-loading').textContent = `Fetching props: ${event.home_team} vs ${event.away_team} (${count+1}/${totalPropGames})…`;
+      $('props-loading').textContent = `Fetching props: ${event.home_team} vs ${event.away_team} (${count+1}/${totalPropGames})… ${propsSucceeded} fetched, ${allPropEvs.length} +EV so far`;
     }
-    const propData = await fetchPropsForEvent(key, event.id, event.sport_key);
-    if (propData) {
-      const evs = calcPropsEV(propData, unit);
+    const propResult = await fetchPropsForEvent(key, event.id, event.sport_key);
+    if (propResult.err === 429) {
+      quotaHit = true;
+      break;
+    }
+    if (propResult.err === 401) {
+      setErr('Invalid API key while fetching props');
+      break;
+    }
+    if (propResult.json) {
+      propsSucceeded++;
+      const evs = calcPropsEV(propResult.json, unit);
       allPropEvs.push(...evs);
     }
     count++;
     await new Promise(r => setTimeout(r, 150));
+  }
+
+  if (quotaHit) {
+    propsOut.innerHTML = `<div class="ev-card"><div class="empty" style="color:var(--amber);">⚠ Monthly API quota reached while fetching props — got data for ${propsSucceeded} of ${totalPropGames} games. ${allPropEvs.length} +EV props found so far.</div></div>`;
+    if (!allPropEvs.length) return;
+    // still render what we got
   }
 
   if (!allPropEvs.length) {
@@ -2230,38 +2438,56 @@ function getFilteredEventsForProps(eventsArr) {
 
 // All Tier 2 prop markets
 const TIER2_MARKETS = [
-  // Halves
-  'h2h_h1','h2h_h2','spreads_h1','spreads_h2','totals_h1','totals_h2',
+  // Halves — h2h, spreads, totals, team totals (all variants)
+  'h2h_h1','h2h_h2','h2h_3_way_h1','h2h_3_way_h2',
+  'spreads_h1','spreads_h2','totals_h1','totals_h2',
   'alternate_spreads_h1','alternate_spreads_h2','alternate_totals_h1','alternate_totals_h2',
-  'team_totals_h1','team_totals_h2',
-  // Quarters (NBA/NFL)
+  'team_totals_h1','team_totals_h2','alternate_team_totals_h1','alternate_team_totals_h2',
+  // Quarters (NBA, NFL)
   'h2h_q1','h2h_q2','h2h_q3','h2h_q4',
+  'h2h_3_way_q1','h2h_3_way_q2','h2h_3_way_q3','h2h_3_way_q4',
   'spreads_q1','spreads_q2','spreads_q3','spreads_q4',
   'totals_q1','totals_q2','totals_q3','totals_q4',
   'alternate_spreads_q1','alternate_spreads_q2','alternate_spreads_q3','alternate_spreads_q4',
   'alternate_totals_q1','alternate_totals_q2','alternate_totals_q3','alternate_totals_q4',
   'team_totals_q1','team_totals_q2','team_totals_q3','team_totals_q4',
+  'alternate_team_totals_q1','alternate_team_totals_q2','alternate_team_totals_q3','alternate_team_totals_q4',
   // Periods (NHL)
-  'h2h_p1','h2h_p2','h2h_p3','spreads_p1','spreads_p2','spreads_p3',
+  'h2h_p1','h2h_p2','h2h_p3',
+  'h2h_3_way_p1','h2h_3_way_p2','h2h_3_way_p3',
+  'spreads_p1','spreads_p2','spreads_p3',
   'totals_p1','totals_p2','totals_p3',
+  'alternate_spreads_p1','alternate_spreads_p2','alternate_spreads_p3',
+  'alternate_totals_p1','alternate_totals_p2','alternate_totals_p3',
+  'team_totals_p1','team_totals_p2','team_totals_p3',
+  'alternate_team_totals_p1','alternate_team_totals_p2','alternate_team_totals_p3',
   // Innings (MLB)
   'h2h_1st_1_innings','h2h_1st_3_innings','h2h_1st_5_innings','h2h_1st_7_innings',
+  'h2h_3_way_1st_1_innings','h2h_3_way_1st_3_innings','h2h_3_way_1st_5_innings','h2h_3_way_1st_7_innings',
   'spreads_1st_1_innings','spreads_1st_3_innings','spreads_1st_5_innings','spreads_1st_7_innings',
   'totals_1st_1_innings','totals_1st_3_innings','totals_1st_5_innings','totals_1st_7_innings',
   'alternate_spreads_1st_1_innings','alternate_spreads_1st_3_innings',
+  'alternate_spreads_1st_5_innings','alternate_spreads_1st_7_innings',
   'alternate_totals_1st_1_innings','alternate_totals_1st_3_innings',
-  // Team totals
+  'alternate_totals_1st_5_innings','alternate_totals_1st_7_innings',
+  // Team totals (full game)
   'team_totals','alternate_team_totals',
 ];
 
 const TIER2_LABEL = {
+  // Halves
   h2h_h1:'H2H 1st Half', h2h_h2:'H2H 2nd Half',
+  h2h_3_way_h1:'3-Way 1st Half', h2h_3_way_h2:'3-Way 2nd Half',
   spreads_h1:'Spread 1st Half', spreads_h2:'Spread 2nd Half',
   totals_h1:'Total 1st Half', totals_h2:'Total 2nd Half',
   alternate_spreads_h1:'Alt Spread 1st Half', alternate_spreads_h2:'Alt Spread 2nd Half',
   alternate_totals_h1:'Alt Total 1st Half', alternate_totals_h2:'Alt Total 2nd Half',
   team_totals_h1:'Team Total 1st Half', team_totals_h2:'Team Total 2nd Half',
+  alternate_team_totals_h1:'Alt Team Total 1st Half', alternate_team_totals_h2:'Alt Team Total 2nd Half',
+  // Quarters
   h2h_q1:'H2H Q1', h2h_q2:'H2H Q2', h2h_q3:'H2H Q3', h2h_q4:'H2H Q4',
+  h2h_3_way_q1:'3-Way Q1', h2h_3_way_q2:'3-Way Q2',
+  h2h_3_way_q3:'3-Way Q3', h2h_3_way_q4:'3-Way Q4',
   spreads_q1:'Spread Q1', spreads_q2:'Spread Q2', spreads_q3:'Spread Q3', spreads_q4:'Spread Q4',
   totals_q1:'Total Q1', totals_q2:'Total Q2', totals_q3:'Total Q3', totals_q4:'Total Q4',
   alternate_spreads_q1:'Alt Spread Q1', alternate_spreads_q2:'Alt Spread Q2',
@@ -2270,19 +2496,35 @@ const TIER2_LABEL = {
   alternate_totals_q3:'Alt Total Q3', alternate_totals_q4:'Alt Total Q4',
   team_totals_q1:'Team Total Q1', team_totals_q2:'Team Total Q2',
   team_totals_q3:'Team Total Q3', team_totals_q4:'Team Total Q4',
+  alternate_team_totals_q1:'Alt Team Total Q1', alternate_team_totals_q2:'Alt Team Total Q2',
+  alternate_team_totals_q3:'Alt Team Total Q3', alternate_team_totals_q4:'Alt Team Total Q4',
+  // Periods (NHL)
   h2h_p1:'H2H P1', h2h_p2:'H2H P2', h2h_p3:'H2H P3',
+  h2h_3_way_p1:'3-Way P1', h2h_3_way_p2:'3-Way P2', h2h_3_way_p3:'3-Way P3',
   spreads_p1:'Spread P1', spreads_p2:'Spread P2', spreads_p3:'Spread P3',
   totals_p1:'Total P1', totals_p2:'Total P2', totals_p3:'Total P3',
+  alternate_spreads_p1:'Alt Spread P1', alternate_spreads_p2:'Alt Spread P2', alternate_spreads_p3:'Alt Spread P3',
+  alternate_totals_p1:'Alt Total P1', alternate_totals_p2:'Alt Total P2', alternate_totals_p3:'Alt Total P3',
+  team_totals_p1:'Team Total P1', team_totals_p2:'Team Total P2', team_totals_p3:'Team Total P3',
+  alternate_team_totals_p1:'Alt Team Total P1', alternate_team_totals_p2:'Alt Team Total P2', alternate_team_totals_p3:'Alt Team Total P3',
+  // Innings (MLB)
   h2h_1st_1_innings:'ML 1st Inn', h2h_1st_3_innings:'ML 1st 3 Inn',
   h2h_1st_5_innings:'ML 1st 5 Inn', h2h_1st_7_innings:'ML 1st 7 Inn',
+  h2h_3_way_1st_1_innings:'3-Way 1st Inn', h2h_3_way_1st_3_innings:'3-Way 1st 3 Inn',
+  h2h_3_way_1st_5_innings:'3-Way 1st 5 Inn', h2h_3_way_1st_7_innings:'3-Way 1st 7 Inn',
   spreads_1st_1_innings:'Spread 1st Inn', spreads_1st_3_innings:'Spread 1st 3 Inn',
   spreads_1st_5_innings:'Spread 1st 5 Inn', spreads_1st_7_innings:'Spread 1st 7 Inn',
   totals_1st_1_innings:'Total 1st Inn', totals_1st_3_innings:'Total 1st 3 Inn',
   totals_1st_5_innings:'Total 1st 5 Inn', totals_1st_7_innings:'Total 1st 7 Inn',
   alternate_spreads_1st_1_innings:'Alt Spread 1st Inn',
   alternate_spreads_1st_3_innings:'Alt Spread 1st 3 Inn',
+  alternate_spreads_1st_5_innings:'Alt Spread 1st 5 Inn',
+  alternate_spreads_1st_7_innings:'Alt Spread 1st 7 Inn',
   alternate_totals_1st_1_innings:'Alt Total 1st Inn',
   alternate_totals_1st_3_innings:'Alt Total 1st 3 Inn',
+  alternate_totals_1st_5_innings:'Alt Total 1st 5 Inn',
+  alternate_totals_1st_7_innings:'Alt Total 1st 7 Inn',
+  // Team totals (full game)
   team_totals:'Team Total', alternate_team_totals:'Alt Team Total',
 };
 
@@ -2290,10 +2532,19 @@ const TIER2_LABEL = {
 
 // Fetch Tier 2 data for a single event
 async function fetchT2ForEvent(key, eventId, sportKey, bookmakers) {
-  const mkts = TIER2_MARKETS.join(',');
-  const url = `https://api.the-odds-api.com/v4/sports/${sportKey}/events/${eventId}/odds/?apiKey=${key}&regions=us,us2,eu&markets=${mkts}&bookmakers=${bookmakers}&oddsFormat=american`;
-  const res = await tryFetch(url);
-  return res ? res.json : null;
+  const batches = chunk(TIER2_MARKETS, 25);
+  const responses = [];
+  for (const batch of batches) {
+    const mkts = batch.join(',');
+    const url = `https://api.the-odds-api.com/v4/sports/${sportKey}/events/${eventId}/odds/?apiKey=${key}&regions=us,us2,eu&markets=${mkts}&bookmakers=${bookmakers}&oddsFormat=american`;
+    const res = await tryFetch(url);
+    if (res && (res.err === 429 || res.err === 401)) {
+      return { json: null, err: res.err };
+    }
+    if (res && res.json) responses.push(res.json);
+    await new Promise(r => setTimeout(r, 80));
+  }
+  return { json: mergeEventResponses(responses), err: null };
 }
 
 // Helper functions for Tier 2 formatting
@@ -2356,6 +2607,11 @@ function calcT2Opps(eventData, unit, targetBks, pinnEnabled) {
     const bkKeys = Object.keys(bkMkts);
     if (bkKeys.length < 2) continue;
 
+    // 3-way moneyline markets (h2h_3_way_*) behave like soccer full-match moneylines:
+    // they have Home/Away/Draw outcomes and need all three legs covered across
+    // different books to form a valid arb. Handled separately below.
+    const is3Way = /h2h_3_way/.test(mkt);
+
     // Get all outcomes across all books for this market
     const outcomeMap = {};
     for (const bk of bkKeys) {
@@ -2364,6 +2620,89 @@ function calcT2Opps(eventData, unit, targetBks, pinnEnabled) {
         if (!outcomeMap[key2]) outcomeMap[key2] = [];
         outcomeMap[key2].push({ bk, name: oc.name, odds: oc.price, point: oc.point, dec: oc.price > 0 ? oc.price/100+1 : 100/Math.abs(oc.price)+1 });
       }
+    }
+
+    // 3-way path: find all triples (home, away, draw) across different books
+    // whose combined implied probability < 1. Mirrors the Tier 1 soccer 3-way logic.
+    if (is3Way) {
+      const outcomeNames = Object.keys(outcomeMap);
+      if (outcomeNames.length >= 3) {
+        // Identify the draw outcome. Books label it 'Draw' or 'Tie' or similar.
+        const drawName = outcomeNames.find(n => /draw|tie/i.test(n));
+        if (drawName) {
+          const otherNames = outcomeNames.filter(n => n !== drawName);
+          // For each pair of non-draw outcomes (should usually be exactly two: home/away),
+          // try all book combinations for the three legs.
+          for (let ii = 0; ii < otherNames.length; ii++) {
+            for (let jj = ii + 1; jj < otherNames.length; jj++) {
+              const homeArr = outcomeMap[otherNames[ii]] || [];
+              const awayArr = outcomeMap[otherNames[jj]] || [];
+              const drawArr = outcomeMap[drawName] || [];
+              for (const h of homeArr) {
+                for (const a of awayArr) {
+                  for (const d of drawArr) {
+                    if (h.bk === a.bk || h.bk === d.bk || a.bk === d.bk) continue;
+                    const iSum = 1/h.dec + 1/a.dec + 1/d.dec;
+                    if (iSum >= 1) continue;
+                    const pct = (1 - iSum) * 100;
+                    const s1 = (1/h.dec / iSum) * unit;
+                    const s2 = (1/a.dec / iSum) * unit;
+                    const s3 = (1/d.dec / iSum) * unit;
+                    const profit = s1 * h.dec - unit;
+                    arbs.push({
+                      event: eventData.home_team + ' vs ' + eventData.away_team,
+                      sport: eventData.sport_title || '',
+                      sport_key: eventData.sport_key || '',
+                      commenceTime: eventData.commence_time,
+                      mkt: `${label} (T2 3-way)`,
+                      tier: 2,
+                      threeWay: true,
+                      leg1: { bk: h.bk, name: h.name, odds: h.odds, dec: h.dec, stake: s1 },
+                      leg2: { bk: a.bk, name: a.name, odds: a.odds, dec: a.dec, stake: s2 },
+                      leg3: { bk: d.bk, name: d.name, odds: d.odds, dec: d.dec, stake: s3 },
+                      pct, profit, unit
+                    });
+                  }
+                }
+              }
+            }
+          }
+        }
+        // else: cannot identify draw outcome — safer to skip than produce bad 2-way arbs
+      }
+      // EV vs Pinnacle still valid per-outcome below; skip the generic 2-way pairing.
+      if (pinnEnabled && pinnData) {
+        const pinnMkt = (pinnData.markets || []).find(m => m.key === mkt);
+        if (pinnMkt) {
+          const pinnOutcomes = pinnMkt.outcomes || [];
+          for (const bk of bkKeys) {
+            for (const oc of (bkMkts[bk].outcomes || [])) {
+              const pinnOc = pinnOutcomes.find(p => p.name === oc.name && (oc.point === undefined || p.point === oc.point));
+              if (!pinnOc) continue;
+              const matchFn = p => (oc.point === undefined ? p.point === undefined : p.point === oc.point);
+              const fp = fairProbDevig(pinnOc, pinnOutcomes, matchFn);
+              if (fp === null) continue;
+              const dec = oc.price > 0 ? oc.price/100+1 : 100/Math.abs(oc.price)+1;
+              const ev = evCalcDevig(dec, fp);
+              if (ev <= 0) continue;
+              evs.push({
+                event: eventData.home_team + ' vs ' + eventData.away_team,
+                sport: eventData.sport_title || '',
+                sport_key: eventData.sport_key || '',
+                commenceTime: eventData.commence_time,
+                mkt: `${label} (T2)`,
+                tier: 2,
+                bet: oc.name + (oc.point !== undefined ? ' ' + oc.point : ''),
+                book: bk, bk,
+                odds: oc.price,
+                pinnOdds: pinnOc.price,
+                ev, unit,
+              });
+            }
+          }
+        }
+      }
+      continue; // Skip the 2-way pairing loop below for this market
     }
 
     // Try h2h-style arbs (2 outcomes: pick best odds per side)
@@ -2506,7 +2845,31 @@ async function fetchAndRenderT2(key, sports) {
   tier2EvData = [];
 
   const t2Sports = Array.isArray(sports) ? sports : getSelectedSports();
-  const filteredEvents = getFilteredEventsForProps(data).filter(e => !t2Sports.length || t2Sports.includes(e.sport_key));
+  // Tier 2 markets (halves, quarters, periods, innings, team totals) are only
+  // available for a specific set of team sports. Filter out sports that won't
+  // return T2 data to avoid wasting API quota.
+  const T2_SUPPORTED_SPORTS = [
+    // US team sports
+    'basketball_nba','basketball_wnba','basketball_ncaab','basketball_wncaab',
+    'americanfootball_nfl','americanfootball_ncaaf','americanfootball_cfl','americanfootball_ufl',
+    'baseball_mlb','baseball_ncaa',
+    'icehockey_nhl','icehockey_ahl',
+    // Major soccer (halves)
+    'soccer_epl','soccer_efl_champ','soccer_usa_mls','soccer_spain_la_liga',
+    'soccer_italy_serie_a','soccer_germany_bundesliga','soccer_france_ligue_one',
+    'soccer_mexico_ligamx','soccer_uefa_champs_league','soccer_uefa_europa_league',
+    'soccer_netherlands_eredivisie','soccer_portugal_primeira_liga',
+    'soccer_brazil_campeonato','soccer_argentina_primera_division',
+    // Others with halves/quarters
+    'aussierules_afl','rugbyleague_nrl','basketball_euroleague',
+  ];
+  const validT2Sports = t2Sports.filter(s => T2_SUPPORTED_SPORTS.includes(s));
+  if (!validT2Sports.length) {
+    log('Tier 2 skipped — none of the selected sports have Tier 2 markets available.');
+    renderAll();
+    return;
+  }
+  const filteredEvents = getFilteredEventsForProps(data).filter(e => validT2Sports.includes(e.sport_key));
   if (!filteredEvents.length) {
     renderAll(); // Re-render main section to update with empty Tier 2 data
     return;
@@ -2516,17 +2879,37 @@ async function fetchAndRenderT2(key, sports) {
   const BOOKMAKERS = getSelectedBookmarks();
   const pinnEnabled = selectedBooks.has('pinnacle');
   let count = 0;
+  let t2Succeeded = 0;
+  let t2QuotaHit = false;
+
+  // Show progress in the connection log since there's no dedicated T2 loading element.
+  const totalT2Games = filteredEvents.length;
+  log(`Fetching Tier 2 markets for ${totalT2Games} games (1 API request each)…`);
 
   for (const event of filteredEvents) {
-    // No need for separate t2-loading element, we'll update main section status
-    const evData = await fetchT2ForEvent(key, event.id, event.sport_key, BOOKMAKERS);
-    if (evData) {
-      const { arbs, evs } = calcT2Opps(evData, unit, TARGET_BKS, pinnEnabled);
+    log(`Tier 2: ${event.home_team} vs ${event.away_team} (${count+1}/${totalT2Games}) · ${t2Succeeded} fetched, ${tier2ArbData.length} arbs, ${tier2EvData.length} EVs so far`);
+    const t2Result = await fetchT2ForEvent(key, event.id, event.sport_key, BOOKMAKERS);
+    if (t2Result.err === 429) {
+      t2QuotaHit = true;
+      setErr(`Hit monthly API quota during Tier 2 scan — got ${t2Succeeded} of ${totalT2Games} games. Found ${tier2ArbData.length} T2 arbs and ${tier2EvData.length} T2 +EV bets.`);
+      break;
+    }
+    if (t2Result.err === 401) {
+      setErr('Invalid API key while fetching Tier 2 markets');
+      break;
+    }
+    if (t2Result.json) {
+      t2Succeeded++;
+      const { arbs, evs } = calcT2Opps(t2Result.json, unit, TARGET_BKS, pinnEnabled);
       tier2ArbData.push(...arbs);
       tier2EvData.push(...evs);
     }
     count++;
     await new Promise(r => setTimeout(r, 200));
+  }
+
+  if (!t2QuotaHit) {
+    log(`Tier 2 scan complete: ${t2Succeeded} games fetched, ${tier2ArbData.length} arbs, ${tier2EvData.length} +EV bets.`);
   }
 
   // Re-render main section with combined Tier 1 + Tier 2 data
@@ -2677,6 +3060,12 @@ let t2Enabled       = false;
 // arbs containing a Pinnacle leg are hidden from the display (they still exist in
 // `data`, so re-enabling this toggle shows them instantly without re-fetching).
 let pinnacleAsArbLeg = false;
+// Hide soccer/cricket 3-way moneyline arbs. Mathematically valid but require placing
+// three simultaneous bets across three different books — logistically hard and can
+// swamp the arb list for users who aren't actively chasing them.
+// DEFAULT ON (hidden) — users explicitly asked not to see these. Flip via the
+// checkbox in the arb column to opt back in.
+let hideSoccerMoneylines = true;
 var openMenuId      = null;
 
 function toggleBook(key) {
