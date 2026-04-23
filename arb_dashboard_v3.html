@@ -965,19 +965,49 @@ async function tryFetch(api) {
   return {err:'fail'};
 }
 
+// Sports whose only valid market is `outrights` (tournament/futures winners).
+// Requesting h2h/spreads/totals on these returns a 422 "Invalid parameter
+// combination" error. We skip them entirely in the main fetch since you can't
+// arb a futures bet anyway.
+function isOutrightsOnlySport(sportKey) {
+  if (!sportKey) return false;
+  const k = sportKey.toLowerCase();
+  return (
+    /_winner$/.test(k) ||
+    /_championship$/.test(k) ||
+    /_championship_winner$/.test(k) ||
+    /_mvp$/.test(k) ||
+    /_election_winner$/.test(k) ||
+    k.startsWith('golf_') ||                   // golf is tournament outrights
+    (k.startsWith('tennis_atp_') && k !== 'tennis_atp') ||  // individual tournaments
+    (k.startsWith('tennis_wta_') && k !== 'tennis_wta') ||
+    k === 'politics_us_presidential_election_winner' ||
+    k === 'soccer_fifa_world_cup_winner' ||
+    k === 'soccer_uefa_european_championship'
+  );
+}
+
 async function go() {
   const key = $('f-key').value.trim();
   if(!key){setErr('Please enter your Odds API key.');return;}
   setErr('');
   $('help').style.display='none';
-  const selectedSports = getSelectedSports();
-  if(!selectedSports.length){ setErr('Please select at least one sport.'); return; }
+  const selectedSportsRaw = getSelectedSports();
+  if(!selectedSportsRaw.length){ setErr('Please select at least one sport.'); return; }
+  // Split into playable sports (h2h/spreads/totals) and outrights-only sports (skipped with warning)
+  const selectedSports = selectedSportsRaw.filter(s => !isOutrightsOnlySport(s));
+  const skippedOutrights = selectedSportsRaw.filter(s => isOutrightsOnlySport(s));
+  if (!selectedSports.length) {
+    setErr('All selected sports are outrights/futures markets (tournament winners). These can\'t be used for arbitrage. Please select a regular sport like NBA, NFL, MLB, or NHL.');
+    return;
+  }
   const btns = [$('fetch-btn'),$('mob-btn')];
   btns.forEach(b=>{if(b){b.textContent='Loading…';b.disabled=true;}});
   data=[];
 
   const bookList = getSelectedBookmarks();
   const allEvents = [];
+  const sportErrors = []; // collect per-sport errors instead of aborting the whole fetch
   for(let si=0; si<selectedSports.length; si++){
     const sport = selectedSports[si];
     log(`Fetching ${sport} (${si+1}/${selectedSports.length})…`);
@@ -986,9 +1016,9 @@ async function go() {
     if(res.json && Array.isArray(res.json)) {
       allEvents.push(...res.json);
     } else if(res.json && res.json.message) {
-      setErr('API error: ' + res.json.message);
-      btns.forEach(b=>{b.textContent='Fetch odds';b.disabled=false;});
-      return;
+      // Per-sport API error — log it, skip this sport, keep going
+      sportErrors.push(`${sport}: ${res.json.message}`);
+      console.warn(`Skipping ${sport}: ${res.json.message}`);
     } else if(res.err === 401) {
       setErr('Invalid API key — double-check at the-odds-api.com');
       btns.forEach(b=>{b.textContent='Fetch odds';b.disabled=false;});
@@ -1002,9 +1032,9 @@ async function go() {
       btns.forEach(b=>{b.textContent='Fetch odds';b.disabled=false;});
       return;
     } else if(res.err) {
-      setErr('Connection failed. Check your API key and try again.');
-      btns.forEach(b=>{b.textContent='Fetch odds';b.disabled=false;});
-      return;
+      // Other error on this sport — skip and continue
+      sportErrors.push(`${sport}: connection failed`);
+      console.warn(`Skipping ${sport}: connection failed`);
     }
     if(selectedSports.length > 1) await new Promise(r=>setTimeout(r,120));
   }
@@ -1016,7 +1046,20 @@ async function go() {
   renderAll();
   if(propsEnabled) fetchAndRenderProps(key, selectedSports);
   if(t2Enabled) fetchAndRenderT2(key, selectedSports);
-  if(!data.length) setErr('No events found — this sport may be off-season. Try NBA, MLB, or NHL.');
+  // Surface skipped sports + per-sport errors as a non-fatal warning at the end,
+  // so the user can see what came through and what didn't.
+  const warnings = [];
+  if (skippedOutrights.length) {
+    warnings.push(`Skipped ${skippedOutrights.length} outrights/futures sport(s) — these can\'t be arbed.`);
+  }
+  if (sportErrors.length) {
+    warnings.push(`Errors on ${sportErrors.length} sport(s): ${sportErrors.slice(0,3).join('; ')}${sportErrors.length > 3 ? '…' : ''}`);
+  }
+  if(!data.length) {
+    setErr('No events found' + (warnings.length ? ' — ' + warnings.join(' ') : ' — these sports may be off-season. Try NBA, MLB, or NHL.'));
+  } else if (warnings.length) {
+    setErr('Loaded ' + data.length + ' events. ' + warnings.join(' '));
+  }
 }
 
 function updateDots() {
@@ -1572,8 +1615,16 @@ async function goAll() {
       return;
     }
     const sData = await sResp.json();
-    // Filter to active (in-season) sports only
-    activeSports = sData.filter(s => s.active && !s.key.includes('winner') && !s.key.includes('preseason') && !s.key.includes('all_star') && !s.key.includes('summer_league'));
+    // Filter to active (in-season) sports only, skipping outrights/futures that
+    // can't be arbed, plus preseason/all-star/summer-league which often have
+    // sparse book coverage. Uses the same helper as go() for consistency.
+    activeSports = sData.filter(s =>
+      s.active &&
+      !isOutrightsOnlySport(s.key) &&
+      !s.key.includes('preseason') &&
+      !s.key.includes('all_star') &&
+      !s.key.includes('summer_league')
+    );
   } catch(e) {
     setErr('Network error fetching sports list: ' + e.message);
     allBtn.textContent = 'Fetch all in-season'; allBtn.disabled = false; fetchBtn.disabled = false;
@@ -1592,12 +1643,26 @@ async function goAll() {
   // Step 2: fetch each sport sequentially to avoid rate limits
   const allEvents = [];
   let fetched = 0;
+  let sportsSucceeded = 0;
+  const skippedSports = [];
   for (const sport of activeSports) {
-    $('all-sport-log').textContent = `Fetching ${sport.title} (${fetched + 1} / ${activeSports.length})…`;
+    $('all-sport-log').textContent = `Fetching ${sport.title} (${fetched + 1} / ${activeSports.length})… ${sportsSucceeded} with data so far`;
     const apiUrl = `https://api.the-odds-api.com/v4/sports/${sport.key}/odds/?apiKey=${key}&regions=us,us2,eu&markets=h2h,spreads,totals&bookmakers=${getSelectedBookmarks()}&oddsFormat=american`;
     const res = await tryFetch(apiUrl);
     if (res.json && Array.isArray(res.json)) {
+      if (res.json.length > 0) sportsSucceeded++;
       allEvents.push(...res.json);
+    } else if (res.json && res.json.message) {
+      // Per-sport error — skip and continue rather than abort the whole scan
+      skippedSports.push(sport.key);
+      console.warn(`Skipping ${sport.key}: ${res.json.message}`);
+    } else if (res.err === 401 || res.err === 429) {
+      // Hard stop: auth or quota
+      setErr(res.err === 401 ? 'Invalid API key' : 'Monthly API quota reached');
+      allBtn.textContent = 'Fetch all in-season'; allBtn.disabled = false; fetchBtn.disabled = false;
+      return;
+    } else if (res.err) {
+      skippedSports.push(sport.key);
     }
     fetched++;
     // Small delay to be polite to the API
@@ -1614,7 +1679,8 @@ async function goAll() {
 
   data = allEvents;
   $('refreshed').textContent = 'All sports updated ' + new Date().toLocaleTimeString();
-  $('all-sport-log').textContent = `Loaded ${allEvents.length} events across ${activeSports.length} sports. Used ${fetched} API requests.`;
+  const skipNote = skippedSports.length ? ` · ${skippedSports.length} sport(s) skipped (errors or no data)` : '';
+  $('all-sport-log').textContent = `Loaded ${allEvents.length} events across ${sportsSucceeded} sports. ${fetched} API requests used${skipNote}.`;
   updateDots(data);
   renderAll();
   // Build list of sport keys that were actually fetched so props/T2 use the full set
@@ -3141,6 +3207,31 @@ function toggleT2(e) {
 
 // Init
 updateSportChips();
+// Disable outrights/futures sport checkboxes on page load — these can't be used
+// for arbitrage since you can't take both sides of "Lakers win championship".
+// Greyed out + tooltip explains why.
+(function disableOutrightsInPicker() {
+  document.querySelectorAll('#sport-picker-dropdown input[type="checkbox"]').forEach(cb => {
+    if (isOutrightsOnlySport(cb.value)) {
+      cb.disabled = true;
+      cb.checked = false;
+      const label = cb.closest('.sp-item');
+      if (label) {
+        label.style.opacity = '0.35';
+        label.style.cursor = 'not-allowed';
+        label.title = 'Outrights/futures market — cannot be used for arbitrage';
+        // Add a small indicator so the user knows why
+        if (!label.querySelector('.sp-disabled-badge')) {
+          const badge = document.createElement('span');
+          badge.className = 'sp-disabled-badge';
+          badge.style.cssText = 'font-size:9px;color:var(--text3);margin-left:4px;font-style:italic;';
+          badge.textContent = ' (futures — not arb-able)';
+          label.appendChild(badge);
+        }
+      }
+    }
+  });
+})();
 // ═════════════════════════════════════════════════════════════════════════
 </script>
 </body>
