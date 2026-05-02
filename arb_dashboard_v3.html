@@ -2761,7 +2761,7 @@ function calcT2Opps(eventData, unit, targetBks, pinnEnabled) {
                 mkt: `${label} (T2)`,
                 tier: 2,
                 bet: oc.name + (oc.point !== undefined ? ' ' + oc.point : ''),
-                book: bk, bk,
+                book: bk,
                 odds: oc.price,
                 pinnOdds: pinnOc.price,
                 ev, unit,
@@ -2843,7 +2843,7 @@ function calcT2Opps(eventData, unit, targetBks, pinnEnabled) {
         const pct = (1 - ci) * 100;
         const s1 = unit * (1/b1.dec) / ci;
         const s2 = unit * (1/b2.dec) / ci;
-        const profit = unit - unit * ci;
+        const profit = unit / ci - unit;
         
         // ENHANCED LEG NAMING: Include all relevant details
         const leg1Name = formatTier2LegName(b1, mkt);
@@ -2890,7 +2890,7 @@ function calcT2Opps(eventData, unit, targetBks, pinnEnabled) {
             mkt: `${label} (T2)`,
             tier: 2,
             bet: oc.name + (oc.point !== undefined ? ' ' + oc.point : ''),
-            book: bk, bk,
+            book: bk,
             odds: oc.price,
             pinnOdds: pinnOc.price,
             ev, unit, win,
